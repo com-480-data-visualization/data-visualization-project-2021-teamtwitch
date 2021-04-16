@@ -2,8 +2,8 @@
 
 | Student's name | SCIPER |
 | -------------- | ------ |
-| | |
-| | |
+| Devrim Celik | 322731 |
+| Nina Mainusch | |
 | | |
 
 [Milestone 1](#milestone-1) • [Milestone 2](#milestone-2) • [Milestone 3](#milestone-3)
