@@ -36,7 +36,7 @@ As a website that serves millions of users on a daily basis and is able to colle
 
 ### Exploratory Data Analysis (EDA)
 
-Our EDA contains some interactive plots, which are best experienced in the [Jupyter Notebook](https://github.com/Nina-Mainusch/com-480-project-twizards/blob/main/Milestone_1_EDA.ipynb). 
+Our EDA contains some interactive plots, which makes the file size of the jupyter notebook quite big. To best experience our plots, you can either download our folder and run the notebook yourself, or checkout this [Jupyter Notebook](https://github.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/blob/master/Milestone_1_EDA_executed.ipynb), where we provide all the plots in a pre-executed, static manner.
 
 ### Related Work
 
@@ -47,4 +47,5 @@ We believe, the originality of our project stems from two facts:
 - Even though the difference in the consumption of video games and streaming before and after the corona pandemic have been studied separately in more detail, it is our impression that the bridge that connects these two topics (namely live streaming service that focuses on video games) have been neglected. Especially our differentiation between different streaming categories sets us apart from previous analyses.
 
 - The idea of relating consumption of a medium with time periods in which lockdowns have been issued, is to the best of our knowledge, quite original. Although the impact of the pandemic as a whole has been investigated, we did not find any study that focused on the difference between periods with and without active lockdowns.
+
 
