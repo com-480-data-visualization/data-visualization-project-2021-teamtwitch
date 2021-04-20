@@ -46,7 +46,7 @@ As a website that serves millions of users on a daily basis and is able to colle
 
 ### Exploratory Data Analysis (EDA)
 
-Our EDA contains some interactive plots, which makes the file size of the jupyter notebook quite big. To best experience our plots, you can either download our folder and run the notebook yourself, or checkout this [Jupyter Notebook](https://github.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/blob/master/Milestone_1_EDA_executed.ipynb), where me provide all the plots in a pre-executed, static manner.
+Our EDA contains some interactive plots, which makes the file size of the jupyter notebook quite big. To best experience our plots, you can either download our folder and run the notebook yourself, or checkout this [Jupyter Notebook](https://github.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/blob/master/Milestone_1_EDA_executed.ipynb), where we provide all the plots in a pre-executed, static manner.
 
 ### Related Work
 
