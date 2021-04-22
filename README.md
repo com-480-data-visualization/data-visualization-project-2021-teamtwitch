@@ -6,7 +6,7 @@
 | Nina Mainusch | 323160 |
 | Huan-Cheng Chang | 293760 |
 
-[Milestone 1](#milestone-1) • [Milestone 2](#milestone-2) • [Milestone 3](#milestone-3)
+[Milestone 1](#milestone-1-friday-23rd-april-5pm) • [Milestone 2](#milestone-2-7th-may-5pm) • [Milestone 3](#milestone-3-4th-june-5pm)
 
 ## Milestone 1 (Friday 23rd April, 5pm)
 
@@ -50,7 +50,7 @@ Finally, we want to direct the users attention on the category of chess by showi
 
 ### Exploratory Data Analysis (EDA)
 
-Our EDA contains some interactive plots, which makes the file size of the Jupyter notebook quite big. To best experience our plots, you can either download our folder and run the notebook yourself, or checkout this Jupyter Notebook<sup>[5]</sup>, where we provide all the plots in a pre-executed, static manner.
+Our EDA contains some interactive plots, which makes the file size of the Jupyter notebook quite big. To best experience our plots, you can either download our folder and run the notebook yourself, or checkout this report page<sup>[5]</sup>, where we provide all the plots in a pre-executed, static manner.
 
 ### Related Work
 
@@ -67,7 +67,7 @@ We believe, the originality of our project stems from two facts:
 * [2] https://dev.TwitchTv/docs/api/
 * [3] https://sullygnome.com/
 * [4] https://gamerant.com/twitch-chess-category-spike-popularity/
-* [5] https://github.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/blob/master/Milestone_1_EDA_executed.ipynb
+* [5] http://htmlpreview.github.io/?https://github.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/blob/master/Milestone_1/Milestone_1_EDA_executed.html
 * [6] https://ieeexplore.ieee.org/abstract/document/7377227}
 * [7] https://en.wikipedia.org/wiki/Impact_of_the_COVID-19_pandemic_on_the_video_game_industry
 * [8] https://www.nbcnews.com/tech/social-media/youtube-thrives-window-those-isolated-coronavirus-n1173651
