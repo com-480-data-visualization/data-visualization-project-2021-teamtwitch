@@ -13,3 +13,5 @@ You need two terminal sessions for this.
 * Run `PORT=<your port number> node serve.js`
 * Navigate to `localhost:<port number>` to see the results
 * Refresh the page when changes are made to see the updates
+
+Feeling the indentation is ugly or there are too many messy lines? Run `yarn lint` regularly and it will prettify the code for you.
