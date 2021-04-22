@@ -4,7 +4,7 @@
 | -------------- | ------ |
 | Devrim Celik | 322741 |
 | Nina Mainusch | 323160 |
-| | |
+| Huan-Cheng Chang | 293760 |
 
 [Milestone 1](#milestone-1) • [Milestone 2](#milestone-2) • [Milestone 3](#milestone-3)
 
