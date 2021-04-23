@@ -37,16 +37,17 @@ Note that this dataset is available over all channels and in respect to all stre
 
 ### Problematic
 
-As a website that serves millions of users on a daily basis and is able to collect some kind of information about these users (i.e. number of viewers per channel), it presents a rich environment for all kind of analyses. We want to focus on how the Corona Pandemic influences the interests of the TwitchTv users. In this setting, we aim at incorporating the following questions into our visualisation:
+We want to focus on how the Corona Pandemic influences the interests of the TwitchTv users. In this setting, we aim at incorporating the following questions into our visualisation:
 
-1. The Corona pandemic changed our lives in a multitude of ways, one of them being that many individuals work from home. As a result, we ask whether the amount of time that individuals spent on recreational activities on the web, such as watching gaming live-streams, increased. And if it did, did it increase within the progression of the pandemic?
+1. Firstly, we want to get a picture of the general trends of certain categories over the last few years. For example, we want to find out which categories were constantly popular and which ones were rather short-lived.
 
-2. We are interested in whether the life-altering changes that came with the current pandemic have an influence on our interests. Specifically, we are interested whether certain channels have become unexpectedly more popular under the pandemic. One channel that we are very intrigued in is *Chess*. TwitchTv has noticed a huge surge of interest in this channel over the year 2020. Many argue that this is due to release of the popular TV show Queen's Gambit<sup>[4]</sup>. We want to investigate the big picture: Did the pandemic have an influence in the surge of this category? What other factors played a role?
+2. The Corona pandemic changed our lives in a multitude of ways, one of them being that many individuals work from home. As a result, we ask whether the amount of time that individuals spent on recreational activities on the web, such as watching gaming live-streams, increased. And if it did, did it increase within the progression of the pandemic?
+
+3. We are interested in whether the life-altering changes that came with the current pandemic have an influence on our interests. Specifically, we are interested whether certain channels have become unexpectedly more popular under the pandemic. One channel that we are very intrigued in is *Chess*. TwitchTv has noticed a huge surge of interest in this channel over the year 2020. Many argue that this is due to release of the popular TV show Queen's Gambit<sup>[4]</sup>. We want to investigate the big picture: Did the pandemic have an influence in the surge of this category? What other factors played a role?
 
 ##### What are we trying to show?
-In our final website, we firstly we want to give a general overview over Twitch; this will include a welcoming page in which give a basic idea behind the TwitchTv platform.  
-Next, we want to paint the picture of how exactly the Pandemic, and consequently lockdowns, influenced metrics such as average viewer numbers and average watch time.  
-Finally, we want to direct the users attention on the category of chess by showing how the interest in this game exploded over the last year. This will be followed by an analyzing and showing the main factors for this rapid growth in interest.
+We want paint a picture of what TwitchTv is and what kind of trends were observable before the pandemic. Afterwards, we will contrast these findings with trends after the pandemic.  
+Lastly, we want to introduce the chess phenomenon on TwitchTv and find out how it came to be.
 
 ### Exploratory Data Analysis (EDA)
 
