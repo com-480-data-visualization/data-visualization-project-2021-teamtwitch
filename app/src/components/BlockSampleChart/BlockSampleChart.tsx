@@ -7,8 +7,12 @@ const BlockSampleChart = (): JSX.Element => {
   const h = 200;
 
   React.useEffect(() => {
+    // Think of d3Container.current as the HTML node that d3 will attach to
     if (d3Container.current) {
+      /* Begin of d3 implementation */
       const data = [12, 5, 6, 6, 9, 10];
+
+      // Attach d3 to the node
       const svg = d3
         .select(d3Container.current)
         .append("svg")
@@ -33,9 +37,13 @@ const BlockSampleChart = (): JSX.Element => {
         .text((d) => d)
         .attr("x", (_, i) => i * 70)
         .attr("y", (d) => h - 10 * d - 3);
+
+      /* End of d3 implementation */
     }
   }, [d3Container.current]);
 
+  // Arrange descriptions and other JS logic here
+  // d3 element will be mounted on the svg node
   return (
     <div>
       <h2>Sample d3.js chart</h2>
