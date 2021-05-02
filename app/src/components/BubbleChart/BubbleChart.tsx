@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import React from "react";
 import * as d3 from "d3";
 import { sliderBottom, sliderTime } from 'd3-simple-slider';
@@ -43,13 +45,16 @@ const BubbleChart = (): JSX.Element => {
           ö---> maybe no ticks? text shows anyways? not as nice as only ticks though...
       4. ToolTip doesnt show bold.
       5. Add image to tooltip.
-      6. Make modular (introduce variables)
+      6. Make modular (introduce variables) DONE
       7. Way to load json files... doesnt work?! I think because react
         7.2 --> Make it data is loaded dynamically
       8. I think months are missing in ALL
       9. Think about bubble colors
       10. Mouseover radius of bubbles; what should be like?
       */
+
+
+
 
       // left/top padding
       const padding = 50;
@@ -69,7 +74,7 @@ const BubbleChart = (): JSX.Element => {
       const bubbleTextFontSize = "1em";
 
       // slider params
-      const sliderWidth = width;
+      const sliderWidth = width/3;
       const sliderHeight = 100;
       const sliderPaddingLeft = 50;
       const sliderPaddingTop = 20;
@@ -77,16 +82,29 @@ const BubbleChart = (): JSX.Element => {
       const defaultDate = new Date(2016, 1)
       const totalMonths = 64
       let currentlyDisplayedYear = defaultDate.getUTCFullYear();
+      let currentlyDisplayedMonth = defaultDate.getUTCMonth();
 
       // for translating numbers to months
       const months = ["January", "February", "March", "April", "May", "June",
                     "July", "August", "September", "October", "November",
                     "December"];
+      const months_lowercase = ["january", "february", "march", "april", "may", "june",
+                    "july", "august", "september", "october", "november",
+                    "december"];
+
+      var divTT = d3.select("body").append("div")
+          .style("position", "absolute")
+          .style("text-align", "center")
+          .style("width", "60px")
+          .style("height", "28px")
+          .style("opacity", 0)
+          .style("background-color", "yellow");
+
 
 
       // get the node and attach svg to it, set it up
       const svg = d3
-        .select(d3Container.current) // select the current container
+        .select("#information") // select the current container
         .append("svg") // create svg container
         .attr("viewBox", [0, 0, width, height]) // set viewbox
         .attr("font-size", fontSize) // define font-size, etc.
@@ -117,13 +135,33 @@ const BubbleChart = (): JSX.Element => {
           .attr("fill", d => GetRandomColor()) // TODO maybe constrain to nice colors?;
 
         // mouseover event for the bubbles
-        bubbleGroup.select("circle").on("mouseover", function(d){
+        bubbleGroup.select("circle").on("mouseover", function(event, d){
             d3.select(this)
               .transition()
               .duration(transitionDurationThick)
               .attr('stroke-width', selectedStrokeWidth) // increase stroke width
               .attr("r", d => d.r + 70/d.r) // TODO better idea?
               .attr("fill-opacity", selectedBubbleOpacity);
+
+            divTT.transition()
+              .duration(200)
+              .style("opacity", .9);
+
+            let p1 = "<b>TEST</b>";
+            let p2 = "<b>Viewed Minutes</b>:" + "\t" + d.data.viewminutes;
+            let p3 = "Streamed Minutes:"+ "\t" + d.data.streamedminutes;
+            let p4 = "Peak Number of Channels:" + "\t" + d.data.maxchannels;
+            let p5 = "Unique Channels:" + "\t" + d.data.uniquechannels;
+            let p6 = "Average Number of Channels:"+ "\t" + d.data.avgchannels;
+            let p7 = "Peak Number of Viewers:"+ "\t" + d.data.maxviewers;
+            let p8 = "Average Number of Viewers:"+ "\t" + d.data.avgviewers;
+            let p9 = "Viewer/Channel Ratio:"+ "\t" + d.data.avgratio;
+            let img = `<img src="${d.data.logo}" alt="${d.data.name}">`;
+            //let toolTipText = [p1, p2, p3, p4, p5, p6, p7, p8, p9, img].join("\n");
+
+            let toolTipText = img;
+
+            divTT.html(toolTipText);
           });
 
         // mouseout event for the bubbles
@@ -134,24 +172,11 @@ const BubbleChart = (): JSX.Element => {
             .attr('stroke-width', defaultStrokeWidth)
             .attr("r", d => d.r)
             .attr("fill-opacity", defaultBubbleOpacity);
+          divTT.transition()
+           .duration(500)
+           .style("opacity", 0);
         });
 
-        // tooltip menu for bubbles
-        bubbleGroup.select("circle").append("title")
-          .text((d) => {
-            //let p1 = "Category:" + "\t" + d.data.name;
-            let p1 = "";
-            let p2 = "<b>Viewed Minutes</b>:" + "\t" + d.data.viewminutes;
-            let p3 = "Streamed Minutes:"+ "\t" + d.data.streamedminutes;
-            let p4 = "Peak Number of Channels:" + "\t" + d.data.maxchannels;
-            let p5 = "Unique Channels:" + "\t" + d.data.uniquechannels;
-            let p6 = "Average Number of Channels:"+ "\t" + d.data.avgchannels;
-            let p7 = "Peak Number of Viewers:"+ "\t" + d.data.maxviewers;
-            let p8 = "Average Number of Viewers:"+ "\t" + d.data.avgviewers;
-            let p9 = "Viewer/Channel Ratio:"+ "\t" + d.data.avgratio;
-            return [p1, p2, p3, p4, p5, p6, p7, p8, p9].join("\n");
-            return title_str
-          });
 
         // add text within the bubbles
         bubbleGroup.append("text")
@@ -178,14 +203,16 @@ const BubbleChart = (): JSX.Element => {
           .on('onchange', function(d){
             // change the shown text
             d3.select('p#bubble-slider-text')
-            .text(`<b>${months[d.getUTCMonth()]} <br/>
-              ${d.getUTCFullYear()}</b>`);
+            .html(`<b>${months[d.getUTCMonth()]} <br/> ${d.getUTCFullYear()}</b>`);
 
             // depending on the selected value, display the corresponding data
-            if (d.getUTCFullYear() != currentlyDisplayedYear){
-              currentlyDisplayedYear = d.getUTCFullYear();
+            if (d.getUTCFullYear() != currentlyDisplayedYear || d.getUTCMonth() != currentlyDisplayedMonth){
+              const selected_file = `./data/bubbleTest/2016-${months_lowercase[d.getUTCMonth()]}.json`;
+              d3.json(selected_file).then(function (d){
+                console.log(selected_file);
+                CreateBubbles(d.slice(0, 100));
+              });
 
-              CreateBubbles(eval("data" + (7 - (2022 - d.getUTCFullYear())));
             }
             /*
             if (d.getUTCFullYear() != currentlyDisplayedYear){
@@ -213,7 +240,7 @@ const BubbleChart = (): JSX.Element => {
         gSimple.call(sliderSimple);
         // show default text
         d3.select('p#bubble-slider-text')
-          .text(`<b>${months[defaultDate.getUTCMonth()]} <br/>
+          .html(`<b>${months[defaultDate.getUTCMonth()]} <br/>
             ${defaultDate.getUTCFullYear()}</b>`)
           .style("font-size", bubbleTextFontSize);
       }
@@ -231,10 +258,15 @@ const BubbleChart = (): JSX.Element => {
     <div>
       <h2>Bubble Chart</h2>
       <div>
-        <div><p id="bubble-slider-text"></p></div>
-        <div><div id="bubble-slider"></div></div>
+        <div>
+          <div><p id="bubble-slider-text"></p></div>
+          <div><div id="bubble-slider"></div></div>
+          <svg className="d3-component" width={width} height={height} ref={d3Container} />
+        </div>
+        <div>
+          <div id="information"></div>
+        </div>
       </div>
-      <svg className="d3-component" width={width} height={height} ref={d3Container} />
     </div>
   );
 };
