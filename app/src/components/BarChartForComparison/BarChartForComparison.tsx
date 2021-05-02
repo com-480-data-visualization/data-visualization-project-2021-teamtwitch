@@ -4,6 +4,39 @@ import { sliderBottom } from "d3-simple-slider";
 
 const styles = require("./barchart.scss");
 
+const languageMapping: { [key: string]: string } = {
+  English: "217",
+  "American Sign Language": "243",
+};
+const dateLabels = [
+  "2016 April",
+  "2016 May",
+  "2016 June",
+  "2016 July",
+  "2016 August",
+  "2016 September",
+];
+const columnLabels = ["View minutes", "Streamed minutes", "Unique channels"];
+const data: {
+  [key: string]: { [key: string]: { key: string; value: number }[] };
+} = {};
+Object.values(languageMapping).map((v) => {
+  data[v] = {
+    viewminutes: dateLabels.map((d) => ({
+      key: d,
+      value: Math.round(Math.random() * 30 + 30),
+    })),
+    streamedminutes: dateLabels.map((d) => ({
+      key: d,
+      value: Math.round(Math.random() * 200 + 60),
+    })),
+    uniquechannels: dateLabels.map((d) => ({
+      key: d,
+      value: Math.round(Math.random() * 10 + 10),
+    })),
+  };
+});
+
 const BarChartForComparison = (): JSX.Element => {
   const d3Container = React.useRef(null);
   const sliderContainer = React.useRef(null);
@@ -11,56 +44,14 @@ const BarChartForComparison = (): JSX.Element => {
     width = 600 - margin.left - margin.right,
     height = 300 - margin.top - margin.bottom;
 
-  const languages: { [key: string]: string } = { English: "217" };
-  const dateLabels = [
-    "2016 April",
-    "2016 May",
-    "2016 June",
-    "2016 July",
-    "2016 August",
-    "2016 September",
-  ];
-  const columnLabels = ["View minutes", "Streamed minutes", "Unique channels"];
-  const data: {
-    [key: string]: { [key: string]: { key: string; value: number }[] };
-  } = {
-    "217": {
-      viewminutes: [
-        { key: "2016 April", value: 30 },
-        { key: "2016 May", value: 45 },
-        { key: "2016 June", value: 60 },
-        { key: "2016 July", value: 50 },
-        { key: "2016 August", value: 20 },
-        { key: "2016 September", value: 70 },
-      ],
-      streamedminutes: [
-        { key: "2016 April", value: 200 },
-        { key: "2016 May", value: 160 },
-        { key: "2016 June", value: 190 },
-        { key: "2016 July", value: 300 },
-        { key: "2016 August", value: 350 },
-        { key: "2016 September", value: 320 },
-      ],
-      uniquechannels: [
-        { key: "2016 April", value: 10 },
-        { key: "2016 May", value: 13 },
-        { key: "2016 June", value: 14 },
-        { key: "2016 July", value: 10 },
-        { key: "2016 August", value: 18 },
-        { key: "2016 September", value: 19 },
-      ],
-    },
-  };
-  const languageSelected = "English";
+  const [language, setLanguage] = React.useState("217");
   const [column, setColumn] = React.useState("viewminutes");
 
   const [dateSelected, setDateSelected] = React.useState([
     0,
     dateLabels.length - 1,
   ]);
-  const dataSelected = dateSelected.map(
-    (i) => data[languages[languageSelected]][column][i]
-  );
+  const dataSelected = dateSelected.map((i) => data[language][column][i]);
 
   React.useEffect(() => {
     if (d3Container.current) {
@@ -144,36 +135,16 @@ const BarChartForComparison = (): JSX.Element => {
     <div>
       <h2>Bar chart for comparison</h2>
       <div>
-        <div className={styles.columnSelector}>
-          {columnLabels.map((label) => (
-            <div key={label}>
-              {label.toLowerCase().replace(" ", "") === column ? (
-                <input
-                  type="radio"
-                  id={label}
-                  name="column"
-                  value={label.toLowerCase().replace(" ", "")}
-                  onChange={(curr) =>
-                    column !== curr.target.value && setColumn(curr.target.value)
-                  }
-                  checked
-                />
-              ) : (
-                <input
-                  type="radio"
-                  id={label}
-                  name="column"
-                  value={label.toLowerCase().replace(" ", "")}
-                  onChange={(curr) =>
-                    column !== curr.target.value && setColumn(curr.target.value)
-                  }
-                />
-              )}
-
-              <label htmlFor={label}>{label}</label>
-            </div>
-          ))}
-        </div>
+        <LanguageSelector
+          languageMapping={languageMapping}
+          setLanguage={setLanguage}
+          language={language}
+        />
+        <ColumnSelector
+          columnLabels={columnLabels}
+          column={column}
+          setColumn={setColumn}
+        />
         <div>
           <svg
             className="d3-component"
@@ -194,5 +165,62 @@ const BarChartForComparison = (): JSX.Element => {
     </div>
   );
 };
+
+const LanguageSelector = (props: {
+  languageMapping: { [key: string]: string };
+  language: string;
+  setLanguage: (v: string) => void;
+}) => (
+  <select
+    onChange={(e) =>
+      props.language !== e.target.value && props.setLanguage(e.target.value)
+    }
+  >
+    {Object.keys(props.languageMapping).map((k) => (
+      <option key={k} value={props.languageMapping[k]}>
+        {k}
+      </option>
+    ))}
+  </select>
+);
+
+const ColumnSelector = (props: {
+  columnLabels: string[];
+  column: string;
+  setColumn: (c: string) => void;
+}) => (
+  <div className={styles.columnSelector}>
+    {props.columnLabels.map((label) => (
+      <div key={label}>
+        {label.toLowerCase().replace(" ", "") === props.column ? (
+          <input
+            type="radio"
+            id={label}
+            name="column"
+            value={label.toLowerCase().replace(" ", "")}
+            onChange={(curr) =>
+              props.column !== curr.target.value &&
+              props.setColumn(curr.target.value)
+            }
+            checked
+          />
+        ) : (
+          <input
+            type="radio"
+            id={label}
+            name="column"
+            value={label.toLowerCase().replace(" ", "")}
+            onChange={(curr) =>
+              props.column !== curr.target.value &&
+              props.setColumn(curr.target.value)
+            }
+          />
+        )}
+
+        <label htmlFor={label}>{label}</label>
+      </div>
+    ))}
+  </div>
+);
 
 export default BarChartForComparison;
