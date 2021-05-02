@@ -2,6 +2,8 @@ import React from "react";
 import * as d3 from "d3";
 import { sliderBottom } from "d3-simple-slider";
 
+const styles = require("./barchart.scss");
+
 const BarChartForComparison = (): JSX.Element => {
   const d3Container = React.useRef(null);
   const sliderContainer = React.useRef(null);
@@ -18,9 +20,7 @@ const BarChartForComparison = (): JSX.Element => {
     "2016 August",
     "2016 September",
   ];
-  const columnLabels: { [key: string]: string } = {
-    "View minutes": "viewminutes",
-  };
+  const columnLabels = ["View minutes", "Streamed minutes", "Unique channels"];
   const data: {
     [key: string]: { [key: string]: { key: string; value: number }[] };
   } = {
@@ -33,17 +33,33 @@ const BarChartForComparison = (): JSX.Element => {
         { key: "2016 August", value: 20 },
         { key: "2016 September", value: 70 },
       ],
+      streamedminutes: [
+        { key: "2016 April", value: 200 },
+        { key: "2016 May", value: 160 },
+        { key: "2016 June", value: 190 },
+        { key: "2016 July", value: 300 },
+        { key: "2016 August", value: 350 },
+        { key: "2016 September", value: 320 },
+      ],
+      uniquechannels: [
+        { key: "2016 April", value: 10 },
+        { key: "2016 May", value: 13 },
+        { key: "2016 June", value: 14 },
+        { key: "2016 July", value: 10 },
+        { key: "2016 August", value: 18 },
+        { key: "2016 September", value: 19 },
+      ],
     },
   };
   const languageSelected = "English";
-  const column = "View minutes";
+  const [column, setColumn] = React.useState("viewminutes");
 
   const [dateSelected, setDateSelected] = React.useState([
     0,
     dateLabels.length - 1,
   ]);
   const dataSelected = dateSelected.map(
-    (i) => data[languages[languageSelected]][columnLabels[column]][i]
+    (i) => data[languages[languageSelected]][column][i]
   );
 
   React.useEffect(() => {
@@ -102,7 +118,7 @@ const BarChartForComparison = (): JSX.Element => {
 
       const sliderRange = sliderBottom(sliderScale)
         // @ts-ignore type definition is not updated
-        .width(600)
+        .width(width)
         .min(0)
         .max(dateLabels.length - 1)
         .step(1)
@@ -111,18 +127,15 @@ const BarChartForComparison = (): JSX.Element => {
         .default(dateSelected)
         .handle(d3.symbol().type(d3.symbolCircle).size(200)())
         .fill("#2196f3")
-        .on("onchange", (d: number[]) => {
-          setDateSelected(d);
-        });
+        .on("onchange", (d: number[]) => setDateSelected(d.slice()));
 
       d3.select(sliderContainer.current).html("");
       const gRange = d3
         .select(sliderContainer.current)
-        .attr("width", 800)
+        .attr("width", width + margin.left + margin.right)
         .attr("height", 100)
         .append("g")
-        .attr("transform", "translate(30,30)");
-
+        .attr("transform", `translate(${margin.left},30)`);
       gRange.call(sliderRange);
     }
   }, [d3Container.current, sliderContainer.current, dataSelected]);
@@ -130,18 +143,54 @@ const BarChartForComparison = (): JSX.Element => {
   return (
     <div>
       <h2>Bar chart for comparison</h2>
-      <svg
-        className="d3-component"
-        width={width}
-        height={height + margin.top + margin.bottom}
-        ref={d3Container}
-      />
-      <svg
-        className="d3-component"
-        width={800}
-        height={height + margin.top + margin.bottom}
-        ref={sliderContainer}
-      />
+      <div>
+        <div className={styles.columnSelector}>
+          {columnLabels.map((label) => (
+            <div key={label}>
+              {label.toLowerCase().replace(" ", "") === column ? (
+                <input
+                  type="radio"
+                  id={label}
+                  name="column"
+                  value={label.toLowerCase().replace(" ", "")}
+                  onChange={(curr) =>
+                    column !== curr.target.value && setColumn(curr.target.value)
+                  }
+                  checked
+                />
+              ) : (
+                <input
+                  type="radio"
+                  id={label}
+                  name="column"
+                  value={label.toLowerCase().replace(" ", "")}
+                  onChange={(curr) =>
+                    column !== curr.target.value && setColumn(curr.target.value)
+                  }
+                />
+              )}
+
+              <label htmlFor={label}>{label}</label>
+            </div>
+          ))}
+        </div>
+        <div>
+          <svg
+            className="d3-component"
+            width={width}
+            height={height + margin.top + margin.bottom}
+            ref={d3Container}
+          />
+          <div>
+            <svg
+              className="d3-component"
+              width={width + margin.left + margin.right}
+              height={height + margin.top + margin.bottom}
+              ref={sliderContainer}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
