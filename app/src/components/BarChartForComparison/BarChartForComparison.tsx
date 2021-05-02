@@ -1,8 +1,10 @@
 import React from "react";
 import * as d3 from "d3";
+import { sliderBottom } from "d3-simple-slider";
 
 const BarChartForComparison = (): JSX.Element => {
   const d3Container = React.useRef(null);
+  const sliderContainer = React.useRef(null);
   const margin = { top: 20, right: 20, bottom: 30, left: 40 },
     width = 600 - margin.left - margin.right,
     height = 300 - margin.top - margin.bottom;
@@ -36,15 +38,16 @@ const BarChartForComparison = (): JSX.Element => {
   const languageSelected = "English";
   const column = "View minutes";
 
-  const dateSelected = ["2016 April", "2016 August"];
-  const dataSelected = dateSelected
-    .map((i) => dateLabels.indexOf(i))
-    .map((i) => data[languages[languageSelected]][columnLabels[column]][i]);
+  const [dateSelected, setDateSelected] = React.useState([
+    0,
+    dateLabels.length - 1,
+  ]);
+  const dataSelected = dateSelected.map(
+    (i) => data[languages[languageSelected]][columnLabels[column]][i]
+  );
 
   React.useEffect(() => {
-    // Think of d3Container.current as the HTML node that d3 will attach to
     if (d3Container.current) {
-      /* Begin of d3 implementation */
       const x = d3.scaleBand().range([0, width]).padding(0.1);
       x.domain(dataSelected.map((d) => d.key)).padding(0.5);
 
@@ -53,12 +56,13 @@ const BarChartForComparison = (): JSX.Element => {
         .domain([0, 1.2 * (d3.max(dataSelected, (d) => d.value) || 0)])
         .range([height, 0]);
 
-      // Attach d3 to the node
-      const svg = d3
+      d3.select(d3Container.current).html("");
+      const wrapper = d3
         .select(d3Container.current)
-        .append("svg")
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("height", height + margin.top + margin.bottom);
+
+      const svg = wrapper
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -70,9 +74,8 @@ const BarChartForComparison = (): JSX.Element => {
 
       // Bars
       const barColor = ["#6b486b", "#a05d56"];
-      svg
-        .selectAll("rect")
-        .data(dataSelected)
+      const bars = svg.selectAll("rect").data(dataSelected);
+      bars
         .enter()
         .append("rect")
         .attr("x", (d) => x(d.key) || true)
@@ -80,9 +83,8 @@ const BarChartForComparison = (): JSX.Element => {
         .attr("width", x.bandwidth())
         .attr("height", (d) => height - y(d.value))
         .attr("fill", (_, i) => barColor[i]);
-      svg
-        .selectAll(".text")
-        .data(dataSelected)
+      const barLabels = svg.selectAll(".text").data(dataSelected);
+      barLabels
         .enter()
         .append("text")
         .text((d) => d.value)
@@ -90,12 +92,41 @@ const BarChartForComparison = (): JSX.Element => {
         .attr("x", (d) => (x(d.key) || 0) + x.bandwidth() / 2)
         .attr("y", (d) => y(d.value) - 10);
 
-      /* End of d3 implementation */
-    }
-  }, [d3Container.current, dataSelected]);
+      // Slider
+      const labelsWithIdx = dateLabels.map((v, i) => ({ key: i, value: v }));
+      const sliderScale = d3.scaleLinear().range([0, dateLabels.length]);
+      sliderScale.domain([
+        d3.min(labelsWithIdx, (d) => d.key) || 0,
+        d3.max(labelsWithIdx, (d) => d.key) || 0,
+      ]);
 
-  // Arrange descriptions and other JS logic here
-  // d3 element will be mounted on the svg node
+      const sliderRange = sliderBottom(sliderScale)
+        // @ts-ignore type definition is not updated
+        .width(600)
+        .min(0)
+        .max(dateLabels.length - 1)
+        .step(1)
+        .tickFormat((i: number) => dateLabels[i])
+        .ticks(dateLabels.length)
+        .default(dateSelected)
+        .handle(d3.symbol().type(d3.symbolCircle).size(200)())
+        .fill("#2196f3")
+        .on("onchange", (d: number[]) => {
+          setDateSelected(d);
+        });
+
+      d3.select(sliderContainer.current).html("");
+      const gRange = d3
+        .select(sliderContainer.current)
+        .attr("width", 800)
+        .attr("height", 100)
+        .append("g")
+        .attr("transform", "translate(30,30)");
+
+      gRange.call(sliderRange);
+    }
+  }, [d3Container.current, sliderContainer.current, dataSelected]);
+
   return (
     <div>
       <h2>Bar chart for comparison</h2>
@@ -104,6 +135,12 @@ const BarChartForComparison = (): JSX.Element => {
         width={width}
         height={height + margin.top + margin.bottom}
         ref={d3Container}
+      />
+      <svg
+        className="d3-component"
+        width={800}
+        height={height + margin.top + margin.bottom}
+        ref={sliderContainer}
       />
     </div>
   );
