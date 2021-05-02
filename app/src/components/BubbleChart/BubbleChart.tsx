@@ -1,236 +1,227 @@
 import React from "react";
 import * as d3 from "d3";
-import { sliderBottom } from 'd3-simple-slider';
+import { sliderBottom, sliderTime } from 'd3-simple-slider';
+import { GetRandomColor,
+        Pack,
+        MakeHierarchy,
+        MakeHierarchicalData
+      } from './bubbleFunctions.js';
+
+import data from "./bubbleTest/2016-may.json";
+const data1 = data.slice(0, 100);
+const data2 = data.slice(100, 200);
+const data3 = data.slice(200, 300);
+const data4 = data.slice(300, 400);
+const data5 = data.slice(400, 500);
+const data6 = data.slice(500, 600);
+
+/* --> kills server
+import data from "./bubbleTest/2016-june.json";
+const data2 = data.slice(0, 100);
+import data from "./bubbleTest/2016-july.json";
+const data3 = data.slice(0, 100);
+import data from "./bubbleTest/2016-february.json";
+const data4 = data.slice(0, 100);
+import data from "./bubbleTest/2016-april.json";
+const data5 = data.slice(0, 100);
+import data from "./bubbleTest/2016-march.json";
+const data6 = data.slice(0, 100);
+*/
 
 const BubbleChart = (): JSX.Element => {
   const d3Container = React.useRef(null);
-  const w = 1000;
-  const h = 1000;
+  const width = 1000;
+  const height = 500;
 
   React.useEffect(() => {
-    // Think of d3Container.current as the HTML node that d3 will attach to
     if (d3Container.current) {
-      /* Begin of d3 implementation */
-      const year1 = [{"title": "League of Legends", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "Minecraft", "measure":100, "property":"This is an awesome Game!"},
-                    {"title": "Just Chatting", "measure":310, "property":"This is an awesome Game!"},
-                    {"title": "Music", "measure":60, "property":"This is an awesome Game!"},
-                    {"title": "Chess", "measure":177, "property":"This is an awesome Game!"},
-                    {"title": "Counter Strike", "measure":132, "property":"This is an awesome Game!"},
-                    {"title": "DOTA", "measure":140, "property":"This is an awesome Game!"},
-                    {"title": "Misc", "measure":44, "property":"This is an awesome Game!"},
-                    {"title": "League of Legends", "measure":100, "property":"This is an awesome Game!"},
-                    {"title": "Minecraft", "measure":40, "property":"This is an awesome Game!"},
-                    {"title": "Just Chatting", "measure":200, "property":"This is an awesome Game!"},
-                    {"title": "Music", "measure":15, "property":"This is an awesome Game!"},
-                    {"title": "Chess", "measure":80, "property":"This is an awesome Game!"},
-                    ];
+      /*TODOs
+      1. Clip Long Text, that are shown when the circle is hovered over
+      2. Add way of selecting the measure
+      3. Fix Slider --> Mostly NIce, however 2016 doesnt show. If i change minimum
+        to a date in 2015, i can select dec 2015 which i also dont want
+          ö---> maybe no ticks? text shows anyways? not as nice as only ticks though...
+      4. ToolTip doesnt show bold.
+      5. Add image to tooltip.
+      6. Make modular (introduce variables)
+      7. Way to load json files... doesnt work?! I think because react
+        7.2 --> Make it data is loaded dynamically
+      8. I think months are missing in ALL
+      9. Think about bubble colors
+      10. Mouseover radius of bubbles; what should be like?
+      */
 
-      const year2 = [{"title": "1", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "2", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "3", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "4", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "6", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "5 Strike", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "7", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "8", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "0 of Legends", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "9", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "ß12 Chatting", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "23", "measure":400, "property":"This is an awesome Game!"},
-                    {"title": "124", "measure":400, "property":"This is an awesome Game!"},
-                    ];
-      const data = {"year1": year1, "year2": year2};
-
-      const width = 1000;
-      const height = 1000;
+      // left/top padding
       const padding = 50;
-      const transitionDurationThick = 300;
-      const standardStrokeWidth = 2;
+
+      // font
+      const fontSize = 12;
+      const fontFamily = "sans-serif";
+
+      // bubbles parameters
+      const bubblePadding = 10;
+      const defaultBubbleOpacity = 0.4;
+      const selectedBubbleOpacity = 0.8;
+      const defaultStrokeWidth = 2;
       const selectedStrokeWidth = 4;
-      const minMeasureForText = 50;
+      const transitionDurationThick = 300;
+      const bubbleDurationAppear = 250;
+      const bubbleTextFontSize = "1em";
 
-      const defaultYear = 2017;
-      const defaultMonth = 10;
-      const defaultDay = 1;
-      const defaultDate = new Date(defaultYear, defaultMonth, defaultDay);
-      let currentlyDisplayedYear = defaultYear;
+      // slider params
+      const sliderWidth = width;
+      const sliderHeight = 100;
+      const sliderPaddingLeft = 50;
+      const sliderPaddingTop = 20;
+      const sliderTicks = 6;
+      const defaultDate = new Date(2016, 1)
+      const totalMonths = 64
+      let currentlyDisplayedYear = defaultDate.getUTCFullYear();
 
-      // for generating a random color
-      function getRandomColor() {
-        var letters = '0123456789ABCDEF';
-        var color = '#';
-        for (var i = 0; i < 6; i++) {
-          color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-      }
-
-
-      // takes our flat data, and creates a hierachical structured dataset
-      // necessary for the bubble chart
-      const makeHierarchy = function (data){
-        return d3.hierarchy({children:data})
-        .sum(d => d.measure)
-      };
-
-      // given the height and the size and a padding, it creates a layout
-      // for the bubble chart. the higher the padding, the further away
-      // the circles
-      const pack = function (size, pack_padding){
-        return d3.pack()
-        .size(size)
-        .padding(30)
-      };
+      // for translating numbers to months
+      const months = ["January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November",
+                    "December"];
 
 
       // get the node and attach svg to it, set it up
       const svg = d3
-        .select(d3Container.current)
-        .append("svg")
-        .attr("viewBox", [0, 0, width, height])
-        .attr("font-size", 10)
-        .attr("font-family", "sans-serif")
+        .select(d3Container.current) // select the current container
+        .append("svg") // create svg container
+        .attr("viewBox", [0, 0, width, height]) // set viewbox
+        .attr("font-size", fontSize) // define font-size, etc.
+        .attr("font-family", fontFamily)
         .attr("text-anchor", "middle");
 
-      const makeHierarchicalData = function(data){
-        //d3.shuffle(data);
-        let hierarchalData = makeHierarchy(data);
-        let packLayout = pack([width-padding, height-padding]);
-        // then enter the hierachical data into the layout
-        return packLayout(hierarchalData);
-      }
+      const CreateBubbles = function(data){
+        // get hierachical data with bubble layout
+        const root =  MakeHierarchicalData(data, width, height, padding, bubblePadding);
 
+        // for each element in the data, create a group and translate it to the
+        // position given by the packing function (contained in each datapoint)
+        const bubbleGroup = svg
+        .selectAll("g")
+        .html("")
+        .data(root)
+        .join("g")
+          .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
 
-      const createBubbles = function(data){
-      // shuffle the data, then create a hierachical structure and get
-      // a layout (shuffle so it different every time)
-      const root =  makeHierarchicalData(data);
-
-      // for each bubble, create a group element, at the positoin (x,y),
-      // given by the layout
-      svg.html("");
-
-      const leaf = svg
-      .selectAll("g")
-      .data(root.leaves())
-      .join("g")
-        .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
-
-      // create the actual bubbles
-      leaf.append("circle")
-          .attr("r", d => d.r)
-          .attr("fill-opacity", 0.5)
+        // create the actual bubbles
+        bubbleGroup.append("circle")
+          .transition()
+          .duration(bubbleDurationAppear)
+          .attr("r", d => d.r) // radius was calculated by the packing func
+          .attr("fill-opacity", defaultBubbleOpacity)
           .attr("stroke", "black")
-          .attr("stroke-width", standardStrokeWidth)
-          .attr("fill", d => getRandomColor())
-          .on("mouseover", function(d){
-            d3.select(this)
-              .transition()
-              .duration(transitionDurationThick)
-              .attr('stroke-width', selectedStrokeWidth)
-              .attr("r", d => d.r + 70/d.r)
-              .attr("fill-opacity", 1.0);
-          })
-          .on("mouseout", function(d){
-            d3.select(this)
-              .transition()
-              .duration(transitionDurationThick)
-              .attr('stroke-width', standardStrokeWidth)
-              .attr("r", d => d.r)
-              .attr("fill-opacity", 0.5);;
-          })
-          .append("title")
-            .text((d) => {
-              let title_str = "Category:".bold() + "\t" + d.data.title;
-              let measure_str = "Measure:".bold() + "\t" + d.data.measure;
-              let property_str = "Property:".bold() + "\t" + d.data.property;
-              return [title_str, measure_str, property_str].join("\n");
-            });
+          .attr("stroke-width", defaultStrokeWidth)
+          .attr("fill", d => GetRandomColor()) // TODO maybe constrain to nice colors?;
 
-      leaf.append("text")
-      .style("font-size", "20px")
-      .selectAll("tspan")
-      .data(d => (d.data.measure >= minMeasureForText)
-        ? d.data.title.split(/(?=[A-Z][a-z])|\s+/g)
-        : "")
-      .join("tspan")
-        .attr("x", 0)
-        .attr("y", (d, i, nodes) => `${i - nodes.length / 2 + 0.8}em`)
-        .text(d => d)
+        // mouseover event for the bubbles
+        bubbleGroup.select("circle").on("mouseover", function(d){
+            d3.select(this)
+              .transition()
+              .duration(transitionDurationThick)
+              .attr('stroke-width', selectedStrokeWidth) // increase stroke width
+              .attr("r", d => d.r + 70/d.r) // TODO better idea?
+              .attr("fill-opacity", selectedBubbleOpacity);
+          });
+
+        // mouseout event for the bubbles
+        bubbleGroup.select("circle").on("mouseout", function(d){
+          d3.select(this)
+            .transition()
+            .duration(transitionDurationThick)
+            .attr('stroke-width', defaultStrokeWidth)
+            .attr("r", d => d.r)
+            .attr("fill-opacity", defaultBubbleOpacity);
+        });
+
+        // tooltip menu for bubbles
+        bubbleGroup.select("circle").append("title")
+          .text((d) => {
+            //let p1 = "Category:" + "\t" + d.data.name;
+            let p1 = "";
+            let p2 = "<b>Viewed Minutes</b>:" + "\t" + d.data.viewminutes;
+            let p3 = "Streamed Minutes:"+ "\t" + d.data.streamedminutes;
+            let p4 = "Peak Number of Channels:" + "\t" + d.data.maxchannels;
+            let p5 = "Unique Channels:" + "\t" + d.data.uniquechannels;
+            let p6 = "Average Number of Channels:"+ "\t" + d.data.avgchannels;
+            let p7 = "Peak Number of Viewers:"+ "\t" + d.data.maxviewers;
+            let p8 = "Average Number of Viewers:"+ "\t" + d.data.avgviewers;
+            let p9 = "Viewer/Channel Ratio:"+ "\t" + d.data.avgratio;
+            return [p1, p2, p3, p4, p5, p6, p7, p8, p9].join("\n");
+            return title_str
+          });
+
+        // add text within the bubbles
+        bubbleGroup.append("text")
+          .style("font-size", bubbleTextFontSize) // set font-size
+          .text(d => d.data.name)
+            .attr("x", d => 0)
+            .attr("y", d => 0)
+
       };
 
-      const createSlider = function(){
+      // for creating the slider
+      const CreateSlider = function(){
 
-        const totalMonths = 12*6
+        // define the slider
         var sliderSimple = sliderBottom()
-          .min(new Date(2015, 1, 1))
-          .max(new Date(2021, 12, 31))
+          .min(new Date(2015, 12, 15))
+          .max(new Date(2021, 3))
           .step(totalMonths)
-          .tickFormat(d3.timeFormat('%M:%Y'))
-          .width(500)
-          .height(50)
-          .ticks(6)
-          .default(new Date(2017, 10))
-          .on('onchange', val => {
+          .tickFormat(d3.timeFormat('%Y'))
+          .width(sliderWidth)
+          .height(sliderHeight)
+          .ticks(sliderTicks)
+          .default(defaultDate)
+          .on('onchange', function(d){
             // change the shown text
-            d3.select('p#bubble-slider-text').text(`${val.getUTCMonth() +1}:${val.getUTCFullYear()}`);
-            // depending on year (and month) display data
-            console.log(val.getUTCFullYear());
+            d3.select('p#bubble-slider-text')
+            .text(`<b>${months[d.getUTCMonth()]} <br/>
+              ${d.getUTCFullYear()}</b>`);
 
-            if (val.getUTCFullYear() != currentlyDisplayedYear){
-              currentlyDisplayedYear = val.getUTCFullYear();
-              if (val.getUTCFullYear() <= 2018){
+            // depending on the selected value, display the corresponding data
+            if (d.getUTCFullYear() != currentlyDisplayedYear){
+              currentlyDisplayedYear = d.getUTCFullYear();
+
+              CreateBubbles(eval("data" + (7 - (2022 - d.getUTCFullYear())));
+            }
+            /*
+            if (d.getUTCFullYear() != currentlyDisplayedYear){
+              currentlyDisplayedYear = d.getUTCFullYear();
+              if (d.getUTCFullYear() <= 2018){
                 var dataIndx = 1;
               } else {
                 var dataIndx = 2;
               }
-              console.log("data.year" + dataIndx);
-              const temp_data = makeHierarchicalData(eval("data.year" + dataIndx)).leaves();
-              var group = svg.selectAll("g")
-                        .data(temp_data);
-              group.exit().remove();//
-              group.enter().append("circle")
-                        .attr("r",0);//create any new circles needed
-
-              console.log(temp_data);
-              const temp = group.transition()
-                .duration(500)
-                .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
-              temp.select("circle")
-                  .attr("r", d => return d.r)
-                  .select("title")
-                    .text((d) => {
-                      let title_str = "Category:".bold() + "\t" + d.data.title;
-                      let measure_str = "Measure:".bold() + "\t" + d.data.measure;
-                      let property_str = "Property:".bold() + "\t" + d.data.property;
-                      return [title_str, measure_str, property_str].join("\n");
-                    })
-
-              temp.select("text")
-                  .attr("x", 0)
-                  .attr("y", 0)
-                  .text(d => d.data.title);
+              CreateBubbles(eval("data" + dataIndx));
             }
-          });
+            */
+        });
 
-
+        // creating the svg for the slider
         var gSimple = d3
           .select('#bubble-slider')
           .append('svg')
-          .attr('width', 700)
-          .attr('height', 200)
+          .attr('width', sliderWidth+sliderPaddingLeft*2)
+          .attr('height', sliderHeight+sliderPaddingTop)
           .append('g')
-          .attr('transform', 'translate(50,50)');
+          .attr('transform', `translate(${sliderPaddingLeft},${sliderPaddingTop})`);
 
+        // link slider to svg
         gSimple.call(sliderSimple);
-        d3.select('p#bubble-slider-text').text(sliderSimple.value());
+        // show default text
+        d3.select('p#bubble-slider-text')
+          .text(`<b>${months[defaultDate.getUTCMonth()]} <br/>
+            ${defaultDate.getUTCFullYear()}</b>`)
+          .style("font-size", bubbleTextFontSize);
       }
-      createSlider();
-      createBubbles(data.year1);
 
-
-      /* End of d3 implementation */
+      //create the slider
+      CreateSlider();
+      //create default bubbles
+      CreateBubbles(data1);
     }
   }, [d3Container.current]);
 
@@ -243,7 +234,7 @@ const BubbleChart = (): JSX.Element => {
         <div><p id="bubble-slider-text"></p></div>
         <div><div id="bubble-slider"></div></div>
       </div>
-      <svg className="d3-component" width={w} height={h} ref={d3Container} />
+      <svg className="d3-component" width={width} height={height} ref={d3Container} />
     </div>
   );
 };

@@ -1,5 +1,7 @@
+import * as d3 from "d3";
+
 // for generating a random color
-export function getRandomColor() {
+export function GetRandomColor() {
   var letters = '0123456789ABCDEF';
   var color = '#';
   for (var i = 0; i < 6; i++) {
@@ -8,34 +10,26 @@ export function getRandomColor() {
   return color;
 }
 
+// takes our flat data, and creates a hierachical structured dataset
+// necessary for the bubble chart
+export const MakeHierarchy = function (data){
+  return d3.hierarchy({children:data})
+  .sum(d => d.avgviewers)
+};
 
-const year1 = [{"title": "League of Legends", "measure":400, "property":"This is an awesome Game!"},
-              {"title": "Minecraft", "measure":100, "property":"This is an awesome Game!"},
-              {"title": "Just Chatting", "measure":310, "property":"This is an awesome Game!"},
-              {"title": "Music", "measure":60, "property":"This is an awesome Game!"},
-              {"title": "Chess", "measure":177, "property":"This is an awesome Game!"},
-              {"title": "Counter Strike", "measure":132, "property":"This is an awesome Game!"},
-              {"title": "DOTA", "measure":140, "property":"This is an awesome Game!"},
-              {"title": "Misc", "measure":44, "property":"This is an awesome Game!"},
-              {"title": "League of Legends", "measure":100, "property":"This is an awesome Game!"},
-              {"title": "Minecraft", "measure":40, "property":"This is an awesome Game!"},
-              {"title": "Just Chatting", "measure":200, "property":"This is an awesome Game!"},
-              {"title": "Music", "measure":15, "property":"This is an awesome Game!"},
-              {"title": "Chess", "measure":80, "property":"This is an awesome Game!"},
-              ];
+// given the height and the size and a padding, it creates a layout
+// for the bubble chart. the higher the padding, the further away
+// the circles
+export const Pack = function (size, pack_padding){
+  return d3.pack()
+  .size(size)
+  .padding(pack_padding)
+};
 
-const year2 = [{"title": "League of Legends", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Minecraft", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Just Chatting", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Music", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Chess", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Counter Strike", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "DOTA", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Misc", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "League of Legends", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Minecraft", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Just Chatting", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Music", "measure":500, "property":"This is an awesome Game!"},
-              {"title": "Chess", "measure":500, "property":"This is an awesome Game!"},
-              ];
-export const data = {"year1": year1, "year2": year2};
+export const MakeHierarchicalData = function(data, width, height, padding, pack_padding){
+  //d3.shuffle(data);
+  let hierarchalData = MakeHierarchy(data);
+  let packLayout = Pack([width-padding, height-padding], pack_padding);
+  // then enter the hierachical data into the layout
+  return packLayout(hierarchalData).leaves();
+}
