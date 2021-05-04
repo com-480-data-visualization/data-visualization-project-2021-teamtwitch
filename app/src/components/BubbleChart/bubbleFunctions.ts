@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as d3 from "d3";
 
 /*
@@ -14,33 +15,39 @@ export function GetRandomColor() {
 
 // takes our flat data, and creates a hierachical structured dataset
 // necessary for the bubble chart
-export const MakeHierarchy = function (data, measure){
-  return d3.hierarchy({children:data})
-  .sum(d => d[measure])
+export const MakeHierarchy = function (data, measure) {
+  return d3.hierarchy({ children: data }).sum((d) => d[measure]);
 };
 
 // given the height and the size and a padding, it creates a layout
 // for the bubble chart. the higher the padding, the further away
 // the circles
-export const Pack = function (size, pack_padding){
-  return d3.pack()
-  .size(size)
-  .padding(pack_padding)
+export const Pack = function (size, pack_padding) {
+  return d3.pack().size(size).padding(pack_padding);
 };
 
 // given data and other params, transform the data to a hierachical structure
 // with all necessary information for bubble chart
-export const MakeHierarchicalData = function(data, measure, width, height, padding, pack_padding){
+export const MakeHierarchicalData = function (
+  data,
+  measure,
+  width,
+  height,
+  padding,
+  pack_padding
+) {
   //d3.shuffle(data);
   let hierarchalData = MakeHierarchy(data, measure);
-  let packLayout = Pack([width-padding, height-padding], pack_padding);
+  let packLayout = Pack([width - padding, height - padding], pack_padding);
   // then enter the hierachical data into the layout
   return packLayout(hierarchalData).leaves();
-}
+};
 
 // since it is very long, we will use a function for creating the path names
 // for files
-export const MakeDataPath = function(language, year, month){
-  console.log(`[!] Loading '${`./data/bubbleTest/${language}/${year}-${month}.json`}'`)
-  return `./data/bubbleTest/${language}/${year}-${month}.json`;
-}
+export const MakeDataPath = function (language, year, month) {
+  console.log(
+    `[!] Loading '${`./data/bubbleTest/${language}/${year}-${month}.json`}'`
+  );
+  return `https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/master/data/${language}/${language}-${year}${month}.csv`;
+};

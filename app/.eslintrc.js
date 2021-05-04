@@ -39,6 +39,9 @@ module.exports = {
     "node_modules/",
     "coverage/",
     "dist/",
+    "src/components/BubbleChart/",
+    "src/components/OldBubbleChart/",
+    "src/components/ChessLineChart/",
   ],
   rules: {
     quotes: ["error", "double", { avoidEscape: true }],

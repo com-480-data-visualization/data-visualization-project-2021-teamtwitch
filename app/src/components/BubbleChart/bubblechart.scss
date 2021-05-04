@@ -1,0 +1,15 @@
+.label {
+  font-weight: bold;
+}
+
+.bubbleChartWrapper {
+  display: flex;
+}
+
+#bubbleChartInfo {
+  text-align: center;
+  width: 400px;
+  height: 400px;
+  background-color: gray;
+  border: 2px solid black;
+}
