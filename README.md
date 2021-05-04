@@ -77,6 +77,8 @@ We believe, the originality of our project stems from two facts:
 
 **10% of the final grade**
 
+Please find our prototype [here](https://com-480-data-visualization.github.io/data-visualization-project-2021-teamtwitch/site/index.html).
+
 
 ## Milestone 3 (4th June, 5pm)
 
