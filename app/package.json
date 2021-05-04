@@ -16,7 +16,8 @@
     "build": "webpack --mode=production",
     "lint:prettier": "prettier '**/*.{js,ts,tsx,scss,html}' --write",
     "lint": "yarn lint:prettier && eslint --ext .js,.jsx,.ts,.tsx --fix .",
-    "t": "jest src"
+    "t": "jest src",
+    "deploy": "yarn build && ./deploy.sh"
   },
   "browserslist": {
     "production": [
