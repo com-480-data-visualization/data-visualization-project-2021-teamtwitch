@@ -49,5 +49,5 @@ export const MakeDataPath = function (language, year, month) {
   console.log(
     `[!] Loading '${`./data/bubbleTest/${language}/${year}-${month}.json`}'`
   );
-  return `./data/bubbleTest/${language}/${year}-${month}.json`;
+  return `https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/master/data/${language}/${language}-${year}${month}.csv`;
 };
