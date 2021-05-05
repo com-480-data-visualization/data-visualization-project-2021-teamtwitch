@@ -203,7 +203,7 @@ const BubbleChart = (): JSX.Element => {
           .attr("stroke-width", selectedStrokeWidth) // increase stroke width
           .attr("r", (d) => d.r + selectedBubbleRadiusIncreaseFactor)
           .attr("fill-opacity", selectedBubbleOpacity);
-
+          
         // make it tooltip appear
         divTT.transition().duration(200).style("opacity", tooltipOpacity);
         // generate content for tooltip
