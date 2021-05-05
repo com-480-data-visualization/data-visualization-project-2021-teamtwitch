@@ -7,7 +7,7 @@ import {
   Pack,
   MakeHierarchy,
   MakeHierarchicalData,
-  MakeDataPath,
+  MakeDataPath
 } from "./bubbleFunctions";
 
 const styles = require("./bubblechart.scss");
@@ -18,22 +18,6 @@ const BubbleChart = (): JSX.Element => {
   const [currItem, setCurrItem] = React.useState<any>(null);
 
   React.useEffect(() => {
-    /*TODOs
-      1. Fix Slider --> Mostly NIce, however 2016 doesnt show. If i change minimum
-        to a date in 2015, i can select dec 2015 which i also dont want
-          ö---> maybe no ticks? text shows anyways? not as nice as only ticks though...
-      2. I think months are missing in ALL
-      3. When clicking and clicking on another agian, html appears and disappears
-        I want it to be there all the time
-      4. Let user select nrBubbles?
-      5. Weird warning in Console [Deprecation Warning]
-      */
-
-    /* TODOS when integrating for whole dataset
-      1. Slider + both Selection need to load the correct path. For measure
-        selection, it should already be compatible since it doesnt change the
-        selected data file
-      */
 
     // left/top padding
     const padding = 50;
@@ -55,8 +39,8 @@ const BubbleChart = (): JSX.Element => {
     const bubbleTextFontSize = "0";
 
     // slider params
-    const earliestDate = new Date(2016, 1);
-    const latestDate = new Date(2021, 3);
+    const earliestDate = new Date(2016, 1, 1);
+    const latestDate = new Date(2021, 3, 1);
     const sliderTextFontSize = "1em";
     const sliderWidth = width / 3;
     const sliderHeight = 100;
@@ -219,6 +203,7 @@ const BubbleChart = (): JSX.Element => {
           .attr("stroke-width", selectedStrokeWidth) // increase stroke width
           .attr("r", (d) => d.r + selectedBubbleRadiusIncreaseFactor)
           .attr("fill-opacity", selectedBubbleOpacity);
+
         // make it tooltip appear
         divTT.transition().duration(200).style("opacity", tooltipOpacity);
         // generate content for tooltip
@@ -239,39 +224,19 @@ const BubbleChart = (): JSX.Element => {
         // fil the tooltip
         divTT.html(toolTipText);
       });
-      /*
-        // mouseout event for the bubbles
-        bubbleGroup.select("circle").on("mouseout", function(d){
-          d3.select(this)
-            .transition()
-            .duration(transitionDurationThick)
-            .attr('stroke-width', defaultStrokeWidth)
-            .attr("r", d => d.r)
-            .attr("fill-opacity", defaultBubbleOpacity);
-          divTT.html("")
-        });
-        */
-
-      // add text within the bubbles
-      bubbleGroup
-        .append("text")
-        .style("font-size", bubbleTextFontSize) // set font-size
-        .text((d) => d.data.name)
-        .attr("x", (d) => 0)
-        .attr("y", (d) => 0);
     };
 
     // for creating the slider
     const CreateSlider = function () {
       // define the slider
       var sliderSimple = sliderBottom()
-        .min(earliestDate)
-        .max(latestDate)
+        .domain([earliestDate, latestDate])
         .step(totalMonths)
+        .ticks(sliderTicks)
+        .tickValues(Array.from({length:6},(_,k)=>k+2015).map(y => new Date(y, 12, 15)))
         .tickFormat(d3.timeFormat("%Y"))
         .width(sliderWidth)
         .height(sliderHeight)
-        .ticks(sliderTicks)
         .default(defaultDate)
         .on("onchange", function (d) {
           // change the shown text
@@ -292,10 +257,8 @@ const BubbleChart = (): JSX.Element => {
               currentlyDisplayedYear,
               months[currentlyDisplayedMonth].toLowerCase()
             );
-
-            d3.csv(currentlyDisplayedData).then(function (d) {
-              CreateBubbles(d.slice(0, nrBubbles));
-            });
+            // make a transition with the new data
+            BubbleTransition();
           }
 
           // also, when sliding, empty the tooltip
@@ -348,10 +311,8 @@ const BubbleChart = (): JSX.Element => {
           currentlyDisplayedYear,
           months[currentlyDisplayedMonth].toLowerCase()
         );
-        // change bubble chart with the selected data
-        d3.csv(currentlyDisplayedData).then(function (d) {
-          CreateBubbles(d.slice(0, nrBubbles));
-        });
+        // make a transition with the new data
+        BubbleTransition();
       });
     };
 
@@ -374,10 +335,8 @@ const BubbleChart = (): JSX.Element => {
         currentlyDisplayedMeasure =
           measureToAttribute[d3.select(this).property("value")];
 
-        // change bubble chart with the selected data
-        d3.csv(currentlyDisplayedData).then(function (d) {
-          CreateBubbles(d.slice(0, nrBubbles));
-        });
+        // make a transition with the new data
+        BubbleTransition();
       });
     };
 
@@ -391,6 +350,52 @@ const BubbleChart = (): JSX.Element => {
     d3.csv(currentlyDisplayedData).then(function (d) {
       CreateBubbles(d.slice(0, nrBubbles));
     });
+
+    // function for initiating a fluid transition by means of
+    // different data / measure
+    const BubbleTransition = function () {
+      // load the data
+      d3.csv(currentlyDisplayedData).then(function (d) {
+        let tempData = d.slice(0, nrBubbles);
+        //d3.shuffle(tempData); in or out?
+        // create a bubble layout with the data
+        let newData = MakeHierarchicalData(
+          tempData,
+          currentlyDisplayedMeasure,
+          width,
+          height,
+          padding,
+          bubblePadding
+        );
+
+        // change the patterns ids and urls
+        defs.selectAll(".category-pattern")
+          .data(newData)
+            .attr("id", (d) => {
+              return d.data.name.toLowerCase().replaceAll(" ", "-").replaceAll("'", "");
+            })
+          .select("image")
+            .attr("xlink:href", (d) => d.data.logo);
+
+        // change data and logo reference in the circles
+        svg.selectAll("g")
+          .data(newData)
+          .transition()
+            .duration(500)
+            .attr("transform", (d) => `translate(${d.x + 1},${d.y + 1})`)
+          .select("circle")
+            .attr("r", (d) => d.r)
+            .attr(
+              "fill",
+              (d) =>
+                `url(#${d.data.name
+                  .toLowerCase()
+                  .replaceAll(" ", "-")
+                  .replaceAll("'", "")})`
+            );
+      });
+    }
+
   });
 
   // Arrange descriptions and other JS logic here
