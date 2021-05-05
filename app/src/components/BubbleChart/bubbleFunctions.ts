@@ -46,8 +46,5 @@ export const MakeHierarchicalData = function (
 // since it is very long, we will use a function for creating the path names
 // for files
 export const MakeDataPath = function (language, year, month) {
-  console.log(
-    `[!] Loading '${`./data/bubbleTest/${language}/${year}-${month}.json`}'`
-  );
   return `https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/master/data/${language}/${language}-${year}${month}.csv`;
 };

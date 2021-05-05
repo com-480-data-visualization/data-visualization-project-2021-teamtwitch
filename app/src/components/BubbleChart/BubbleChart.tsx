@@ -287,7 +287,7 @@ const BubbleChart = (): JSX.Element => {
             currentlyDisplayedYear = d.getUTCFullYear();
             currentlyDisplayedMonth = d.getUTCMonth();
             // load corresponding data
-            var currentlyDisplayedData = MakeDataPath(
+            currentlyDisplayedData = MakeDataPath(
               currentlyDisplayedLanguage,
               currentlyDisplayedYear,
               months[currentlyDisplayedMonth].toLowerCase()
@@ -343,7 +343,7 @@ const BubbleChart = (): JSX.Element => {
         // recover chosen language
         currentlyDisplayedLanguage = d3.select(this).property("value");
         // generate path to select data
-        var currentlyDisplayedData = MakeDataPath(
+        currentlyDisplayedData = MakeDataPath(
           currentlyDisplayedLanguage,
           currentlyDisplayedYear,
           months[currentlyDisplayedMonth].toLowerCase()
