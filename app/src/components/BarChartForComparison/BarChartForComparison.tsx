@@ -1,22 +1,10 @@
 import React from "react";
 import * as d3 from "d3";
 import { sliderBottom } from "d3-simple-slider";
+import { languageMapping, dateLabels, columnLabels } from "./utils";
 
 const styles = require("./barchart.scss");
 
-const languageMapping: { [key: string]: string } = {
-  English: "217",
-  "American Sign Language": "243",
-};
-const dateLabels = [
-  "2016 April",
-  "2016 May",
-  "2016 June",
-  "2016 July",
-  "2016 August",
-  "2016 September",
-];
-const columnLabels = ["View minutes", "Streamed minutes", "Unique channels"];
 const data: {
   [key: string]: { [key: string]: { key: string; value: number }[] };
 } = {};
