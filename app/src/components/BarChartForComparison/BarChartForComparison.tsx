@@ -5,44 +5,84 @@ import { languageMapping, dateLabels, columnLabels } from "./utils";
 
 const styles = require("./barchart.scss");
 
-const data: {
+interface DataRow {
+  year: number;
+  month: string;
+  language: string;
+}
+
+interface GenericDataType {
+  [key: string]: number;
+}
+
+const loadData = async (): Promise<{
   [key: string]: { [key: string]: { key: string; value: number }[] };
-} = {};
-Object.values(languageMapping).map((v) => {
-  data[v] = {
-    viewminutes: dateLabels.map((d) => ({
-      key: d,
-      value: Math.round(Math.random() * 30 + 30),
-    })),
-    streamedminutes: dateLabels.map((d) => ({
-      key: d,
-      value: Math.round(Math.random() * 200 + 60),
-    })),
-    uniquechannels: dateLabels.map((d) => ({
-      key: d,
-      value: Math.round(Math.random() * 10 + 10),
-    })),
+}> => {
+  return fetch(
+    "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/2788e27b9e61afe6cd7b084fd41deb9b00106596/data/agg.json"
+  )
+    .then((data) => data.json())
+    .then((body: (DataRow & GenericDataType)[]) => {
+      const data: {
+        [key: string]: { [key: string]: { key: string; value: number }[] };
+      } = {};
+      const colKeys = columnLabels.map((s) => s.toLowerCase().replace(" ", ""));
+      for (const code of Object.values(languageMapping)) {
+        data[code] = {};
+        for (const col of colKeys) {
+          data[code][col] = [];
+        }
+      }
+      for (const row of body) {
+        for (const col of colKeys) {
+          data[row.language][col].push({
+            key: `${row.year} ${
+              row.month[0].toUpperCase() + row.month.slice(1)
+            }`,
+            value: row[col],
+          });
+        }
+      }
+      return data;
+    });
+};
+interface State {
+  data: {
+    [key: string]: { [key: string]: { key: string; value: number }[] };
   };
-});
+  language: string;
+  column: string;
+  dateSelected: number[];
+}
 
-const BarChartForComparison = (): JSX.Element => {
-  const d3Container = React.useRef(null);
-  const sliderContainer = React.useRef(null);
-  const margin = { top: 20, right: 20, bottom: 30, left: 40 },
-    width = 600 - margin.left - margin.right,
-    height = 300 - margin.top - margin.bottom;
+class BarChartForComparison extends React.Component<null, State> {
+  d3Container: React.MutableRefObject<null>;
+  sliderContainer: React.MutableRefObject<null>;
+  constructor(props: null) {
+    super(props);
+    this.d3Container = React.createRef();
+    this.sliderContainer = React.createRef();
+    this.state = {
+      data: {},
+      language: "000",
+      column: "viewminutes",
+      dateSelected: [0, dateLabels.length - 1],
+    };
+  }
 
-  const [language, setLanguage] = React.useState("217");
-  const [column, setColumn] = React.useState("viewminutes");
+  componentDidMount(): void {
+    loadData().then((d) => this.setState({ data: d }));
+  }
 
-  const [dateSelected, setDateSelected] = React.useState([
-    0,
-    dateLabels.length - 1,
-  ]);
-  const dataSelected = dateSelected.map((i) => data[language][column][i]);
+  render(): JSX.Element {
+    const margin = { top: 20, right: 20, bottom: 30, left: 40 },
+      width = 600 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
 
-  React.useEffect(() => {
-    if (d3Container.current) {
+    if (this.d3Container.current) {
+      const dataSelected = this.state.dateSelected.map(
+        (i) => this.state.data[this.state.language][this.state.column][i]
+      );
       const x = d3.scaleBand().range([0, width]).padding(0.1);
       x.domain(dataSelected.map((d) => d.key)).padding(0.5);
 
@@ -51,9 +91,9 @@ const BarChartForComparison = (): JSX.Element => {
         .domain([0, 1.2 * (d3.max(dataSelected, (d) => d.value) || 0)])
         .range([height, 0]);
 
-      d3.select(d3Container.current).html("");
+      d3.select(this.d3Container.current).html("");
       const wrapper = d3
-        .select(d3Container.current)
+        .select(this.d3Container.current)
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
 
@@ -103,56 +143,58 @@ const BarChartForComparison = (): JSX.Element => {
         .step(1)
         .tickFormat((i: number) => dateLabels[i])
         .ticks(dateLabels.length)
-        .default(dateSelected)
+        .default(this.state.dateSelected)
         .handle(d3.symbol().type(d3.symbolCircle).size(200)())
         .fill("#2196f3")
-        .on("onchange", (d: number[]) => setDateSelected(d.slice()));
+        .on("onchange", (d: number[]) =>
+          this.setState({ dateSelected: d.slice() })
+        );
 
-      d3.select(sliderContainer.current).html("");
+      d3.select(this.sliderContainer.current).html("");
       const gRange = d3
-        .select(sliderContainer.current)
+        .select(this.sliderContainer.current)
         .attr("width", width + margin.left + margin.right)
         .attr("height", 100)
         .append("g")
         .attr("transform", `translate(${margin.left},30)`);
       gRange.call(sliderRange);
     }
-  }, [d3Container.current, sliderContainer.current, dataSelected]);
 
-  return (
-    <div>
-      <h2>Bar chart for comparison</h2>
+    return (
       <div>
-        <LanguageSelector
-          languageMapping={languageMapping}
-          setLanguage={setLanguage}
-          language={language}
-        />
-        <ColumnSelector
-          columnLabels={columnLabels}
-          column={column}
-          setColumn={setColumn}
-        />
+        <h2>Bar chart for comparison</h2>
         <div>
-          <svg
-            className="d3-component"
-            width={width}
-            height={height + margin.top + margin.bottom}
-            ref={d3Container}
+          <LanguageSelector
+            languageMapping={languageMapping}
+            setLanguage={(d) => this.setState({ language: d })}
+            language={this.state.language}
+          />
+          <ColumnSelector
+            columnLabels={columnLabels}
+            column={this.state.column}
+            setColumn={(c) => this.setState({ column: c })}
           />
           <div>
             <svg
               className="d3-component"
-              width={width + margin.left + margin.right}
+              width={width}
               height={height + margin.top + margin.bottom}
-              ref={sliderContainer}
+              ref={this.d3Container}
             />
+            <div>
+              <svg
+                className="d3-component"
+                width={width + margin.left + margin.right}
+                height={height + margin.top + margin.bottom}
+                ref={this.sliderContainer}
+              />
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+}
 
 const LanguageSelector = (props: {
   languageMapping: { [key: string]: string };
