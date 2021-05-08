@@ -19,6 +19,13 @@
     "jsx": "react",
     "baseUrl": "."
   },
+  "linterOptions": {
+    "exclude": [
+      "src/components/BubbleChart/**",
+      "src/components/OldBubbleChart/**",
+      "src/components/ChessLineChart/**",
+    ],
+  },
   "include": [
     "src/",
     ".eslintrc.js",

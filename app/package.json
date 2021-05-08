@@ -5,6 +5,7 @@
   "dependencies": {
     "classnames": "^2.2.6",
     "d3": "^6.7.0",
+    "d3-simple-slider": "^1.10.4",
     "express": "^4.17.1",
     "react": "16.14.0",
     "react-dom": "16.14.0",
@@ -15,7 +16,8 @@
     "build": "webpack --mode=production",
     "lint:prettier": "prettier '**/*.{js,ts,tsx,scss,html}' --write",
     "lint": "yarn lint:prettier && eslint --ext .js,.jsx,.ts,.tsx --fix .",
-    "t": "jest src"
+    "t": "jest src",
+    "deploy": "yarn build && ./deploy.sh"
   },
   "browserslist": {
     "production": [
@@ -39,6 +41,7 @@
     "@testing-library/user-event": "^12.1.10",
     "@types/classnames": "^2.2.11",
     "@types/d3": "^6.3.0",
+    "@types/d3-simple-slider": "^1.5.1",
     "@types/enzyme": "^3.10.8",
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/jest": "^26.0.15",
