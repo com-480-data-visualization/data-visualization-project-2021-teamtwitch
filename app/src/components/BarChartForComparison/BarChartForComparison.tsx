@@ -19,7 +19,7 @@ const loadData = async (): Promise<{
   [key: string]: { [key: string]: { key: string; value: number }[] };
 }> => {
   return fetch(
-    "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/2788e27b9e61afe6cd7b084fd41deb9b00106596/data/agg.json"
+    "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/662d2972130af64b87bc9c6325bfd86390e15498/data/agg.json"
   )
     .then((data) => data.json())
     .then((body: (DataRow & GenericDataType)[]) => {
@@ -75,16 +75,14 @@ class BarChartForComparison extends React.Component<null, State> {
   }
 
   render(): JSX.Element {
-    const margin = { top: 20, right: 20, bottom: 30, left: 40 },
-      width = 600 - margin.left - margin.right,
-      height = 300 - margin.top - margin.bottom;
+    const margin = 60;
+    const width = 1000 - 2 * margin;
+    const height = 600 - 2 * margin;
 
     if (this.d3Container.current) {
-      const dataSelected = this.state.dateSelected.map(
-        (i) => this.state.data[this.state.language][this.state.column][i]
-      );
+      const dataSelected = this.state.data[this.state.language][this.state.column];
       const x = d3.scaleBand().range([0, width]).padding(0.1);
-      x.domain(dataSelected.map((d) => d.key)).padding(0.5);
+      x.domain(dateLabels).padding(0.5);
 
       const y = d3
         .scaleLinear()
@@ -94,16 +92,16 @@ class BarChartForComparison extends React.Component<null, State> {
       d3.select(this.d3Container.current).html("");
       const wrapper = d3
         .select(this.d3Container.current)
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom);
+        .attr("width", width + margin * 2)
+        .attr("height", height + margin * 2);
 
       const svg = wrapper
         .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        .attr("transform", `translate(${margin},${margin})`);
 
       svg
         .append("g")
-        .attr("transform", "translate(0," + height + ")")
+        .attr("transform", `translate(0,${height})`)
         .call(d3.axisBottom(x));
       svg.append("g").call(d3.axisLeft(y));
 
@@ -118,6 +116,7 @@ class BarChartForComparison extends React.Component<null, State> {
         .attr("width", x.bandwidth())
         .attr("height", (d) => height - y(d.value))
         .attr("fill", (_, i) => barColor[i]);
+      /*
       const barLabels = svg.selectAll(".text").data(dataSelected);
       barLabels
         .enter()
@@ -126,6 +125,7 @@ class BarChartForComparison extends React.Component<null, State> {
         .attr("text-anchor", "middle")
         .attr("x", (d) => (x(d.key) || 0) + x.bandwidth() / 2)
         .attr("y", (d) => y(d.value) - 10);
+      */
 
       // Slider
       const labelsWithIdx = dateLabels.map((v, i) => ({ key: i, value: v }));
@@ -153,10 +153,10 @@ class BarChartForComparison extends React.Component<null, State> {
       d3.select(this.sliderContainer.current).html("");
       const gRange = d3
         .select(this.sliderContainer.current)
-        .attr("width", width + margin.left + margin.right)
+        .attr("width", width + margin * 2)
         .attr("height", 100)
         .append("g")
-        .attr("transform", `translate(${margin.left},30)`);
+        .attr("transform", `translate(${margin},30)`);
       gRange.call(sliderRange);
     }
 
@@ -178,14 +178,14 @@ class BarChartForComparison extends React.Component<null, State> {
             <svg
               className="d3-component"
               width={width}
-              height={height + margin.top + margin.bottom}
+              height={height + margin * 2}
               ref={this.d3Container}
             />
             <div>
               <svg
                 className="d3-component"
-                width={width + margin.left + margin.right}
-                height={height + margin.top + margin.bottom}
+                width={width + margin * 2}
+                height={height + margin * 2}
                 ref={this.sliderContainer}
               />
             </div>
