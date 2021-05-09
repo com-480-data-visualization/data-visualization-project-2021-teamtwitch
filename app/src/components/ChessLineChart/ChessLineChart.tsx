@@ -77,7 +77,6 @@ const ChessLineChart = (): JSX.Element => {
         "text_delay":totalPathAnimationTime/1.3
       };
 
-      // TODO NINA
       // set the dimensions and margins of the graph
       var margin = {
         top: 10,
@@ -93,7 +92,7 @@ const ChessLineChart = (): JSX.Element => {
         var svg = d3.select(d3Container.current).append("svg")
             .attr("width", width + margin.left + margin.right )
             .attr("height", height + margin.top + margin.bottom)
-          .append("g") //TODO what is this group for? --> axis!?
+          .append("g")
             .attr("transform",
                   "translate(" + margin.left + "," + margin.top + ")");
 
@@ -136,7 +135,7 @@ const ChessLineChart = (): JSX.Element => {
             .attr("cx", function(d) { return x(d.date); })
             .attr("cy", function(d) { return y(d.viewminutes); })
             .attr("fill", "firebrick")
-            .style("opacity", 0); // TODO Mouseover values
+            .style("opacity", 0);
       }
 
       // for correctly setting the axes
@@ -178,10 +177,10 @@ const ChessLineChart = (): JSX.Element => {
         // format the data
         data.forEach(function(d) {
             d.date = d3.timeParse("%Y-%m-%d")(d.date);
-            d.viewminutes = +d.viewminutes; //TODO NINA
+            d.viewminutes = +d.viewminutes;
         });
 
-        // TODO NINA
+        // set domain
         x.domain(d3.extent(data, function(d) { return d.date; }));
         y.domain([0, d3.max(data, function(d) { return d.viewminutes; })]);
 
@@ -303,7 +302,7 @@ const ChessLineChart = (): JSX.Element => {
             .style("text-align", "center")
             .html("Click <br/> Me!")
             .transition()
-              .delay(event_obj["text_delay"]) //TODO for some reason this one takes longer
+              .delay(event_obj["text_delay"])
               .attr("opacity", 1)
               .on("end", blink);
 
