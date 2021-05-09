@@ -10,489 +10,412 @@ const ChessLineChart = (): JSX.Element => {
   React.useEffect(() => {
     // Think of d3Container.current as the HTML node that d3 will attach to
     if (d3Container.current) {
-      /* Begin of d3 implementation */
-      // Create dates for the events
+      // set days for special events
+      // set days for special events
       const lockdowns = new Date("2020-03-09");
       const queens_gambit = new Date("2020-10-23");
       const gm_twitch = new Date("2017-07-04");
-      // Define variables for infoboxes
-      var x_ =  15
-      var x_text = 30
-      var y_ = 70
-      var fill_ = "white"
-      // Define the rectangles for each event
-      const rect1_obj = {
-                        "y":85,
-                        "x_text":5,
-                        "width":90,
-                        "height":40,
-                        "expanded_width":160,
-                        "expanded_height":180;
-                        "stroke":"black",
-                        "fill":"white",
-                        "date":gm_twitch,
-                        "text":"",
-                        "image_url":"https://pbs.twimg.com/profile_images/1370552383151828995/k0xtMmPB_400x400.jpg"
-                        };
-      const rect2_obj = {
-                        "y":85,
-                        "x_text":5,
 
-                        "height":40,
-                        "width":90,
-                        "expanded_width":140,
-                        "expanded_height":180;
-                        "stroke":"black",
-                        "fill":"white",
-                        "date":lockdowns,
-                        "text":"",
-                        "image_url":"https://www.gannett-cdn.com/presto/2020/03/15/USAT/e6e30693-9224-4c89-b003-6cc4b4348528-insta-noemoji-heart.png?width=660&height=660&fit=crop&format=pjpg&auto=webp"
-                        };
 
-      const rect3_obj = {
-                        "y":85,
-                        "x_text":5,
-                        "height":40,
-                        "width":90,
-                        "expanded_width":160,
-                        "expanded_height":180;
-                        "stroke":"black",
-                        "fill":"white",
-                        "date":queens_gambit,
-                        "text":"",
-                        "image_url":"https://upload.wikimedia.org/wikipedia/en/1/12/The_Queen%27s_Gambit_%28miniseries%29.png"
-                        };
+      const totalPathAnimationTime = 12000;
+      const blinkTimer = 1100;
+      const line_duration = totalPathAnimationTime/5;
+      const textBoxWidth = 300;
+      const textBoxHeight = 200;
+      const boxTime = 400;
+      // specify time format
+      var formatTime = d3.timeFormat("%e %B %Y");
+
+      // attributes of each event
+      const event1 = {
+        "y":85,
+        "x_text":5,
+        "width":50,
+        "height":50,
+        "expanded_width":135,
+        "expanded_height":145,
+        "stroke":"black",
+        "fill":"white",
+        "date":gm_twitch,
+        "text": `<b>${formatTime(gm_twitch)}</b> <br/> Grandmaster Hikaru Nakamura, 5-times US chess champion, joins Twitch.Tv.`,
+        "image_url":"https://pbs.twimg.com/profile_images/1370552383151828995/k0xtMmPB_400x400.jpg",
+        "box_image_url":"https://static.thenounproject.com/png/71303-200.png",
+        "line_delay":totalPathAnimationTime/8.5,
+        "text_delay":totalPathAnimationTime/4.15 // because text delay is for some reason different from the rest, we need extra value for it
+      };
+      const event2 = {
+        "y":85,
+        "x_text":5,
+        "height":50,
+        "width":50,
+        "expanded_width":135,
+        "expanded_height":145,
+        "stroke":"black",
+        "fill":"white",
+        "date":lockdowns,
+        "text":`<b>${formatTime(lockdowns)} </b> <br/> The lockdowns in Europe start.`,
+        "image_url":"https://www.gannett-cdn.com/presto/2020/03/15/USAT/e6e30693-9224-4c89-b003-6cc4b4348528-insta-noemoji-heart.png?width=660&height=660&fit=crop&format=pjpg&auto=webp",
+        "box_image_url":"https://static.thenounproject.com/png/71309-200.png",
+        "line_delay":totalPathAnimationTime/2.35,
+        "text_delay":totalPathAnimationTime/1.75
+      };
+
+      const event3 = {
+        "y":85,
+        "x_text":5,
+        "height":50,
+        "width":50,
+        "expanded_width":135,
+        "expanded_height":145,
+        "stroke":"black",
+        "fill":"white",
+        "date":queens_gambit,
+        "text":`<b>${formatTime(queens_gambit)}</b> <br/> The TV show Queen's Gambit is released on Netflix and was a huge hit.`,
+        "image_url":"https://upload.wikimedia.org/wikipedia/en/1/12/The_Queen%27s_Gambit_%28miniseries%29.png",
+        "box_image_url":"https://static.thenounproject.com/png/71305-200.png",
+        "line_delay":totalPathAnimationTime/1.6,
+        "text_delay":totalPathAnimationTime/1.3
+      };
+
+      // TODO NINA
+      // set the dimensions and margins of the graph
+      var margin = {
+        top: 10,
+        right: 30,
+        bottom: 30,
+        left: 150},
+        width = 1000 - margin.left - margin.right,
+        height = 600 - margin.top - margin.bottom;
+
+
+        // append the svg obgect to the body of the page
+        // appends a 'group' element to 'svg'
+        var svg = d3.select(d3Container.current).append("svg")
+            .attr("width", width + margin.left + margin.right )
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g") //TODO what is this group for? --> axis!?
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+
+      // for drawing the path of the linechart
+      const drawLineChart = function (data, x, y) {
+
+        // define the lines
+        var valueline = d3.line()
+            .x(function(d) { return x(d.date); })
+            .y(function(d) { return y(d.viewminutes); });
+
+        // add the valueline path
+        var path = svg.append("path")
+           .data([data])
+           .attr("fill", "none")
+           .attr("stroke", "firebrick")
+           .attr("class", "line")
+           .attr("stroke-width", 2)
+           .attr("d", valueline);
+
+        var totalLength = path.node().getTotalLength();
+
+
+        path
+          .attr("stroke-dasharray", totalLength + " " + totalLength)
+          .attr("stroke-dashoffset", totalLength)
+          .transition()
+            .duration(totalPathAnimationTime)
+            .ease(d3.easeLinear)
+            .attr("stroke-dashoffset", 0);
+
+         // add the dots with tooltips
+         svg.selectAll(".dot")
+            .data(data)
+          .enter().append("circle")
+            .attr("r", 15)
+            .attr("cx", function(d) { return x(d.date); })
+            .attr("cy", function(d) { return y(d.viewminutes); })
+            .attr("fill", "firebrick")
+            .style("opacity", 0); // TODO Mouseover values
+      }
+
+      // for correctly setting the axes
+      const setAxes = function (x, y){
+        // add the x axis
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        // text label for the x-axis
+        svg.append("text")
+             .attr("transform",
+                   "translate(" + (width/2) + " ," +
+                                  (height + margin.top + 20) + ")")
+             .style("text-anchor", "middle")
+             .text("Date");
+
+        // add the y-axis
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        // text label for the y-axis
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 30 - margin.left)
+            .attr("x",0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Viewminutes");
+      }
+
       // Get the data
       d3.csv("https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/master/data/chess.csv").then(function(data) {
+
+        // set the ranges
+        var x = d3.scaleTime().range([0, width]);
+        var y = d3.scaleLinear().range([height, 0]);
 
         // format the data
         data.forEach(function(d) {
             d.date = d3.timeParse("%Y-%m-%d")(d.date);
-            d.viewminutes = +d.viewminutes;
+            d.viewminutes = +d.viewminutes; //TODO NINA
         });
 
+        // TODO NINA
+        x.domain(d3.extent(data, function(d) { return d.date; }));
+        y.domain([0, d3.max(data, function(d) { return d.viewminutes; })]);
+
+        // draw the line chart; supply the x and y axis
+        drawLineChart(data, x, y);
+        // add the axes
+        setAxes(x, y);
 
 
-      // set the dimensions and margins of the graph
-      // set the dimensions and margins of the graph
-      var margin = {top: 10, right: 30, bottom: 30, left: 150},
-          width = 1000 - margin.left - margin.right,
-          height = 600 - margin.top - margin.bottom;
-        // parse the date / time
-        //var parseTime = d3.timeParse("%d-%b-%y");
-      var formatTime = d3.timeFormat("%e %B %Y");
 
-      // set the ranges
-      var x = d3.scaleTime().range([0, width]);
-      var y = d3.scaleLinear().range([height, 0]);
 
-      // define the line
-      var valueline = d3.line()
-          .x(function(d) { return x(d.date); })
-          .y(function(d) { return y(d.viewminutes); });
 
-      var div = d3.select("body").append("div")
-          .attr("class", "tooltip")
-          .style("opacity", 0)
-          .style("position", "absolute")
-          .style("width", "110px")
-          .style("height", "65px")
+
+        // ====================================================================
+        /* HORIZONTAL LINES WITH BOXES */
+
+        // this will be the text box in the middle
+        const textBox = svg.append("foreignObject")
+          .attr("id", "textbox")
+          .attr("x", width/2 - 107)
+          .attr("y", height/2 - 140)
+          .attr("width", textBoxWidth)
+          .attr("height", textBoxHeight)
+          .append("xhtml:body")
+          .attr("opacity", 1)
+          .attr("id", "textBox")
+          .style("font", "'Helvetica Neue'")
+          .style("font-size", "14px")
           .style("text-align", "center")
-          .style("font", "16px sams-serif")
-          .style("background", "firebrick")
-          .style("border", "0px")
-          .style("border-radius", "8px")
-          .style("pointer-events", "none")
-          .style("padding", "2px");
-
-      var box = d3.select("body").append("box")
-          .attr("class", "tooltip")
-          .style("opacity", 0)
-          .style("position", "absolute")
-          .style("width", "200px")
-          .style("height", "100px")
-          .style("text-align", "center")
-          .style("font", "16px sams-serif")
-          .style("background", "white")
-          .style("border", "0px")
-          .style("border-radius", "8px")
-          .style("pointer-events", "none")
-          .style("padding", "2px");
-
-      var box0 = d3.select("body").append("box")
-          .attr("class", "tooltip")
-          .style("opacity", 0)
-          .style("position", "absolute")
-          .style("width", "50px")
-          .style("height", "50px")
-          .style("text-align", "center")
-          .style("font", "14px sams-serif")
-          .style("background", "white")
-          .style("border", "0px")
-          .style("border-radius", "8px")
-          .style("pointer-events", "none")
-          .style("padding", "2px");
-
-        // append the svg obgect to the body of the page
-        // appends a 'group' element to 'svg'
-        // moves the 'group' element to the top left margin
-        var svg = d3.select(d3Container.current).append("svg")
-            .attr("width", width + margin.left + margin.right )
-            .attr("height", height + margin.top + margin.bottom)
-          .append("g")
-            .attr("transform",
-                  "translate(" + margin.left + "," + margin.top + ")");
+          .html("");
 
         const defs = svg.append("defs");
-
-        defs
-         .append("pattern")
-         .attr("height", "100%")
-         .attr("width", "100%")
-         .attr("patternContentUnits", "objectBoundingBox")
-         .attr("id", "img1")
-         .append("image")
-         .attr("heigh", 1)
-         .attr("width", 1)
-         .attr("preserveAspectRatio", "none")
-         .attr("xlink:href", rect1_obj.image_url);
-
-         defs
-          .append("pattern")
-          .attr("height", "100%")
-          .attr("width", "100%")
-          .attr("patternContentUnits", "objectBoundingBox")
-          .attr("id", "img2")
-          .append("image")
-          .attr("heigh", 1)
-          .attr("width", 1)
-          .attr("preserveAspectRatio", "none")
-          .attr("xlink:href", rect2_obj.image_url);
-
+        // add all necessary patterns for the images
+        [event1, event2, event3].forEach(function (event, index){
           defs
-           .append("pattern")
-           .attr("height", "100%")
-           .attr("width", "100%")
-           .attr("patternContentUnits", "objectBoundingBox")
-           .attr("id", "img3")
-           .append("image")
-           .attr("heigh", 1)
-           .attr("width", 1)
-           .attr("preserveAspectRatio", "none")
-           .attr("xlink:href", rect3_obj.image_url);
-          // scale the range of the data
-          x.domain(d3.extent(data, function(d) { return d.date; }));
-          y.domain([0, d3.max(data, function(d) { return d.viewminutes; })]);
-
-          // add the valueline path
-          svg.append("path")
-             .data([data])
-             .attr("fill", "none")
-             .attr("stroke", "firebrick")
-             .attr("class", "line")
-             .attr("stroke-width", 2)
-             .attr("d", valueline);
-
-          // add the dots with tooltips
-          svg.selectAll("dot")
-             .data(data)
-           .enter().append("circle")
-             .attr("r", 15)
-             .attr("cx", function(d) { return x(d.date); })
-             .attr("cy", function(d) { return y(d.viewminutes); })
-             .attr("fill", "firebrick")
-             .style("opacity", 0)
-             .on("mouseover", function(event,d) {
-               div.transition()
-                 .duration(200)
-                 .style("opacity", .9);
-               div.html(formatTime(d.date) + "<br/>" + d.viewminutes)
-                 .style("left", (event.pageX) + "px")
-                 .style("top", (event.pageY) + "px");
-               })
-             .on("mouseout", function(d) {
-               div.transition()
-                 .duration(500)
-                 .style("opacity", 0);
-               });
-
-          // add the x axis
-          svg.append("g")
-              .attr("transform", "translate(0," + height + ")")
-              .call(d3.axisBottom(x));
-          // text label for the x-axis
-          svg.append("text")
-               .attr("transform",
-                     "translate(" + (width/2) + " ," +
-                                    (height + margin.top + 20) + ")")
-               .style("text-anchor", "middle")
-               .text("Date");
-
-          // add the y-axis
-          svg.append("g")
-              .call(d3.axisLeft(y));
-          // text label for the y-axis
-          svg.append("text")
-              .attr("transform", "rotate(-90)")
-              .attr("y", 30 - margin.left)
-              .attr("x",0 - (height / 2))
-              .attr("dy", "1em")
-              .style("text-anchor", "middle")
-              .text("Viewminutes");
-
-          // Add vertical line for GM joins twitch
-          svg.append("line")
-          .attr("x1", x(gm_twitch))
-          .attr("y1", 100)
-          .attr("x2", x(gm_twitch))
-          .attr("y2", height - margin.top - margin.bottom + 40)
-          .style("stroke-width", 1.5)
-          .style("stroke", "black")
-          .style("fill", "none");
-
-          // Add vertical line for lockdown starts
-          svg.append("line")
-          .attr("x1", x(lockdowns))
-          .attr("y1", 100)
-          .attr("x2", x(lockdowns))
-          .attr("y2", height - margin.top - margin.bottom+40)
-          .style("stroke-width", 1.5)
-          .style("stroke", "black")
-          .style("fill", "none");
-
-          // Add vertical line for Queen's Gambit release
-          svg.append("line")
-          .attr("x1", x(queens_gambit))
-          .attr("y1", 100)
-          .attr("x2", x(queens_gambit))
-          .attr("y2", height - margin.top - margin.bottom + 40)
-          .style("stroke-width", 1.5)
-          .style("stroke", "black")
-          .style("fill", "none");
-
-          // Add box for GM
-          var rect_gm = svg.append('rect')
-            .attr("id", "rect_gm")
-            .attr('x', x(rect1_obj.date)-rect1_obj.width/2)
-            .attr('y', rect1_obj.y - rect1_obj.height/2)
-            .attr('width', rect1_obj.width)
-            .attr('select_state', "not_selected")
-            .attr('height', rect1_obj.height)
-            .attr('stroke', rect1_obj.stroke)
-            .attr('fill', rect1_obj.fill)
-            .on("click", function (event, d) {
-              if (rect_gm.attr("select_state") === "not_selected"){
-                rect_gm
-                  .on("mouseover", function(event,d) {
-                    box.transition()
-                      .duration(200)
-                      .style("opacity", .9);
-                    box.html(formatTime(gm_twitch)+":" + "<br/>" + "Grandmaster Hikaru Nakamura"+", 5-times US chess champion joins Twitch.Tv")
-                      .style("left", (x(rect1_obj.date) + rect1_obj.expanded_width/3) + "px")
-                      .style("top", (rect1_obj.y + rect1_obj.expanded_height/1.15) + "px");
-                    })
-                  .on("mouseout", function(d) {
-                    box.transition()
-                      .duration(500)
-                      .style("opacity", 0);
-                    })
-                  .transition()
-                  .duration("10")
-                  .attr("fill", "url(#img1)")
-                  .attr("select_state", "selected")
-                  .transition()
-                  .duration("400")
-                  .attr("x", x(rect1_obj.date) - rect1_obj.expanded_width/2)
-                  .attr("y", rect1_obj.y - rect1_obj.expanded_height/8)
-                  .attr("width", rect1_obj.expanded_width)
-                  .attr("height", rect1_obj.expanded_height);
-              } else {
-                rect_gm
-                .on("mouseover", function(event,d) {
-                  box.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                  box.html(formatTime(gm_twitch)+":" + "<br/>" + "Grandmaster Hikaru Nakamura"+", 5-times US chess champion joins Twitch.Tv")
-                    .style("left", (x(rect1_obj.date) + rect1_obj.expanded_width/3) + "px")
-                    .style("top", (rect1_obj.y + rect1_obj.expanded_height/1.5) + "px");
-                  })
-                .on("mouseout", function(d) {
-                  box.transition()
-                    .duration(500)
-                    .style("opacity", 0);
-                  })
-                  .transition()
-                  .duration("400")
-                  .attr("x", x(rect1_obj.date) - rect1_obj.width/2)
-                  .attr("y", rect1_obj.y - rect1_obj.height/2)
-                  .attr("width", rect1_obj.width)
-                  .attr("height", rect1_obj.height)
-                  .attr("select_state", "not_selected")
-                  .transition()
-                  .duration("10")
-                  .attr('stroke', rect1_obj.stroke)
-                  .attr('fill', rect1_obj.fill);
-              }
-            });
-
-          // Add text for GM
-          svg.append('text')
-            .attr('x', x(gm_twitch)-x_text-10)
-            .attr('y', y_+20)
-            //.attr('stroke', 'black')
-            .text("Click me!")
-            .style("opacity", 0.4);
-
-          // Add box for lockdowns
-          var y_lockdown = 450;
-
-          var rect_ld = svg.append('rect')
-            .attr('x', x(rect2_obj.date)-rect2_obj.width/2)
-            .attr('y', rect2_obj.y - rect2_obj.height/2)
-            .attr('width', rect2_obj.width)
-            .attr('height', rect2_obj.height)
-            .attr('stroke', rect2_obj.stroke)
-            .attr('fill', rect2_obj.fill)
-            .attr('select_state', "not_selected")
-            .on("click", function (event, d) {
-              if (rect_ld.attr("select_state") === "not_selected"){
-                rect_ld
-                .on("mouseover", function(event,d) {
-                  box.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                  box.html(formatTime(lockdowns)+":" + "<br/>" + "The lockdowns in Europe start.")
-                    .style("left", (x(rect2_obj.date) - rect2_obj.expanded_width/18) + "px")
-                    .style("top", (rect2_obj.y + rect2_obj.expanded_height) + "px");
-                  })
-                .on("mouseout", function(d) {
-                  box.transition()
-                    .duration(500)
-                    .style("opacity", 0);
-                  })
-                  .transition()
-                  .duration("10")
-                  .attr("fill", "url(#img2)")
-                  .attr("select_state", "selected")
-                  .transition()
-                  .duration("400")
-                  .attr("x", x(rect2_obj.date) - rect2_obj.expanded_width/1.1)
-                  .attr("y", rect2_obj.y - rect2_obj.expanded_height/8)
-                  .attr("width", rect2_obj.expanded_width)
-                  .attr("height", rect2_obj.expanded_height);
-              } else {
-                rect_ld
-                .on("mouseover", function(event,d) {
-                  box.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                  box.html(formatTime(lockdowns)+":" + "<br/>" + "The lockdowns in Europe start.")
-                    .style("left", (x(rect2_obj.date) + rect2_obj.expanded_width/3) + "px")
-                    .style("top", (rect2_obj.y + rect2_obj.expanded_height/1.5) + "px");
-                  })
-                .on("mouseout", function(d) {
-                  box.transition()
-                    .duration(500)
-                    .style("opacity", 0);
-                  })
-                  .transition()
-                  .duration("400")
-                  .attr("x", x(rect2_obj.date) - rect2_obj.width/2)
-                  .attr("y", rect2_obj.y - rect2_obj.height/2)
-                  .attr("width", rect2_obj.width)
-                  .attr("height", rect2_obj.height)
-                  .attr("select_state", "not_selected")
-                  .transition()
-                  .duration("10")
-                  .attr('stroke', rect2_obj.stroke)
-                  .attr('fill', rect2_obj.fill);
-              }
-            });
-
-          // Add text for lockdowns
-          svg.append('text')
-            .attr('x', x(lockdowns)-x_text-10)
-            .attr('y', y_+ 20)
-            .text("Click me!")
-            .style("opacity", 0.4);
-
-          var y_gambit = 540;
-          // Add box for queen's gambit
-          var rect_qg = svg.append('rect')
-            .attr("id", "rect_qg")
-            .attr('x', x(rect3_obj.date)-rect3_obj.width/2)
-            .attr('y', rect3_obj.y - rect3_obj.height/2)
-            .attr('width', rect3_obj.width)
-            .attr('height', rect3_obj.height)
-            .attr('stroke', rect3_obj.stroke)
-            .attr('fill', rect3_obj.fill)
-            .attr('select_state', "not_selected")
-            .on("click", function (event, d) {
-              if (rect_qg.attr("select_state") === "not_selected"){
-                rect_qg
-                .on("mouseover", function(event,d) {
-                  box.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                    box.html(formatTime(queens_gambit)+":" + "<br/>" + "The TV show Queen's Gambit is released on Netflix.")
-                    .style("left", (x(rect3_obj.date) + rect3_obj.expanded_width/2.5) + "px")
-                    .style("top", (rect3_obj.y + rect3_obj.expanded_height/1.1) + "px");
-                  })
-                .on("mouseout", function(d) {
-                  box.transition()
-                    .duration(500)
-                    .style("opacity", 0);
-                  })
-                  .transition()
-                  .duration("10")
-                  .attr("fill", "url(#img3)")
-                  .attr("select_state", "selected")
-                  .transition()
-                  .duration("400")
-                  .attr("x", x(rect3_obj.date) - rect3_obj.expanded_width/2)
-                  .attr("y", rect3_obj.y - rect3_obj.expanded_height/8)
-                  .attr("width", rect3_obj.expanded_width)
-                  .attr("height", rect3_obj.expanded_height);
-              } else {
-
-                rect_qg
-                .on("mouseover", function(event,d) {
-                  box.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                    box.html(formatTime(queens_gambit)+":" + "<br/>" + "The TV show Queen's Gambit is released on Netflix.")
-                    .style("left", (x(rect3_obj.date) + rect3_obj.expanded_width/3) + "px")
-                    .style("top", (rect3_obj.y + rect3_obj.expanded_height/1.5) + "px");
-                  })
-                  .on("mouseout", function(d) {
-                    box.transition()
-                      .duration(500)
-                      .style("opacity", 0);
-                    })
-                  .transition()
-                  .duration("400")
-                  .attr("x", x(rect3_obj.date) - rect3_obj.width/2)
-                  .attr("y", rect3_obj.y - rect2_obj.height/2)
-                  .attr("width", rect3_obj.width)
-                  .attr("height", rect3_obj.height)
-                  .attr("select_state", "not_selected")
-                  .transition()
-                  .duration("10")
-                  .attr('stroke', rect3_obj.stroke)
-                  .attr('fill', rect3_obj.fill);
-              }
-            });
-
-          // Add text for queen's gambit
-          svg.append('text')
-            .attr('x', x(queens_gambit)-x_text-10)
-            .attr('y', y_+ 20)
-            .style("font-size", 16)
-            .style("opacity", 0.4)
-            .text("Click me!");
+            .append("pattern")
+            .attr("height", "100%")
+            .attr("width", "100%")
+            .attr("patternContentUnits", "objectBoundingBox")
+            .attr("id", `img${index+1}`)
+            .append("image")
+            .attr("heigh", 1)
+            .attr("width", 1)
+            .attr("preserveAspectRatio", "none")
+            .attr("xlink:href", event.image_url);
+          defs
+            .append("pattern")
+            .attr("height", "100%")
+            .attr("width", "100%")
+            .attr("patternContentUnits", "objectBoundingBox")
+            .attr("id", `box_img${index+1}`)
+            .append("image")
+            .attr("heigh", 1)
+            .attr("width", 1)
+            .attr("preserveAspectRatio", "none")
+            .attr("xlink:href", event.box_image_url);
         });
+
+        // create group and rectangle/text/line for all events
+        var group1 = svg.append("g")
+          .attr("id", "group1")
+          .attr("transform", `translate(${x(event1.date)} ${event1.y})`);
+
+        var group2 = svg.append("g")
+          .attr("id", "group2")
+          .attr("transform", `translate(${x(event2.date)} ${event2.y})`);
+
+        var group3 = svg.append("g")
+          .attr("id", "group2")
+          .attr("transform", `translate(${x(event3.date)} ${event3.y})`);
+
+        // function for actually building the rectangles
+        const buildRectangle = function(indx, group, event_obj) {
+          // create objects
+          var rect = group.append("rect")
+            .attr("id", `rect${indx}`);
+          var text = group.append("foreignObject")
+            .attr("id", `text${indx}`);
+          var line = group.append("line")
+            .attr("id", `line${indx}`);
+
+          // create the vertical line
+          line
+          .attr("x1", 0)
+          .attr("y1", height - margin.top - margin.bottom - 45)
+          .attr("x2", 0)
+          .attr("y2", height - margin.top - margin.bottom - 45)
+          .transition()
+            .delay(event_obj["line_delay"])
+          .transition()
+            .duration(line_duration)
+            .attr("x2", 0)
+            .attr("y2", 0 + event_obj.height/2)
+            .style("stroke-width", 1.5)
+            .style("stroke", "black")
+            .style("fill", "none");
+
+          // makes the text flicker
+          const blink = function () {
+              text
+                .transition()
+                .duration(blinkTimer)
+                .attr("opacity", 0)
+                .transition()
+                .duration(blinkTimer)
+                .attr("opacity", 1)
+                .on("end", blink);
+          }
+          // create the text shown in the box
+          text
+            .attr('x', -event_obj.width/2)
+            .attr('y', -3*event_obj.height/2)
+            .attr("width", event_obj.width)
+            .attr("height", event_obj.height)
+            .attr("opacity", 0)
+            .append("xhtml:body")
+            .style("font", "'Helvetica Neue'")
+            .style("font-size", "14px")
+            .style("text-align", "center")
+            .html("Click <br/> Me!")
+            .transition()
+              .delay(event_obj["text_delay"]) //TODO for some reason this one takes longer
+              .attr("opacity", 1)
+              .on("end", blink);
+
+
+          //blink();
+
+          // fill it with corresponding attributes
+          rect
+            .attr("id", `rect${indx}`)
+            .attr('x', -event_obj.width/2)
+            .attr('y', -event_obj.height/2)
+            .attr('width', event_obj.width)
+            .attr('height', event_obj.height)
+            .attr('standard_width', event_obj.width)
+            .attr('standard_height', event_obj.height)
+            .attr('stroke', event_obj.stroke)
+            .attr('fill', `url(#box_img${indx})`)
+            .attr('standard_fill', `url(#box_img${indx})`)
+            .attr("opacity", 0)
+            .attr('select_state', "not_selected")
+            .on("click", function (event, d) {
+
+              // unselect any other rectangle, that might be currently
+              // selected
+              d3.selectAll("rect").each(function(r,i){
+                // get the rectange objet
+                let other_rect = d3.select(this)
+                // check that it is not this one and that it is selected
+                if ((other_rect.attr("id") != `rect${indx}`) && (other_rect.attr("select_state") == "selected")){
+                  other_rect
+                    .transition()
+                    .duration(boxTime)
+                    .attr('select_state', "not_selected")
+                    .attr('x', -other_rect.attr("standard_width")/2)
+                    .attr('y', -other_rect.attr("standard_height")/2)
+                    .attr("width", other_rect.attr("standard_width"))
+                    .attr("height", other_rect.attr("standard_height"))
+                    .transition()
+                    .duration("1") //so it happens at the end
+                    .attr("fill", other_rect.attr("standard_fill"));
+
+                  console.log(`line${indx}`);
+                  // make the line also longer again, since img is gone
+                  d3.select(`#line${other_rect.attr("id").substring(other_rect.attr("id").length - 1)}`)
+                  .transition()
+                    .duration(boxTime)
+                    .attr("y2", + event_obj.height/2);
+                }
+              });
+
+
+              // make the text on top
+              text
+                .transition()
+                .duration(boxTime)
+                .attr("opacity", 0);
+
+              // change the text of the textbox in the middle and make it appear
+              // TODO POOR IMPLEMENTATION
+              textBox
+                .html("")
+                .attr("id", "textbox")
+                .attr("x", width/2 - 107)
+                .attr("y", height/2 - 140)
+                .attr("width", textBoxWidth)
+                .attr("height", textBoxHeight)
+                .append("xhtml:body")
+                .attr("opacity", 1)
+                .attr("id", "textBox")
+                .style("font", "'Helvetica Neue'")
+                .style("font-size", "14px")
+                .style("text-align", "center")
+                .html(event_obj.text);
+
+              // retract the horizontal line as much as needed together
+              // with the image
+              line
+              .transition()
+                .duration(boxTime)
+                .attr("y2", + event_obj.expanded_height/2);
+
+
+              // expand the box and fill it with the right image
+              d3.select(this)
+                .attr("select_state", "selected")
+                .transition()
+                .duration("10")
+                .attr("fill", `url(#img${indx})`)
+                .transition()
+                .duration(boxTime)
+                .attr("x", -event_obj.expanded_width/2)
+                .attr("y", -event_obj.expanded_height/2)
+                .attr("width", event_obj.expanded_width)
+                .attr("height", event_obj.expanded_height);
+            });
+
+            // delay the rectangle
+            rect
+              .transition()
+                .delay(event_obj["line_delay"] + line_duration)
+                .attr("opacity", 1)
+                .on("end", blink);
         }
-      }, [d3Container.current]);
+
+        // actually build all three boxes
+        buildRectangle(1, group1, event1);
+        buildRectangle(2, group2, event2);
+        buildRectangle(3, group3, event3);
+
+      });
+    }
+  }, [d3Container.current]);
 
 
   // Arrange descriptions and other JS logic here
