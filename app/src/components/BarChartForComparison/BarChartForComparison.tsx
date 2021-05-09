@@ -1,6 +1,5 @@
 import React from "react";
 import * as d3 from "d3";
-import { sliderBottom } from "d3-simple-slider";
 import { languageMapping, dateLabels, columnLabels, getDate } from "./utils";
 
 const styles = require("./barchart.scss");
@@ -60,13 +59,9 @@ interface State {
 
 class BarChartForComparison extends React.Component<null, State> {
   d3Container: React.MutableRefObject<null>;
-  d3Container2: React.MutableRefObject<null>;
-  sliderContainer: React.MutableRefObject<null>;
   constructor(props: null) {
     super(props);
     this.d3Container = React.createRef();
-    this.d3Container2 = React.createRef();
-    this.sliderContainer = React.createRef();
     this.state = {
       data: {},
       language: "000",
@@ -100,6 +95,13 @@ class BarChartForComparison extends React.Component<null, State> {
         .range([height, 0]);
 
       d3.select(this.d3Container.current).html("");
+      const area = d3
+        .area()
+        // @ts-ignore weird type hints
+        .x((d) => x(d.date))
+        // @ts-ignore weird type hints
+        .y1((d) => y(d.value))
+        .y0(y(0));
       const wrapper = d3
         .select(this.d3Container.current)
         .attr("width", width + margin * 2)
@@ -107,103 +109,21 @@ class BarChartForComparison extends React.Component<null, State> {
 
       const svg = wrapper
         .append("g")
-        .attr("transform", `translate(${margin},${margin})`);
-
-      svg
-        .append("g")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(x));
-      svg.append("g").call(d3.axisLeft(y));
-
-      // Bars
-      const barColor = ["#6b486b", "#a05d56"];
-      const bars = svg.selectAll("rect").data(dataSelected);
-      bars
-        .enter()
-        .append("rect")
-        .attr("x", (d) => x(d.date))
-        .attr("y", (d) => y(d.value))
-        .attr("width", 10)
-        .attr("height", (d) => height - y(d.value))
-        .attr("fill", (_, i) => barColor[i]);
-      /*
-      const barLabels = svg.selectAll(".text").data(dataSelected);
-      barLabels
-        .enter()
-        .append("text")
-        .text((d) => d.value)
-        .attr("text-anchor", "middle")
-        .attr("x", (d) => (x(d.key) || 0) + x.bandwidth() / 2)
-        .attr("y", (d) => y(d.value) - 10);
-      */
-
-      // Slider
-      const labelsWithIdx = dateLabels.map((v, i) => ({ key: i, value: v }));
-      const sliderScale = d3.scaleLinear().range([0, dateLabels.length]);
-      sliderScale.domain([
-        d3.min(labelsWithIdx, (d) => d.key) || 0,
-        d3.max(labelsWithIdx, (d) => d.key) || 0,
-      ]);
-
-      const sliderRange = sliderBottom(sliderScale)
-        // @ts-ignore type definition is not updated
-        .width(width)
-        .min(0)
-        .max(dateLabels.length - 1)
-        .step(1)
-        .tickFormat((i: number) => dateLabels[i])
-        .ticks(dateLabels.length)
-        .default(this.state.dateSelected)
-        .handle(d3.symbol().type(d3.symbolCircle).size(200)())
-        .fill("#2196f3")
-        .on("onchange", (d: number[]) =>
-          this.setState({ dateSelected: d.slice() })
-        );
-
-      d3.select(this.sliderContainer.current).html("");
-      const gRange = d3
-        .select(this.sliderContainer.current)
-        .attr("width", width + margin * 2)
-        .attr("height", 100)
-        .append("g")
-        .attr("transform", `translate(${margin},30)`);
-      gRange.call(sliderRange);
-
-      /* test */
-      d3.select(this.d3Container2.current).html("");
-      const area = d3
-        .area()
-        .x((d) => {
-          const row = (d as unknown) as DataEntry;
-          return x(row.date);
-        })
-        .y1((d) => {
-          const row = (d as unknown) as DataEntry;
-          return y(row.date);
-        })
-        .y0(y(0));
-      const wrapper2 = d3
-        .select(this.d3Container2.current)
-        .attr("width", width + margin * 2)
-        .attr("height", height + margin * 2);
-
-      const svg2 = wrapper2
-        .append("g")
         .attr("transform", `translate(${0},${margin})`);
 
       const xAxis = d3.axisBottom(x);
       const xAxisTranslate = height;
 
-      svg2
+      svg
         .append("g")
         .attr("transform", `translate(0, ${xAxisTranslate})`)
         .call(xAxis);
 
       const yAxis = d3.axisLeft(y).tickFormat(d3.format("~s"));
 
-      svg2.append("g").attr("transform", `translate(${margin}, 0)`).call(yAxis);
+      svg.append("g").attr("transform", `translate(${margin}, 0)`).call(yAxis);
 
-      svg2
+      svg
         .append("path")
         // @ts-ignore weird type hints
         .attr("d", area(dataSelected))
@@ -213,11 +133,11 @@ class BarChartForComparison extends React.Component<null, State> {
 
       // Interactivity
 
-      svg2.append("line").classed("hoverLine", true);
-      svg2.append("circle").classed("hoverPoint", true);
-      svg2.append("text").classed("hoverText", true);
+      svg.append("line").classed("hoverLine", true);
+      svg.append("circle").classed("hoverPoint", true);
+      svg.append("text").classed("hoverText", true);
 
-      svg2
+      svg
         .append("rect")
         .attr("fill", "transparent")
         .attr("x", 0)
@@ -236,11 +156,16 @@ class BarChartForComparison extends React.Component<null, State> {
           return;
         }
 
-        const bisectDate = d3.bisector((d: DataEntry) => d.date).right;
-        const xIndex = bisectDate(dataSelected, mouseDateSnap, 0);
+        const bisectDate = d3.bisector(
+          (d: { date: Date; value: number }) => d.date
+        ).right;
+        const xIndex = Math.min(
+          bisectDate(dataSelected, mouseDateSnap, 0),
+          dataSelected.length - 1
+        );
         const mousePopulation = dataSelected[xIndex].value;
 
-        svg2
+        svg
           .selectAll(".hoverLine")
           .attr("x1", displayX)
           .attr("y1", 0)
@@ -249,7 +174,7 @@ class BarChartForComparison extends React.Component<null, State> {
           .attr("stroke", "#147F90")
           .attr("fill", "#A6E8F2");
 
-        svg2
+        svg
           .selectAll(".hoverPoint")
           .attr("cx", displayX)
           .attr("cy", y(mousePopulation))
@@ -260,7 +185,7 @@ class BarChartForComparison extends React.Component<null, State> {
         const hoverTextX = isLessThanHalf ? "-0.75em" : "0.75em";
         const hoverTextAnchor = isLessThanHalf ? "end" : "start";
 
-        svg2
+        svg
           .selectAll(".hoverText")
           .attr("x", displayX)
           .attr("y", y(mousePopulation))
@@ -270,7 +195,7 @@ class BarChartForComparison extends React.Component<null, State> {
           .text(d3.format(".5s")(mousePopulation));
       };
 
-      svg2.on("mousemove", mouseMove);
+      svg.on("mousemove", mouseMove);
     }
 
     return (
@@ -294,22 +219,8 @@ class BarChartForComparison extends React.Component<null, State> {
               height={height + margin * 2}
               ref={this.d3Container}
             />
-            <div>
-              <svg
-                className="d3-component"
-                width={width + margin * 2}
-                height={height + margin * 2}
-                ref={this.sliderContainer}
-              />
-            </div>
           </div>
         </div>
-        <svg
-          className="d3-component"
-          width={width}
-          height={height + margin * 2}
-          ref={this.d3Container2}
-        />
       </div>
     );
   }
