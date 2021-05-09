@@ -77,6 +77,23 @@ const ChessLineChart = (): JSX.Element => {
         "text_delay":totalPathAnimationTime/1.3
       };
 
+      // instantiate hoverbox for dots
+      var div = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("position", "absolute")
+        .style("width", "80px")
+        .style("height", "45px")
+        .style("text-align", "center")
+        .style("font", "12px sams-serif")
+        .style("background", "white")
+        .style("border", "0px")
+        .style("border-radius", "8px")
+        .style("pointer-events", "none")
+        .style("padding", "2px");
+
       // set the dimensions and margins of the graph
       var margin = {
         top: 10,
@@ -130,12 +147,23 @@ const ChessLineChart = (): JSX.Element => {
          // add the dots with tooltips
          svg.selectAll(".dot")
             .data(data)
-          .enter().append("circle")
+            .enter().append("circle")
             .attr("r", 15)
             .attr("cx", function(d) { return x(d.date); })
             .attr("cy", function(d) { return y(d.viewminutes); })
             .attr("fill", "firebrick")
-            .style("opacity", 0);
+            .style("opacity", 0)
+            .on("mouseover", function (event, d) {
+              div.transition().duration(200).style("opacity", 0.9);
+              div
+                .html(formatTime(d.date) + "<br/>" + d.viewminutes)
+                .style("left", event.pageX + "px")
+                .style("top", event.pageY - 28 + "px");
+            })
+            .on("mouseout", function (d) {
+              div.transition().duration(500).style("opacity", 0);
+            });
+
       }
 
       // for correctly setting the axes
@@ -176,6 +204,7 @@ const ChessLineChart = (): JSX.Element => {
 
         // format the data
         data.forEach(function(d) {
+            d.channel = d.channel;
             d.date = d3.timeParse("%Y-%m-%d")(d.date);
             d.viewminutes = +d.viewminutes;
         });
@@ -249,7 +278,7 @@ const ChessLineChart = (): JSX.Element => {
           .attr("transform", `translate(${x(event2.date)} ${event2.y})`);
 
         var group3 = svg.append("g")
-          .attr("id", "group2")
+          .attr("id", "group3")
           .attr("transform", `translate(${x(event3.date)} ${event3.y})`);
 
         // function for actually building the rectangles
@@ -329,7 +358,7 @@ const ChessLineChart = (): JSX.Element => {
               // selected
               d3.selectAll("rect").each(function(r,i){
                 // get the rectange objet
-                let other_rect = d3.select(this)
+                let other_rect = d3.select(this);
                 // check that it is not this one and that it is selected
                 if ((other_rect.attr("id") != `rect${indx}`) && (other_rect.attr("select_state") == "selected")){
                   other_rect

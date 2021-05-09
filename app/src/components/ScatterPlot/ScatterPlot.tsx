@@ -29,8 +29,22 @@ const ScatterPlot = (): JSX.Element => {
         "December",
       ];
 
-
-
+      // instantiate hoverbox
+      var div = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("position", "absolute")
+        .style("width", "80px")
+        .style("height", "45px")
+        .style("text-align", "center")
+        .style("font", "12px sams-serif")
+        .style("background", "white")
+        .style("border", "0px")
+        .style("border-radius", "8px")
+        .style("pointer-events", "none")
+        .style("padding", "2px");
 
       // specify time format
       var formatTime = d3.timeFormat("%e %B %Y");
@@ -142,7 +156,16 @@ const ScatterPlot = (): JSX.Element => {
             .attr("cx", d => x(d.streamedminutes))
             .attr("cy", d => y(d.viewminutes))
             .attr("fill", "firebrick")
-            .on("mouseover", (event, d) => console.log(d.name));
+            .on("mouseover", function (event, d) {
+            div.transition().duration(200).style("opacity", 0.9);
+            div
+              .html(d.name)
+              .style("left", event.pageX + "px")
+              .style("top", event.pageY - 28 + "px");
+          })
+          .on("mouseout", function (d) {
+            div.transition().duration(500).style("opacity", 0);
+          });
       }
 
       // for correctly setting the axes
@@ -189,11 +212,6 @@ const ScatterPlot = (): JSX.Element => {
       var x = d3.scaleLinear().range([0, width]);
       var y = d3.scaleLinear().range([height, 0]);
 
-      const file1 = "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/master/data/all_test.csv";
-      const file2 = "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/master/data/All/All-2016april.csv";
-
-
-
       const changeDots = function(newDataPath){
         d3.csv(newDataPath).then(function(newData) {
           const transferDuration = 5000;
@@ -222,11 +240,10 @@ const ScatterPlot = (): JSX.Element => {
              .attr("cy", d => y(d.viewminutes));
         })
       }
-
+    // instantiate the slider
     CreateSlider();
-    // Get the data
+    // instantiate the first plot
     d3.csv(currentlyDisplayedData).then(function(data) {
-      console.log(currentlyDisplayedData);
       data = data.slice(0, 1000);
       // format date and cast to numbers
       preprocessing(data);
@@ -238,16 +255,6 @@ const ScatterPlot = (): JSX.Element => {
       // add the axes
       setAxes(x, y);
     });
-
-    //
-    // slider function  sv.gaöppend lsider
-    //   atrr....
-    //   on("change"{
-    //     # get new path
-    //     newDataPath = `${mont} + year`
-    //
-    //     chagnge(Dots(newdatapath))
-    //changeDots(file2);
     }
   }, [d3Container.current]);
 
