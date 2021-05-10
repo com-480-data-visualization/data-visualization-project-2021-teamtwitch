@@ -2,33 +2,33 @@ import React from "react";
 import * as d3 from "d3";
 import { languageMapping, dateLabels, columnLabels, getDate } from "./utils";
 
-const styles = require("./barchart.scss");
+const styles = require("./areachart.scss");
 
-interface RawDataRow {
+interface IRawDataRow {
   year: string;
   month: string;
   language: string;
 }
 
-interface GenericDataType {
+interface IGenericData {
   [key: string]: number;
 }
 
-interface DataEntry {
+interface IDataEntry {
   date: Date;
   value: number;
 }
 
 const loadData = async (): Promise<{
-  [key: string]: { [key: string]: DataEntry[] };
+  [key: string]: { [key: string]: IDataEntry[] };
 }> => {
   return fetch(
     "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/662d2972130af64b87bc9c6325bfd86390e15498/data/agg.json"
   )
     .then((data) => data.json())
-    .then((body: (RawDataRow & GenericDataType)[]) => {
+    .then((body: (IRawDataRow & IGenericData)[]) => {
       const data: {
-        [key: string]: { [key: string]: DataEntry[] };
+        [key: string]: { [key: string]: IDataEntry[] };
       } = {};
       const colKeys = columnLabels.map((s) => s.toLowerCase().replace(" ", ""));
       for (const code of Object.values(languageMapping)) {
@@ -48,16 +48,16 @@ const loadData = async (): Promise<{
       return data;
     });
 };
-interface State {
+interface IAreaChartState {
   data: {
-    [key: string]: { [key: string]: DataEntry[] };
+    [key: string]: { [key: string]: IDataEntry[] };
   };
   language: string;
   column: string;
   dateSelected: number[];
 }
 
-class BarChartForComparison extends React.Component<{}, State> {
+class AreaChart extends React.Component<{}, IAreaChartState> {
   d3Container: React.MutableRefObject<null>;
   constructor(props: {}) {
     super(props);
@@ -260,8 +260,8 @@ class BarChartForComparison extends React.Component<{}, State> {
     y: d3.ScaleLinear<number, number, never>,
     width: number,
     margin: number,
-    dataSelected: DataEntry[]
-  ) {
+    dataSelected: IDataEntry[]
+  ): void {
     const mouseDate = x.invert(xCoord);
     const mouseDateSnap = d3.timeMonth.floor(mouseDate);
     const displayX = Math.min(x(mouseDateSnap), width + margin);
@@ -300,7 +300,7 @@ class BarChartForComparison extends React.Component<{}, State> {
       .text(d3.format(".5s")(mousePopulation));
   }
 
-  updateDiffText(leftValue: DataEntry, rightValue: DataEntry): void {
+  updateDiffText(leftValue: IDataEntry, rightValue: IDataEntry): void {
     const diffValue = d3.format("+.2f")(
       ((rightValue.value - leftValue.value) * 100) / leftValue.value
     );
@@ -319,7 +319,7 @@ class BarChartForComparison extends React.Component<{}, State> {
     }
   }
 
-  updateInfoText(value: DataEntry, className: string): void {
+  updateInfoText(value: IDataEntry, className: string): void {
     const infobox = d3.select(className);
     infobox.select(`.${styles.date}`).text(
       `${value.date.toLocaleString("default", {
@@ -337,7 +337,7 @@ class BarChartForComparison extends React.Component<{}, State> {
     width: number,
     height: number,
     margin: number,
-    dataSelected: DataEntry[],
+    dataSelected: IDataEntry[],
     isRight = false
   ): void {
     const ts = dateLabels[
@@ -511,4 +511,4 @@ const ColumnSelector = (props: {
   </div>
 );
 
-export default BarChartForComparison;
+export default AreaChart;
