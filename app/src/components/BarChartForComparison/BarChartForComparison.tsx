@@ -171,27 +171,40 @@ class BarChartForComparison extends React.Component<{}, State> {
 
       const defs = svg.append("defs");
       const gradient = defs.append("linearGradient").attr("id", "svgGradient");
-      const gradientResetPercentage = "0%";
+
+      const leftLabel = dateLabels[this.state.dateSelected[0]].split(" ");
+      const leftDate = d3.timeMonth.floor(
+        getDate(leftLabel[0], leftLabel[1].toLowerCase())
+      );
+      const displayX1Line = Math.min(x(leftDate), width + margin);
+      const x1Percentage = `${((displayX1Line - margin) / width) * 100}%`;
+
+      const rightLabel = dateLabels[this.state.dateSelected[1]].split(" ");
+      const rightDate = d3.timeMonth.floor(
+        getDate(rightLabel[0], rightLabel[1].toLowerCase())
+      );
+      const displayX2Line = Math.min(x(rightDate), width + margin);
+      const x2Percentage = `${((displayX2Line - margin) / width) * 100}%`;
       gradient
         .append("stop")
         .attr("class", "start")
-        .attr("offset", gradientResetPercentage)
+        .attr("offset", x1Percentage)
         .attr("stop-color", "lightblue");
       gradient
         .append("stop")
         .attr("class", "start")
-        .attr("offset", gradientResetPercentage)
+        .attr("offset", x1Percentage)
         .attr("stop-color", "darkblue");
       gradient
         .append("stop")
         .attr("class", "end")
-        .attr("offset", gradientResetPercentage)
+        .attr("offset", x2Percentage)
         .attr("stop-color", "darkblue")
         .attr("stop-opacity", 1);
       gradient
         .append("stop")
         .attr("class", "end")
-        .attr("offset", gradientResetPercentage)
+        .attr("offset", x2Percentage)
         .attr("stop-color", "lightblue");
 
       const handleMouseMove = (event: MouseEvent) => {
@@ -217,13 +230,7 @@ class BarChartForComparison extends React.Component<{}, State> {
           dataSelected[Math.min(xIndex + 1, dataSelected.length - 1)];
         d3.select(".year1").text(`${leftData.date} : ${leftData.value}`);
         d3.select(".year2").text(`${rightData.date} : ${rightData.value}`);
-        // Update gradient
-        const x1Percentage =
-          ((x(d3.timeMonth.floor(leftData.date)) - margin) / width) * 100;
-        const x2Percentage =
-          ((x(d3.timeMonth.floor(rightData.date)) - margin) / width) * 100;
-        d3.selectAll(".start").attr("offset", `${x1Percentage}%`);
-        d3.selectAll(".end").attr("offset", `${x2Percentage}%`);
+
         const mousePopulation = dataSelected[xIndex].value;
 
         // Point indicator
@@ -249,15 +256,7 @@ class BarChartForComparison extends React.Component<{}, State> {
           .text(d3.format(".5s")(mousePopulation));
       };
 
-      const handleMouseOut = () => {
-        d3.selectAll(".start").attr("offset", gradientResetPercentage);
-        d3.selectAll(".end").attr("offset", gradientResetPercentage);
-        d3.select(".year1").text("");
-        d3.select(".year2").text("");
-      };
-
       svg.on("mousemove", handleMouseMove);
-      svg.on("mouseout", handleMouseOut);
     }
 
     return (
@@ -318,42 +317,82 @@ class BarChartForComparison extends React.Component<{}, State> {
 
     line.call(
       // @ts-ignore weird type hints
-      d3.drag().on("drag", (event, d) => {
-        event.sourceEvent.preventDefault();
-        console.log(isRight);
-        const siblingXIdx = isRight
-          ? this.state.dateSelected[0]
-          : this.state.dateSelected[1];
-        const xCoord = event.x;
-        const mouseDate = x.invert(xCoord);
-        const mouseDateSnap = d3.timeMonth.floor(mouseDate);
-        const displayX = Math.min(x(mouseDateSnap), width + margin);
-        if (displayX < margin - width / dateLabels.length) {
-          return;
-        }
+      d3
+        .drag()
+        .on("drag", (event, d) => {
+          event.sourceEvent.preventDefault();
+          const siblingXIdx = isRight
+            ? this.state.dateSelected[0]
+            : this.state.dateSelected[1];
+          const xCoord = event.x;
+          const mouseDate = x.invert(xCoord);
+          const mouseDateSnap = d3.timeMonth.floor(mouseDate);
+          const displayX = Math.min(x(mouseDateSnap), width + margin);
+          if (displayX < margin - width / dateLabels.length) {
+            return;
+          }
 
-        const bisectDate = d3.bisector(
-          (d: { date: Date; value: number }) => d.date
-        ).right;
-        const xIndex = Math.min(
-          bisectDate(dataSelected, mouseDateSnap, 0),
-          dataSelected.length - 1
-        );
-        if (Math.abs(xIndex - siblingXIdx) <= 1) {
-          return;
-        }
-        line
-          .filter((p) => p === d)
-          .attr("x1", displayX)
-          .attr("x2", displayX);
+          const bisectDate = d3.bisector(
+            (d: { date: Date; value: number }) => d.date
+          ).right;
+          const xIndex = Math.min(
+            bisectDate(dataSelected, mouseDateSnap, 0),
+            dataSelected.length - 1
+          );
+          if (
+            (isRight && xIndex - siblingXIdx <= 1) ||
+            (!isRight && siblingXIdx - xIndex <= 1)
+          ) {
+            return;
+          }
+          line
+            .filter((p) => p === d)
+            .attr("x1", displayX)
+            .attr("x2", displayX);
 
-        this.setState({
-          dateSelected: [
-            Math.min(siblingXIdx, xIndex),
-            Math.max(siblingXIdx, xIndex),
-          ],
-        });
-      })
+          const percentage = ((displayX - margin) / width) * 100;
+          if (isRight) {
+            d3.selectAll(".end").attr("offset", `${percentage}%`);
+          } else {
+            d3.selectAll(".start").attr("offset", `${percentage}%`);
+          }
+          console.log(percentage);
+        })
+        .on("end", (event) => {
+          event.sourceEvent.preventDefault();
+          const siblingXIdx = isRight
+            ? this.state.dateSelected[0]
+            : this.state.dateSelected[1];
+          const xCoord = event.x;
+          const mouseDate = x.invert(xCoord);
+          const mouseDateSnap = d3.timeMonth.floor(mouseDate);
+          const displayX = Math.min(x(mouseDateSnap), width + margin);
+          if (displayX < margin - width / dateLabels.length) {
+            return;
+          }
+
+          const bisectDate = d3.bisector(
+            (d: { date: Date; value: number }) => d.date
+          ).right;
+          const xIndex = Math.min(
+            bisectDate(dataSelected, mouseDateSnap, 0),
+            dataSelected.length - 1
+          );
+
+          if (
+            (isRight && xIndex - siblingXIdx <= 1) ||
+            (!isRight && siblingXIdx - xIndex <= 1)
+          ) {
+            return;
+          }
+
+          this.setState({
+            dateSelected: [
+              Math.min(siblingXIdx, xIndex),
+              Math.max(siblingXIdx, xIndex),
+            ],
+          });
+        })
     );
   };
 }
