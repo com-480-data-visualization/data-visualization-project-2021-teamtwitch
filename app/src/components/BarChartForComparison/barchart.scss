@@ -12,3 +12,30 @@
   offset: 50%;
   stroke-width: 5;
 }
+
+.infobox {
+  display: flex;
+  margin-top: 1em;
+}
+
+.box {
+  margin: 0 4em;
+  & .date {
+    color: darkgray;
+  }
+
+  & .value {
+    font-size: 18pt;
+  }
+}
+
+.diff {
+  font-weight: bold;
+  font-size: 14pt;
+  width: 8em;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+}
