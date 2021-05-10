@@ -134,38 +134,16 @@ class BarChartForComparison extends React.Component<{}, State> {
         .attr("stroke-width", strokeWidth)
         // @ts-ignore weird type hints
         .attr("d", area);
-      /*
-        .append("path")
-        // @ts-ignore weird type hints
-        .attr("d", area(dataSelected))
-        .attr("stroke", "#147F90")
-        .attr("stroke-width", "2px")
-        .attr("fill", "#A6E8F2")
-        */
 
       // Interactivity
       svg.append("circle").classed("hoverPoint", true);
       svg.append("text").classed("hoverText", true);
 
       const entry1 = dataSelected[this.state.dateSelected[0]];
+      this.updateInfoText(entry1, ".year1");
       const entry2 = dataSelected[this.state.dateSelected[1]];
-      const y1 = d3.select(".year1");
-      y1.select(`.${styles.date}`).text(
-        `${entry1.date.toLocaleString("default", {
-          year: "numeric",
-          month: "short",
-        })}`
-      );
-      y1.select(`.${styles.value}`).text(`${d3.format(".5s")(entry1.value)}`);
+      this.updateInfoText(entry2, ".year2");
       this.updateDiffText(entry1, entry2);
-      const y2 = d3.select(".year2");
-      y2.select(`.${styles.date}`).text(
-        `${entry2.date.toLocaleString("default", {
-          year: "numeric",
-          month: "short",
-        })}`
-      );
-      y2.select(`.${styles.value}`).text(`${d3.format(".5s")(entry2.value)}`);
 
       svg
         .append("rect")
@@ -332,6 +310,17 @@ class BarChartForComparison extends React.Component<{}, State> {
     }
   }
 
+  updateInfoText(value: DataEntry, className: string): void {
+    const infobox = d3.select(className);
+    infobox.select(`.${styles.date}`).text(
+      `${value.date.toLocaleString("default", {
+        year: "numeric",
+        month: "short",
+      })}`
+    );
+    infobox.select(`.${styles.value}`).text(`${d3.format(".5s")(value.value)}`);
+  }
+
   createVerticleLine(
     svg: d3.Selection<SVGGElement, unknown, null, undefined>,
     x: d3.ScaleTime<number, number, never>,
@@ -408,18 +397,7 @@ class BarChartForComparison extends React.Component<{}, State> {
           }
 
           d3.selectAll(lineClass).attr("offset", `${percentage}%`);
-          const infobox = d3.select(infoboxClass);
-          infobox
-            .select(`.${styles.date}`)
-            .text(
-              `${entry.date.toLocaleString("default", {
-                year: "numeric",
-                month: "short",
-              })}`
-            );
-          infobox
-            .select(`.${styles.value}`)
-            .text(`${d3.format(".5s")(entry.value)}`);
+          this.updateInfoText(entry, infoboxClass);
           this.updateDiffText(leftValue, rightValue);
         })
         .on("end", (event) => {
