@@ -57,9 +57,9 @@ interface State {
   dateSelected: number[];
 }
 
-class BarChartForComparison extends React.Component<null, State> {
+class BarChartForComparison extends React.Component<{}, State> {
   d3Container: React.MutableRefObject<null>;
-  constructor(props: null) {
+  constructor(props: {}) {
     super(props);
     this.d3Container = React.createRef();
     this.state = {
@@ -123,13 +123,25 @@ class BarChartForComparison extends React.Component<null, State> {
 
       svg.append("g").attr("transform", `translate(${margin}, 0)`).call(yAxis);
 
+      const strokeWidth = 1.5;
       svg
+        .append("path")
+        .datum(dataSelected)
+        .style("fill", "url(#svgGradient)")
+        .attr("stroke", "steelblue")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", strokeWidth)
+        // @ts-ignore weird type hints
+        .attr("d", area);
+        /*
         .append("path")
         // @ts-ignore weird type hints
         .attr("d", area(dataSelected))
         .attr("stroke", "#147F90")
         .attr("stroke-width", "2px")
-        .attr("fill", "#A6E8F2");
+        .attr("fill", "#A6E8F2")
+        */
 
       // Interactivity
 
@@ -195,7 +207,79 @@ class BarChartForComparison extends React.Component<null, State> {
           .text(d3.format(".5s")(mousePopulation));
       };
 
-      svg.on("mousemove", mouseMove);
+      const defs = svg.append("defs");
+      const gradient = defs.append("linearGradient").attr("id", "svgGradient");
+      const gradientResetPercentage = "0%";
+      gradient
+        .append("stop")
+        .attr("class", "start")
+        .attr("offset", gradientResetPercentage)
+        .attr("stop-color", "lightblue");
+      gradient
+        .append("stop")
+        .attr("class", "start")
+        .attr("offset", gradientResetPercentage)
+        .attr("stop-color", "darkblue");
+      gradient
+        .append("stop")
+        .attr("class", "end")
+        .attr("offset", gradientResetPercentage)
+        .attr("stop-color", "darkblue")
+        .attr("stop-opacity", 1);
+      gradient
+        .append("stop")
+        .attr("class", "end")
+        .attr("offset", gradientResetPercentage)
+        .attr("stop-color", "lightblue");
+
+      const handleMouseMove = (event: MouseEvent) => {
+        event.preventDefault();
+        const xCoord = event.pageX;
+
+        const mouseDate = x.invert(xCoord);
+        const mouseDateSnap = d3.timeMonth.floor(mouseDate);
+        const displayX = Math.min(x(mouseDateSnap), width + margin);
+        if (displayX < margin - width / dateLabels.length) {
+          return;
+        }
+
+        const bisectDate = d3.bisector(
+          (d: { date: Date; value: number }) => d.date
+        ).right;
+        const xIndex = Math.min(
+          bisectDate(dataSelected, mouseDateSnap, 0),
+          dataSelected.length - 1
+        );
+        const leftData = dataSelected[xIndex];
+        const rightData =
+          dataSelected[Math.min(xIndex + 1, dataSelected.length - 1)];
+        d3.select(".year1").text(`${leftData.date} : ${leftData.value}`);
+        d3.select(".year2").text(`${rightData.date} : ${rightData.value}`);
+        // Update gradient
+        const x1Percentage =
+          ((x(d3.timeMonth.floor(leftData.date)) - margin) / width) * 100;
+        const x2Percentage =
+          ((x(d3.timeMonth.floor(rightData.date)) - margin) / width) * 100;
+        d3.selectAll(".start").attr("offset", `${x1Percentage}%`);
+        d3.selectAll(".end").attr("offset", `${x2Percentage}%`);
+        const mousePopulation = dataSelected[xIndex].value;
+        svg
+          .selectAll(".hoverPoint")
+          .attr("cx", displayX)
+          .attr("cy", y(mousePopulation))
+          .attr("r", "7")
+          .attr("fill", "#147F90");
+      };
+
+      const handleMouseOut = () => {
+        d3.selectAll(".start").attr("offset", gradientResetPercentage);
+        d3.selectAll(".end").attr("offset", gradientResetPercentage);
+        d3.select(".year1").text("");
+        d3.select(".year2").text("");
+      };
+
+      svg.on("mousemove", handleMouseMove);
+      svg.on("mouseout", handleMouseOut);
     }
 
     return (
@@ -213,6 +297,8 @@ class BarChartForComparison extends React.Component<null, State> {
             setColumn={(c) => this.setState({ column: c })}
           />
           <div>
+            <p className="year1"></p>
+            <p className="year2"></p>
             <svg
               className="d3-component"
               width={width}
