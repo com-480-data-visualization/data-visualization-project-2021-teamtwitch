@@ -134,7 +134,7 @@ class BarChartForComparison extends React.Component<{}, State> {
         .attr("stroke-width", strokeWidth)
         // @ts-ignore weird type hints
         .attr("d", area);
-        /*
+      /*
         .append("path")
         // @ts-ignore weird type hints
         .attr("d", area(dataSelected))
@@ -144,8 +144,6 @@ class BarChartForComparison extends React.Component<{}, State> {
         */
 
       // Interactivity
-
-      svg.append("line").classed("hoverLine", true);
       svg.append("circle").classed("hoverPoint", true);
       svg.append("text").classed("hoverText", true);
 
@@ -157,55 +155,19 @@ class BarChartForComparison extends React.Component<{}, State> {
         .attr("width", width + margin * 2)
         .attr("height", height + margin * 2);
 
-      const mouseMove = (event: MouseEvent) => {
-        event.preventDefault();
-        const xCoord = event.pageX;
+      // Left line
+      this.createVerticleLine(svg, x, width, height, margin, dataSelected);
 
-        const mouseDate = x.invert(xCoord);
-        const mouseDateSnap = d3.timeMonth.floor(mouseDate);
-        const displayX = Math.min(x(mouseDateSnap), width + margin);
-        if (displayX < margin - width / dateLabels.length) {
-          return;
-        }
-
-        const bisectDate = d3.bisector(
-          (d: { date: Date; value: number }) => d.date
-        ).right;
-        const xIndex = Math.min(
-          bisectDate(dataSelected, mouseDateSnap, 0),
-          dataSelected.length - 1
-        );
-        const mousePopulation = dataSelected[xIndex].value;
-
-        svg
-          .selectAll(".hoverLine")
-          .attr("x1", displayX)
-          .attr("y1", 0)
-          .attr("x2", displayX)
-          .attr("y2", height)
-          .attr("stroke", "#147F90")
-          .attr("fill", "#A6E8F2");
-
-        svg
-          .selectAll(".hoverPoint")
-          .attr("cx", displayX)
-          .attr("cy", y(mousePopulation))
-          .attr("r", "7")
-          .attr("fill", "#147F90");
-
-        const isLessThanHalf = xIndex > dataSelected.length / 2;
-        const hoverTextX = isLessThanHalf ? "-0.75em" : "0.75em";
-        const hoverTextAnchor = isLessThanHalf ? "end" : "start";
-
-        svg
-          .selectAll(".hoverText")
-          .attr("x", displayX)
-          .attr("y", y(mousePopulation))
-          .attr("dx", hoverTextX)
-          .attr("dy", "-1.25em")
-          .style("text-anchor", hoverTextAnchor)
-          .text(d3.format(".5s")(mousePopulation));
-      };
+      // Right line
+      this.createVerticleLine(
+        svg,
+        x,
+        width,
+        height,
+        margin,
+        dataSelected,
+        true
+      );
 
       const defs = svg.append("defs");
       const gradient = defs.append("linearGradient").attr("id", "svgGradient");
@@ -263,12 +225,28 @@ class BarChartForComparison extends React.Component<{}, State> {
         d3.selectAll(".start").attr("offset", `${x1Percentage}%`);
         d3.selectAll(".end").attr("offset", `${x2Percentage}%`);
         const mousePopulation = dataSelected[xIndex].value;
+
+        // Point indicator
         svg
           .selectAll(".hoverPoint")
           .attr("cx", displayX)
           .attr("cy", y(mousePopulation))
           .attr("r", "7")
           .attr("fill", "#147F90");
+
+        // Tooltip
+        const isLessThanHalf = xIndex > dataSelected.length / 2;
+        const hoverTextX = isLessThanHalf ? "-0.75em" : "0.75em";
+        const hoverTextAnchor = isLessThanHalf ? "end" : "start";
+
+        svg
+          .selectAll(".hoverText")
+          .attr("x", displayX)
+          .attr("y", y(mousePopulation))
+          .attr("dx", hoverTextX)
+          .attr("dy", "-1.25em")
+          .style("text-anchor", hoverTextAnchor)
+          .text(d3.format(".5s")(mousePopulation));
       };
 
       const handleMouseOut = () => {
@@ -310,6 +288,74 @@ class BarChartForComparison extends React.Component<{}, State> {
       </div>
     );
   }
+
+  createVerticleLine = (
+    svg: d3.Selection<SVGGElement, unknown, null, undefined>,
+    x: d3.ScaleTime<number, number, never>,
+    width: number,
+    height: number,
+    margin: number,
+    dataSelected: DataEntry[],
+    isRight = false
+  ): void => {
+    const ts = dateLabels[
+      isRight ? this.state.dateSelected[1] : this.state.dateSelected[0]
+    ].split(" ");
+    const d1 = d3.timeMonth.floor(getDate(ts[0], ts[1].toLowerCase()));
+    const displayXLine = Math.min(x(d1), width + margin);
+    const line: d3.Selection<
+      SVGLineElement,
+      unknown,
+      null,
+      undefined
+    > = svg
+      .append("line")
+      .classed(styles.verticleLine, true)
+      .attr("x1", displayXLine)
+      .attr("y1", 0)
+      .attr("x2", displayXLine)
+      .attr("y2", height);
+
+    line.call(
+      // @ts-ignore weird type hints
+      d3.drag().on("drag", (event, d) => {
+        event.sourceEvent.preventDefault();
+        console.log(isRight);
+        const siblingXIdx = isRight
+          ? this.state.dateSelected[0]
+          : this.state.dateSelected[1];
+        const xCoord = event.x;
+        const mouseDate = x.invert(xCoord);
+        const mouseDateSnap = d3.timeMonth.floor(mouseDate);
+        const displayX = Math.min(x(mouseDateSnap), width + margin);
+        if (displayX < margin - width / dateLabels.length) {
+          return;
+        }
+
+        const bisectDate = d3.bisector(
+          (d: { date: Date; value: number }) => d.date
+        ).right;
+        const xIndex = Math.min(
+          bisectDate(dataSelected, mouseDateSnap, 0),
+          dataSelected.length - 1
+        );
+        if (Math.abs(xIndex - siblingXIdx) <= 1) {
+          return;
+        }
+        line
+          .filter((p) => p === d)
+          .attr("x1", displayX)
+          .attr("x2", displayX);
+
+        this.setState({
+          dateSelected: [
+            Math.min(siblingXIdx, xIndex),
+            Math.max(siblingXIdx, xIndex),
+          ],
+        });
+      })
+    );
+  };
 }
 
 const LanguageSelector = (props: {
