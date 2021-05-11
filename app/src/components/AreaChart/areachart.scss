@@ -20,14 +20,30 @@
   stroke-width: 5;
 }
 
+.infogrid {
+  display: grid;
+}
+
 .infobox {
   display: flex;
-  margin-top: 2em;
   justify-content: center;
+  margin-top: 1em;
+
+  &:first-child {
+    margin-top: 2em;
+  }
+
+  & .title {
+    display: flex;
+    align-items: center;
+    width: 130px;
+  }
 }
 
 .box {
-  margin: 0 4em;
+  margin: 0 2em;
+  text-align: center;
+  width: 150px;
   & .date {
     color: darkgray;
   }

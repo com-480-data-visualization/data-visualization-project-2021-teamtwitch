@@ -67,8 +67,15 @@ interface IAreaChartState {
 
 class AreaChart extends React.Component<{}, IAreaChartState> {
   d3Container: React.MutableRefObject<null>;
-  circleIds: string[] = ["areaCircle10", "areaCircle50"];
+  circles: { id: string; fill: string }[] = [
+    {
+      id: "areaCircle10",
+      fill: "#147f90",
+    },
+    { id: "areaCircle50", fill: "#8000a3" },
+  ];
   tooltipIds: string[] = ["areaTooltip10", "areaTooltip50"];
+  infoBoxIds: string[] = ["areaInfobox10", "areaInfobox50"];
   constructor(props: {}) {
     super(props);
     this.d3Container = React.createRef();
@@ -99,6 +106,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       const top50DataSelected = this.state.top50Data[this.state.language][
         this.state.column
       ];
+      const dataSelected = [top10DataSelected, top50DataSelected];
       const xExtent = d3.extent(top10DataSelected, (d) => d.date) as [
         Date,
         Date
@@ -168,30 +176,22 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .attr("d", area);
 
       // Interactivity
-      svg
-        .append("circle")
-        .classed(styles.hoverPoint, true)
-        .attr("id", this.circleIds[0])
-        .style("fill", "#147f90");
-      svg
-        .append("circle")
-        .classed(styles.hoverPoint, true)
-        .attr("id", this.circleIds[1])
-        .style("fill", "#8000a3");
-      svg
-        .append("text")
-        .classed(styles.tooltip, true)
-        .attr("id", this.tooltipIds[0]);
-      svg
-        .append("text")
-        .classed(styles.tooltip, true)
-        .attr("id", this.tooltipIds[1]);
-
-      const entry1 = top10DataSelected[this.state.dateSelected[0]];
-      this.updateInfoText(entry1, ".year1");
-      const entry2 = top10DataSelected[this.state.dateSelected[1]];
-      this.updateInfoText(entry2, ".year2");
-      this.updateDiffText(entry1, entry2);
+      for (let i = 0; i < dataSelected.length; i++) {
+        svg
+          .append("circle")
+          .classed(styles.hoverPoint, true)
+          .attr("id", this.circles[i].id)
+          .style("fill", this.circles[i].fill);
+        svg
+          .append("text")
+          .classed(styles.tooltip, true)
+          .attr("id", this.tooltipIds[i]);
+        const entry1 = dataSelected[i][this.state.dateSelected[0]];
+        this.updateInfoText(this.infoBoxIds[i], entry1, ".year1");
+        const entry2 = dataSelected[i][this.state.dateSelected[1]];
+        this.updateInfoText(this.infoBoxIds[i], entry2, ".year2");
+        this.updateDiffText(this.infoBoxIds[i], entry1, entry2);
+      }
 
       svg
         .append("rect")
@@ -202,10 +202,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .attr("height", height);
 
       // Left line
-      this.createVerticleLine(svg, x, y, width, height, margin, [
-        top10DataSelected,
-        top50DataSelected,
-      ]);
+      this.createVerticleLine(svg, x, y, width, height, margin, dataSelected);
 
       // Right line
       this.createVerticleLine(
@@ -215,7 +212,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         width,
         height,
         margin,
-        [top10DataSelected, top50DataSelected],
+        dataSelected,
         true
       );
 
@@ -308,15 +305,36 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             />
           </div>
           <div>
-            <div className={styles.infobox}>
-              <div className={`year1 ${styles.box}`}>
-                <div className={styles.date} />
-                <div className={styles.value} />
+            <div>
+              <div className={styles.infobox}>
+                <div className={styles.title} />
+                <div className={`year1 ${styles.box}`}>
+                  <div className={styles.date} />
+                </div>
+                <div className={styles.diff}></div>
+                <div className={`year2 ${styles.box}`}>
+                  <div className={styles.date} />
+                </div>
               </div>
-              <div className={styles.diff}></div>
-              <div className={`year2 ${styles.box}`}>
-                <div className={styles.date} />
-                <div className={styles.value} />
+              <div className={styles.infobox} id={this.infoBoxIds[0]}>
+                <div className={styles.title}>Top-10 Average</div>
+                <div className={`year1 ${styles.box}`}>
+                  <div className={styles.value} />
+                </div>
+                <div className={styles.diff}></div>
+                <div className={`year2 ${styles.box}`}>
+                  <div className={styles.value} />
+                </div>
+              </div>
+              <div className={styles.infobox} id={this.infoBoxIds[1]}>
+                <div className={styles.title}>Top-50 Average</div>
+                <div className={`year1 ${styles.box}`}>
+                  <div className={styles.value} />
+                </div>
+                <div className={styles.diff}></div>
+                <div className={`year2 ${styles.box}`}>
+                  <div className={styles.value} />
+                </div>
               </div>
             </div>
             <svg
@@ -383,17 +401,17 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
     const bisectDate = d3.bisector((d: { date: Date; value: number }) => d.date)
       .right;
+    const xIndex = Math.min(
+      bisectDate(dataSelected[0], mouseDateSnap, 0),
+      dataSelected[0].length - 1
+    );
 
     for (let i = 0; i < dataSelected.length; i++) {
-      const xIndex = Math.min(
-        bisectDate(dataSelected[i], mouseDateSnap, 0),
-        dataSelected[i].length - 1
-      );
       const yValue = dataSelected[i][xIndex].value;
 
       // Circle pointer
       svg
-        .selectAll(`#${this.circleIds[i]}`)
+        .selectAll(`#${this.circles[i].id}`)
         .attr("cx", displayX)
         .attr("cy", y(yValue))
         .attr("r", "7")
@@ -405,12 +423,11 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             (xIndex < this.state.dateSelected[0] ||
               xIndex > this.state.dateSelected[1])
         );
-
+      console.log(this.state.dateSelected, xIndex);
       // Tooltip
       const isLessThanHalf = xIndex > dataSelected[i].length / 2;
       const hoverTextX = isLessThanHalf ? "-0.75em" : "0.75em";
       const hoverTextAnchor = isLessThanHalf ? "end" : "start";
-      console.log(y(yValue));
       svg
         .selectAll(`#${this.tooltipIds[i]}`)
         .attr("x", displayX)
@@ -429,34 +446,45 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     }
   }
 
-  updateDiffText(leftValue: IDataEntry, rightValue: IDataEntry): void {
+  updateDiffText(
+    id: string,
+    leftValue: IDataEntry,
+    rightValue: IDataEntry
+  ): void {
     const diffValue = d3.format("+.2f")(
       ((rightValue.value - leftValue.value) * 100) / leftValue.value
     );
     if (rightValue.value > leftValue.value) {
-      d3.select(`.${styles.diff}`)
+      d3.select(`#${id}`)
+        .select(`.${styles.diff}`)
         .text(`${diffValue}%`)
         .style("color", "#00b512");
     } else if (rightValue.value < leftValue.value) {
-      d3.select(`.${styles.diff}`)
+      d3.select(`#${id}`)
+        .select(`.${styles.diff}`)
         .text(`${diffValue}%`)
         .style("color", "#c90000");
     } else {
-      d3.select(`.${styles.diff}`)
+      d3.select(`#${id}`)
+        .select(`.${styles.diff}`)
         .text(`${diffValue}%`)
         .style("color", "#000000");
     }
   }
 
-  updateInfoText(value: IDataEntry, className: string): void {
-    const infobox = d3.select(className);
-    infobox.select(`.${styles.date}`).text(
-      `${value.date.toLocaleString("default", {
-        year: "numeric",
-        month: "short",
-      })}`
-    );
-    infobox.select(`.${styles.value}`).text(`${d3.format(".5s")(value.value)}`);
+  updateInfoText(id: string, value: IDataEntry, className: string): void {
+    d3.select(className)
+      .select(`.${styles.date}`)
+      .text(
+        `${value.date.toLocaleString("default", {
+          year: "numeric",
+          month: "short",
+        })}`
+      );
+    d3.select(`#${id}`)
+      .select(className)
+      .select(`.${styles.value}`)
+      .text(`${d3.format(".5s")(value.value)}`);
   }
 
   createVerticleLine(
@@ -518,19 +546,26 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             return;
           }
 
-          const entry = dataSelected[0][xIndex];
-          const percentage = ((displayX - margin) / width) * 100;
-          let infoboxClass = ".year1";
-          let lineClass = ".start";
-          let leftValue = entry;
-          let rightValue = dataSelected[0][this.state.dateSelected[1]];
-          if (isRight) {
-            infoboxClass = ".year2";
-            lineClass = ".end";
-            leftValue = dataSelected[0][this.state.dateSelected[0]];
-            rightValue = entry;
-          }
+          for (let i = 0; i < dataSelected.length; i++) {
+            const entry = dataSelected[i][xIndex];
+            const percentage = ((displayX - margin) / width) * 100;
+            let infoboxClass = ".year1";
+            let lineClass = ".start";
+            let leftValue = entry;
+            let rightValue = dataSelected[i][this.state.dateSelected[1]];
+            if (isRight) {
+              infoboxClass = ".year2";
+              lineClass = ".end";
+              leftValue = dataSelected[i][this.state.dateSelected[0]];
+              rightValue = entry;
+            }
 
+            // Update gradient
+            d3.selectAll(lineClass).attr("offset", `${percentage}%`);
+            // Update infobox
+            this.updateInfoText(this.infoBoxIds[i], entry, infoboxClass);
+            this.updateDiffText(this.infoBoxIds[i], leftValue, rightValue);
+          }
           // Update line
           line
             .filter((p) => p === d)
@@ -547,11 +582,6 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             dataSelected,
             true
           );
-          // Update gradient
-          d3.selectAll(lineClass).attr("offset", `${percentage}%`);
-          // Update infobox
-          this.updateInfoText(entry, infoboxClass);
-          this.updateDiffText(leftValue, rightValue);
         })
         .on("end", (event) => {
           event.sourceEvent.preventDefault();
@@ -570,7 +600,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           ).right;
           let xIndex = Math.min(
             bisectDate(dataSelected[0], mouseDateSnap, 0),
-            dataSelected.length - 1
+            dataSelected[0].length - 1
           );
 
           if (isRight && xIndex - siblingXIdx < 1) {
