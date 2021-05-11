@@ -19,12 +19,17 @@ interface IDataEntry {
   value: number;
 }
 
-const loadData = async (): Promise<{
+const top50DataUrl =
+  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/76a3b9357d650b5e9dcf5c31ec23894dfb354aeb/data/agg-50.json";
+const top10DataUrl =
+  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/76a3b9357d650b5e9dcf5c31ec23894dfb354aeb/data/agg-10.json";
+
+const loadData = async (
+  url: string
+): Promise<{
   [key: string]: { [key: string]: IDataEntry[] };
 }> => {
-  return fetch(
-    "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/662d2972130af64b87bc9c6325bfd86390e15498/data/agg.json"
-  )
+  return fetch(url)
     .then((data) => data.json())
     .then((body: (IRawDataRow & IGenericData)[]) => {
       const data: {
@@ -49,7 +54,10 @@ const loadData = async (): Promise<{
     });
 };
 interface IAreaChartState {
-  data: {
+  top10Data: {
+    [key: string]: { [key: string]: IDataEntry[] };
+  };
+  top50Data: {
     [key: string]: { [key: string]: IDataEntry[] };
   };
   language: string;
@@ -63,7 +71,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     super(props);
     this.d3Container = React.createRef();
     this.state = {
-      data: {},
+      top10Data: {},
+      top50Data: {},
       language: "000",
       column: "viewminutes",
       dateSelected: [0, dateLabels.length - 1],
@@ -71,7 +80,9 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   }
 
   componentDidMount(): void {
-    loadData().then((d) => this.setState({ data: d }));
+    Promise.all([loadData(top10DataUrl), loadData(top50DataUrl)]).then((d) =>
+      this.setState({ top10Data: d[0], top50Data: d[1] })
+    );
   }
 
   render(): JSX.Element {
@@ -80,10 +91,16 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     const height = 480 - 2 * margin;
 
     if (this.d3Container.current) {
-      const dataSelected = this.state.data[this.state.language][
+      const top10DataSelected = this.state.top10Data[this.state.language][
         this.state.column
       ];
-      const xExtent = d3.extent(dataSelected, (d) => d.date) as [Date, Date];
+      const top50DataSelected = this.state.top50Data[this.state.language][
+        this.state.column
+      ];
+      const xExtent = d3.extent(top10DataSelected, (d) => d.date) as [
+        Date,
+        Date
+      ];
       const x = d3
         .scaleTime()
         .range([margin, width + margin])
@@ -91,7 +108,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
       const y = d3
         .scaleLinear()
-        .domain([0, 1.1 * (d3.max(dataSelected, (d) => d.value) || 0)])
+        .domain([0, 1.1 * (d3.max(top10DataSelected, (d) => d.value) || 0)])
         .range([height, 0]);
 
       d3.select(this.d3Container.current).html("");
@@ -123,12 +140,25 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
       svg.append("g").attr("transform", `translate(${margin}, 0)`).call(yAxis);
 
+      const gradIdTop10 = "areaGradTop10";
+      const gradIdTop50 = "areaGradTop50";
       const strokeWidth = 1.5;
       svg
         .append("path")
-        .datum(dataSelected)
-        .style("fill", "url(#svgGradient)")
-        .attr("stroke", "url(#svgGradient)")
+        .datum(top10DataSelected)
+        .style("fill", `url(#${gradIdTop10})`)
+        .attr("stroke", `url(#${gradIdTop10})`)
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .attr("stroke-width", strokeWidth)
+        // @ts-ignore weird type hints
+        .attr("d", area);
+
+      svg
+        .append("path")
+        .datum(top50DataSelected)
+        .style("fill", `url(#${gradIdTop50})`)
+        .attr("stroke", `url(#${gradIdTop50})`)
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
         .attr("stroke-width", strokeWidth)
@@ -139,9 +169,9 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       svg.append("circle").classed(styles.hoverPoint, true);
       svg.append("text").classed(styles.tooltip, true);
 
-      const entry1 = dataSelected[this.state.dateSelected[0]];
+      const entry1 = top10DataSelected[this.state.dateSelected[0]];
       this.updateInfoText(entry1, ".year1");
-      const entry2 = dataSelected[this.state.dateSelected[1]];
+      const entry2 = top10DataSelected[this.state.dateSelected[1]];
       this.updateInfoText(entry2, ".year2");
       this.updateDiffText(entry1, entry2);
 
@@ -154,7 +184,15 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .attr("height", height);
 
       // Left line
-      this.createVerticleLine(svg, x, y, width, height, margin, dataSelected);
+      this.createVerticleLine(
+        svg,
+        x,
+        y,
+        width,
+        height,
+        margin,
+        top10DataSelected
+      );
 
       // Right line
       this.createVerticleLine(
@@ -164,12 +202,9 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         width,
         height,
         margin,
-        dataSelected,
+        top10DataSelected,
         true
       );
-
-      const defs = svg.append("defs");
-      const gradient = defs.append("linearGradient").attr("id", "svgGradient");
 
       const leftLabel = dateLabels[this.state.dateSelected[0]].split(" ");
       const leftDate = d3.timeMonth.floor(
@@ -184,34 +219,35 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       );
       const displayX2Line = Math.min(x(rightDate), width + margin);
       const x2Percentage = `${((displayX2Line - margin) / width) * 100}%`;
-      gradient
-        .append("stop")
-        .attr("class", "start")
-        .attr("offset", x1Percentage)
-        .attr("stop-color", "lightblue")
-        .attr("stop-opacity", 0.3);
-      gradient
-        .append("stop")
-        .attr("class", "start")
-        .attr("offset", x1Percentage)
-        .attr("stop-color", "lightblue");
-      gradient
-        .append("stop")
-        .attr("class", "end")
-        .attr("offset", x2Percentage)
-        .attr("stop-color", "lightblue")
-        .attr("stop-opacity", 1);
-      gradient
-        .append("stop")
-        .attr("class", "end")
-        .attr("offset", x2Percentage)
-        .attr("stop-color", "lightblue")
-        .attr("stop-opacity", 0.3);
+
+      const defs = svg.append("defs");
+      this.createGradient(
+        defs,
+        gradIdTop10,
+        "lightblue",
+        x1Percentage,
+        x2Percentage
+      );
+      this.createGradient(
+        defs,
+        gradIdTop50,
+        "#BE90D4",
+        x1Percentage,
+        x2Percentage
+      );
 
       svg.on("mousemove", (event) => {
         event.preventDefault();
         const xCoord = d3.pointer(event)[0];
-        this.handleMouseMove(xCoord, svg, x, y, width, margin, dataSelected);
+        this.handleMouseMove(
+          xCoord,
+          svg,
+          x,
+          y,
+          width,
+          margin,
+          top10DataSelected
+        );
       });
     }
 
@@ -221,9 +257,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           <h2>How does the populartiy of Twitch change over time?</h2>
           <p>
             Twitch is now a well-known streaming platform, but how popular was
-            it? Before the pademic? Or even long ago? Is it popular across
-            countries? Or people in some regions simply favour this platform
-            more?
+            it a few years ago? Is it popular across countries? Or people in
+            some regions simply favour this platform more?
           </p>
           <p>
             There are some interesting things here that are worth investigating:
@@ -239,14 +274,15 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
               Is there any interesting change between languages when COVID hit
               the world?
             </li>
+            <li>...and anything else you are curious about :)</li>
           </ul>
           <p>
             Here we present the two types of statistics of games that have been
             streamed on Twitch in different languages from 2016 to 2021:
           </p>
           <ul>
-            <li>Average data of all games</li>
-            <li>Average data of top-10 popular games</li>
+            <li>Average data of top-10 popular games (blue)</li>
+            <li>Average data of top-50 popular games (purple)</li>
           </ul>
           <p>Drag the verticle bars and check this out!</p>
         </div>
@@ -285,6 +321,39 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         </div>
       </div>
     );
+  }
+
+  createGradient(
+    defs: d3.Selection<SVGDefsElement, unknown, null, undefined>,
+    id: string,
+    colorCode: string,
+    startOffset: string,
+    endOffset: string
+  ): void {
+    const gradient = defs.append("linearGradient").attr("id", id);
+    gradient
+      .append("stop")
+      .attr("class", "start")
+      .attr("offset", startOffset)
+      .attr("stop-color", colorCode)
+      .attr("stop-opacity", 0.3);
+    gradient
+      .append("stop")
+      .attr("class", "start")
+      .attr("offset", startOffset)
+      .attr("stop-color", colorCode);
+    gradient
+      .append("stop")
+      .attr("class", "end")
+      .attr("offset", endOffset)
+      .attr("stop-color", colorCode)
+      .attr("stop-opacity", 1);
+    gradient
+      .append("stop")
+      .attr("class", "end")
+      .attr("offset", endOffset)
+      .attr("stop-color", colorCode)
+      .attr("stop-opacity", 0.3);
   }
 
   handleMouseMove(
