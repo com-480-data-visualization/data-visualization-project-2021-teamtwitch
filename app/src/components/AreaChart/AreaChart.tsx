@@ -95,9 +95,10 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   }
 
   render(): JSX.Element {
-    const margin = 60;
-    const width = 800 - 2 * margin;
-    const height = 480 - 2 * margin;
+    const marginV = 30;
+    const marginH = 60;
+    const width = 800 - marginV - marginH;
+    const height = 480 - marginV - marginH;
 
     if (this.d3Container.current) {
       const top10DataSelected = this.state.top10Data[this.state.language][
@@ -113,7 +114,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       ];
       const x = d3
         .scaleTime()
-        .range([margin, width + margin])
+        .range([marginH, width + marginH])
         .domain(xExtent);
 
       const y = d3
@@ -131,12 +132,12 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .y0(y(0));
       const wrapper = d3
         .select(this.d3Container.current)
-        .attr("width", width + margin * 2)
-        .attr("height", height + margin * 2);
+        .attr("width", width + marginH * 2)
+        .attr("height", height + marginV * 2);
 
       const svg = wrapper
         .append("g")
-        .attr("transform", `translate(${0},${margin})`);
+        .attr("transform", `translate(${0},${marginV})`);
 
       const xAxis = d3.axisBottom(x);
       const xAxisTranslate = height;
@@ -148,7 +149,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
       const yAxis = d3.axisLeft(y).tickFormat(d3.format("~s"));
 
-      svg.append("g").attr("transform", `translate(${margin}, 0)`).call(yAxis);
+      svg.append("g").attr("transform", `translate(${marginH}, 0)`).call(yAxis);
 
       const gradIdTop10 = "areaGradTop10";
       const gradIdTop50 = "areaGradTop50";
@@ -202,7 +203,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .attr("height", height);
 
       // Left line
-      this.createVerticleLine(svg, x, y, width, height, margin, dataSelected);
+      this.createVerticleLine(svg, x, y, width, height, marginH, dataSelected);
 
       // Right line
       this.createVerticleLine(
@@ -211,7 +212,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         y,
         width,
         height,
-        margin,
+        marginH,
         dataSelected,
         true
       );
@@ -220,15 +221,15 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       const leftDate = d3.timeMonth.floor(
         getDate(leftLabel[0], leftLabel[1].toLowerCase())
       );
-      const displayX1Line = Math.min(x(leftDate), width + margin);
-      const x1Percentage = `${((displayX1Line - margin) / width) * 100}%`;
+      const displayX1Line = Math.min(x(leftDate), width + marginH);
+      const x1Percentage = `${((displayX1Line - marginH) / width) * 100}%`;
 
       const rightLabel = dateLabels[this.state.dateSelected[1]].split(" ");
       const rightDate = d3.timeMonth.floor(
         getDate(rightLabel[0], rightLabel[1].toLowerCase())
       );
-      const displayX2Line = Math.min(x(rightDate), width + margin);
-      const x2Percentage = `${((displayX2Line - margin) / width) * 100}%`;
+      const displayX2Line = Math.min(x(rightDate), width + marginH);
+      const x2Percentage = `${((displayX2Line - marginH) / width) * 100}%`;
 
       const defs = svg.append("defs");
       this.createGradient(
@@ -249,7 +250,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       svg.on("mousemove", (event) => {
         event.preventDefault();
         const xCoord = d3.pointer(event)[0];
-        this.handleMouseMove(xCoord, svg, x, y, width, margin, [
+        this.handleMouseMove(xCoord, svg, x, y, width, marginH, [
           top10DataSelected,
           top50DataSelected,
         ]);
@@ -258,38 +259,42 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
     return (
       <div className={styles.wrapper}>
-        <div className={styles.description}>
+        <div className={styles.content}>
           <h2>How does the populartiy of Twitch change over time?</h2>
-          <p>
-            Twitch is now a well-known streaming platform, but how popular was
-            it a few years ago? Is it popular across countries? Or people in
-            some regions simply favour this platform more?
-          </p>
-          <p>
-            There are some interesting things here that are worth investigating:
-          </p>
-          <ul>
-            <li>
-              In which languages does Twitch get more popular in recent years?
-            </li>
-            <li>
-              Is there any seasonal or annual change in max viewers of channels?
-            </li>
-            <li>
-              Is there any interesting change between languages when COVID hit
-              the world?
-            </li>
-            <li>...and anything else you are curious about :)</li>
-          </ul>
-          <p>
-            Here we present the two types of statistics of games that have been
-            streamed on Twitch in different languages from 2016 to 2021:
-          </p>
-          <ul>
-            <li>Average data of top-10 popular games (blue)</li>
-            <li>Average data of top-50 popular games (purple)</li>
-          </ul>
-          <p>Drag the verticle bars and check this out!</p>
+          <div className={styles.description}>
+            <p>
+              Twitch is now a well-known streaming platform, but how popular was
+              it a few years ago? Is it popular across countries? Or people in
+              some regions simply favour this platform more?
+            </p>
+            <p>
+              There are some interesting things here that are worth
+              investigating:
+            </p>
+            <ul>
+              <li>
+                In which languages does Twitch get more popular in recent years?
+              </li>
+              <li>
+                Is there any seasonal or annual change in max viewers of
+                channels?
+              </li>
+              <li>
+                Is there any interesting change between languages when COVID hit
+                the world?
+              </li>
+            </ul>
+            <p>...and anything else you are curious about! :)</p>
+            <p>
+              Here we present the two types of statistics of games that have
+              been streamed on Twitch in different languages from 2016 to 2021:
+            </p>
+            <ul>
+              <li>Average data of top-10 popular games (blue)</li>
+              <li>Average data of top-50 popular games (purple)</li>
+            </ul>
+            <p>Drag the verticle bars and check this out!</p>
+          </div>
         </div>
         <div>
           <div className={styles.selectors}>
@@ -340,7 +345,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             <svg
               className="d3-component"
               width={width}
-              height={height + margin * 2}
+              height={height + marginV * 2}
               ref={this.d3Container}
             />
           </div>
@@ -388,14 +393,14 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     x: d3.ScaleTime<number, number, never>,
     y: d3.ScaleLinear<number, number, never>,
     width: number,
-    margin: number,
+    marginH: number,
     dataSelected: IDataEntry[][],
     drag = false
   ): void {
     const mouseDate = x.invert(xCoord);
     const mouseDateSnap = d3.timeMonth.floor(mouseDate);
-    const displayX = Math.min(x(mouseDateSnap), width + margin);
-    if (displayX < margin - width / dateLabels.length) {
+    const displayX = Math.min(x(mouseDateSnap), width + marginH);
+    if (displayX < marginH - width / dateLabels.length) {
       return;
     }
 
@@ -493,7 +498,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     y: d3.ScaleLinear<number, number, never>,
     width: number,
     height: number,
-    margin: number,
+    marginH: number,
     dataSelected: IDataEntry[][],
     isRight = false
   ): void {
@@ -501,7 +506,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       isRight ? this.state.dateSelected[1] : this.state.dateSelected[0]
     ].split(" ");
     const d1 = d3.timeMonth.floor(getDate(ts[0], ts[1].toLowerCase()));
-    const displayXLine = Math.min(x(d1), width + margin);
+    const displayXLine = Math.min(x(d1), width + marginH);
     const line: d3.Selection<
       SVGLineElement,
       unknown,
@@ -527,8 +532,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           const xCoord = event.x;
           const mouseDate = x.invert(xCoord);
           const mouseDateSnap = d3.timeMonth.floor(mouseDate);
-          const displayX = Math.min(x(mouseDateSnap), width + margin);
-          if (displayX < margin - width / dateLabels.length) {
+          const displayX = Math.min(x(mouseDateSnap), width + marginH);
+          if (displayX < marginH - width / dateLabels.length) {
             return;
           }
 
@@ -548,7 +553,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
           for (let i = 0; i < dataSelected.length; i++) {
             const entry = dataSelected[i][xIndex];
-            const percentage = ((displayX - margin) / width) * 100;
+            const percentage = ((displayX - marginH) / width) * 100;
             let infoboxClass = ".year1";
             let lineClass = ".start";
             let leftValue = entry;
@@ -578,7 +583,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             x,
             y,
             width,
-            margin,
+            marginH,
             dataSelected,
             true
           );
@@ -590,8 +595,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           const xCoord = event.x;
           const mouseDate = x.invert(xCoord);
           const mouseDateSnap = d3.timeMonth.floor(mouseDate);
-          const displayX = Math.min(x(mouseDateSnap), width + margin);
-          if (displayX < margin - width / dateLabels.length) {
+          const displayX = Math.min(x(mouseDateSnap), width + marginH);
+          if (displayX < marginH - width / dateLabels.length) {
             return;
           }
 
