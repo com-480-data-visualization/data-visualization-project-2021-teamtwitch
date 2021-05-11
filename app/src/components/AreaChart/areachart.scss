@@ -6,6 +6,14 @@
   }
 }
 
+.hoverPoint {
+  fill: #147f90;
+
+  &.outside {
+    opacity: 0.3;
+  }
+}
+
 .verticleLine {
   stroke: #147f90;
   fill: #a6e8f2;
@@ -38,4 +46,28 @@
   justify-content: center;
   align-content: center;
   flex-direction: column;
+}
+
+.selectors {
+  display: flex;
+}
+
+.selector {
+  display: flex;
+
+  & .title {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    margin-right: 8px;
+  }
+
+  &:not(:last-child) {
+    margin-right: 24px;
+  }
+}
+
+.tooltip {
+  font: 12px sans-serif;
 }

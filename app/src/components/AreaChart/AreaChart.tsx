@@ -76,8 +76,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
   render(): JSX.Element {
     const margin = 60;
-    const width = 1000 - 2 * margin;
-    const height = 600 - 2 * margin;
+    const width = 800 - 2 * margin;
+    const height = 500 - 2 * margin;
 
     if (this.d3Container.current) {
       const dataSelected = this.state.data[this.state.language][
@@ -136,8 +136,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .attr("d", area);
 
       // Interactivity
-      svg.append("circle").classed("hoverPoint", true);
-      svg.append("text").classed("hoverText", true);
+      svg.append("circle").classed(styles.hoverPoint, true);
+      svg.append("text").classed(styles.tooltip, true);
 
       const entry1 = dataSelected[this.state.dateSelected[0]];
       this.updateInfoText(entry1, ".year1");
@@ -150,8 +150,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .attr("fill", "transparent")
         .attr("x", 0)
         .attr("y", 0)
-        .attr("width", width + margin * 2)
-        .attr("height", height + margin * 2);
+        .attr("width", width)
+        .attr("height", height);
 
       // Left line
       this.createVerticleLine(svg, x, y, width, height, margin, dataSelected);
@@ -217,18 +217,20 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
     return (
       <div>
-        <h2>Bar chart for comparison</h2>
+        <h2>How does the populartiy of Twitch changes over time?</h2>
         <div>
-          <LanguageSelector
-            languageMapping={languageMapping}
-            setLanguage={(d) => this.setState({ language: d })}
-            language={this.state.language}
-          />
-          <ColumnSelector
-            columnLabels={columnLabels}
-            column={this.state.column}
-            setColumn={(c) => this.setState({ column: c })}
-          />
+          <div className={styles.selectors}>
+            <LanguageSelector
+              languageMapping={languageMapping}
+              setLanguage={(d) => this.setState({ language: d })}
+              language={this.state.language}
+            />
+            <ColumnSelector
+              columnLabels={columnLabels}
+              column={this.state.column}
+              setColumn={(c) => this.setState({ column: c })}
+            />
+          </div>
           <div>
             <div className={styles.infobox}>
               <div className={`year1 ${styles.box}`}>
@@ -260,7 +262,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     y: d3.ScaleLinear<number, number, never>,
     width: number,
     margin: number,
-    dataSelected: IDataEntry[]
+    dataSelected: IDataEntry[],
+    drag = false
   ): void {
     const mouseDate = x.invert(xCoord);
     const mouseDateSnap = d3.timeMonth.floor(mouseDate);
@@ -275,15 +278,22 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       bisectDate(dataSelected, mouseDateSnap, 0),
       dataSelected.length - 1
     );
-    const mousePopulation = dataSelected[xIndex].value;
+    const yValue = dataSelected[xIndex].value;
 
-    // Point indicator
+    // Circle pointer
     svg
-      .selectAll(".hoverPoint")
+      .selectAll(`.${styles.hoverPoint}`)
       .attr("cx", displayX)
-      .attr("cy", y(mousePopulation))
+      .attr("cy", y(yValue))
       .attr("r", "7")
-      .attr("fill", "#147F90");
+      // Follow the colour gradient
+      .classed(
+        styles.outside,
+        // Should not update colour when the bar is being dragged
+        !drag &&
+          (xIndex < this.state.dateSelected[0] ||
+            xIndex > this.state.dateSelected[1])
+      );
 
     // Tooltip
     const isLessThanHalf = xIndex > dataSelected.length / 2;
@@ -291,13 +301,20 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     const hoverTextAnchor = isLessThanHalf ? "end" : "start";
 
     svg
-      .selectAll(".hoverText")
+      .selectAll(`.${styles.tooltip}`)
       .attr("x", displayX)
-      .attr("y", y(mousePopulation))
-      .attr("dx", hoverTextX)
-      .attr("dy", "-1.25em")
+      .attr("y", y(yValue))
       .style("text-anchor", hoverTextAnchor)
-      .text(d3.format(".5s")(mousePopulation));
+      .html(
+        `<tspan x=${displayX} dx='${hoverTextX}' dy='1.2em'>${dataSelected[
+          xIndex
+        ].date.toLocaleString("default", {
+          year: "numeric",
+          month: "short",
+        })}</tspan><tspan x=${displayX} dx='${hoverTextX}' dy='1.2em'>${d3.format(
+          ".5s"
+        )(yValue)}</tspan>`
+      );
   }
 
   updateDiffText(leftValue: IDataEntry, rightValue: IDataEntry): void {
@@ -383,8 +400,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             dataSelected.length - 1
           );
           if (
-            (isRight && xIndex - siblingXIdx <= 1) ||
-            (!isRight && siblingXIdx - xIndex <= 1)
+            (isRight && xIndex - siblingXIdx < 1) ||
+            (!isRight && siblingXIdx - xIndex < 1)
           ) {
             return;
           }
@@ -408,7 +425,16 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             .attr("x1", displayX)
             .attr("x2", displayX);
           // Update circle and tooltip
-          this.handleMouseMove(xCoord, svg, x, y, width, margin, dataSelected);
+          this.handleMouseMove(
+            xCoord,
+            svg,
+            x,
+            y,
+            width,
+            margin,
+            dataSelected,
+            true
+          );
           // Update gradient
           d3.selectAll(lineClass).attr("offset", `${percentage}%`);
           // Update infobox
@@ -417,9 +443,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         })
         .on("end", (event) => {
           event.sourceEvent.preventDefault();
-          const siblingXIdx = isRight
-            ? this.state.dateSelected[0]
-            : this.state.dateSelected[1];
+          const currDates = this.state.dateSelected;
+          const siblingXIdx = isRight ? currDates[0] : currDates[1];
           const xCoord = event.x;
           const mouseDate = x.invert(xCoord);
           const mouseDateSnap = d3.timeMonth.floor(mouseDate);
@@ -431,24 +456,26 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           const bisectDate = d3.bisector(
             (d: { date: Date; value: number }) => d.date
           ).right;
-          const xIndex = Math.min(
+          let xIndex = Math.min(
             bisectDate(dataSelected, mouseDateSnap, 0),
             dataSelected.length - 1
           );
 
-          if (
-            (isRight && xIndex - siblingXIdx <= 1) ||
-            (!isRight && siblingXIdx - xIndex <= 1)
-          ) {
-            return;
+          if (isRight && xIndex - siblingXIdx < 1) {
+            xIndex = siblingXIdx + 1;
+          } else if (!isRight && siblingXIdx - xIndex < 1) {
+            xIndex = siblingXIdx - 1;
           }
 
-          this.setState({
-            dateSelected: [
-              Math.min(siblingXIdx, xIndex),
-              Math.max(siblingXIdx, xIndex),
-            ],
-          });
+          const newState = [
+            Math.min(siblingXIdx, xIndex),
+            Math.max(siblingXIdx, xIndex),
+          ];
+          if (currDates[0] !== newState[0] || currDates[1] !== newState[1]) {
+            this.setState({
+              dateSelected: newState,
+            });
+          }
         })
     );
   }
@@ -459,17 +486,20 @@ const LanguageSelector = (props: {
   language: string;
   setLanguage: (v: string) => void;
 }) => (
-  <select
-    onChange={(e) =>
-      props.language !== e.target.value && props.setLanguage(e.target.value)
-    }
-  >
-    {Object.keys(props.languageMapping).map((k) => (
-      <option key={k} value={props.languageMapping[k]}>
-        {k}
-      </option>
-    ))}
-  </select>
+  <div className={styles.selector}>
+    <div className={styles.title}>Language of channels</div>
+    <select
+      onChange={(e) =>
+        props.language !== e.target.value && props.setLanguage(e.target.value)
+      }
+    >
+      {Object.keys(props.languageMapping).map((k) => (
+        <option key={k} value={props.languageMapping[k]}>
+          {k}
+        </option>
+      ))}
+    </select>
+  </div>
 );
 
 const ColumnSelector = (props: {
@@ -477,37 +507,19 @@ const ColumnSelector = (props: {
   column: string;
   setColumn: (c: string) => void;
 }) => (
-  <div className={styles.columnSelector}>
-    {props.columnLabels.map((label) => (
-      <div key={label}>
-        {label.toLowerCase().replace(" ", "") === props.column ? (
-          <input
-            type="radio"
-            id={label}
-            name="column"
-            value={label.toLowerCase().replace(" ", "")}
-            onChange={(curr) =>
-              props.column !== curr.target.value &&
-              props.setColumn(curr.target.value)
-            }
-            checked
-          />
-        ) : (
-          <input
-            type="radio"
-            id={label}
-            name="column"
-            value={label.toLowerCase().replace(" ", "")}
-            onChange={(curr) =>
-              props.column !== curr.target.value &&
-              props.setColumn(curr.target.value)
-            }
-          />
-        )}
-
-        <label htmlFor={label}>{label}</label>
-      </div>
-    ))}
+  <div className={styles.selector}>
+    <div className={styles.title}>Type of stats</div>
+    <select
+      onChange={(e) =>
+        props.column !== e.target.value && props.setColumn(e.target.value)
+      }
+    >
+      {props.columnLabels.map((k) => (
+        <option key={k} value={k.toLowerCase().replace(" ", "")}>
+          {k}
+        </option>
+      ))}
+    </select>
   </div>
 );
 
