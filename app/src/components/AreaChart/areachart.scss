@@ -1,0 +1,95 @@
+.wrapper {
+  display: flex;
+}
+
+.content {
+  margin-left: 2em;
+  margin-right: 1em;
+}
+
+.description {
+  margin-top: 3em;
+}
+
+.hoverPoint {
+  &.outside {
+    opacity: 0.3;
+  }
+}
+
+.verticleLine {
+  stroke: #147f90;
+  fill: #a6e8f2;
+  offset: 50%;
+  stroke-width: 5;
+}
+
+.infogrid {
+  display: grid;
+}
+
+.infobox {
+  display: flex;
+  justify-content: center;
+  margin-top: 1em;
+
+  &:first-child {
+    margin-top: 2em;
+  }
+
+  & .title {
+    display: flex;
+    align-items: center;
+    width: 130px;
+  }
+}
+
+.box {
+  margin: 0 2em;
+  text-align: center;
+  width: 150px;
+  & .date {
+    color: darkgray;
+  }
+
+  & .value {
+    font-size: 18pt;
+  }
+}
+
+.diff {
+  font-weight: bold;
+  font-size: 14pt;
+  width: 8em;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  flex-direction: column;
+}
+
+.selectors {
+  display: flex;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.selector {
+  display: flex;
+
+  & .title {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-direction: column;
+    margin-right: 8px;
+  }
+
+  &:not(:last-child) {
+    margin-right: 4em;
+  }
+}
+
+.tooltip {
+  font: 12px sans-serif;
+}
