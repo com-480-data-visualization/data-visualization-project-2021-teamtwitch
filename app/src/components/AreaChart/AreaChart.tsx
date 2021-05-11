@@ -77,7 +77,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   render(): JSX.Element {
     const margin = 60;
     const width = 800 - 2 * margin;
-    const height = 500 - 2 * margin;
+    const height = 480 - 2 * margin;
 
     if (this.d3Container.current) {
       const dataSelected = this.state.data[this.state.language][
@@ -210,14 +210,46 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
       svg.on("mousemove", (event) => {
         event.preventDefault();
-        const xCoord = event.pageX;
+        const xCoord = d3.pointer(event)[0];
         this.handleMouseMove(xCoord, svg, x, y, width, margin, dataSelected);
       });
     }
 
     return (
-      <div>
-        <h2>How does the populartiy of Twitch changes over time?</h2>
+      <div className={styles.wrapper}>
+        <div className={styles.description}>
+          <h2>How does the populartiy of Twitch change over time?</h2>
+          <p>
+            Twitch is now a well-known streaming platform, but how popular was
+            it? Before the pademic? Or even long ago? Is it popular across
+            countries? Or people in some regions simply favour this platform
+            more?
+          </p>
+          <p>
+            There are some interesting things here that are worth investigating:
+          </p>
+          <ul>
+            <li>
+              In which languages does Twitch get more popular in recent years?
+            </li>
+            <li>
+              Is there any seasonal or annual change in max viewers of channels?
+            </li>
+            <li>
+              Is there any interesting change between languages when COVID hit
+              the world?
+            </li>
+          </ul>
+          <p>
+            Here we present the two types of statistics of games that have been
+            streamed on Twitch in different languages from 2016 to 2021:
+          </p>
+          <ul>
+            <li>Average data of all games</li>
+            <li>Average data of top-10 popular games</li>
+          </ul>
+          <p>Drag the verticle bars and check this out!</p>
+        </div>
         <div>
           <div className={styles.selectors}>
             <LanguageSelector
