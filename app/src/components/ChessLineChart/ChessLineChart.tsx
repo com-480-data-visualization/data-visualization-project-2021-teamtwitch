@@ -127,6 +127,7 @@ const ChessLineChart = (): JSX.Element => {
         // add the valueline path
         var path = svg.append("path")
            .data([data])
+           .attr("id", "linePath")
            .attr("fill", "none")
            .attr("stroke", "firebrick")
            .attr("class", "line")
@@ -270,14 +271,17 @@ const ChessLineChart = (): JSX.Element => {
 
         // create group and rectangle/text/line for all events
         var group1 = svg.append("g")
+          .attr("class", "line_accs")
           .attr("id", "group1")
           .attr("transform", `translate(${x(event1.date)} ${event1.y})`);
 
         var group2 = svg.append("g")
+          .attr("class", "line_accs")
           .attr("id", "group2")
           .attr("transform", `translate(${x(event2.date)} ${event2.y})`);
 
         var group3 = svg.append("g")
+          .attr("class", "line_accs")
           .attr("id", "group3")
           .attr("transform", `translate(${x(event3.date)} ${event3.y})`);
 
@@ -441,6 +445,41 @@ const ChessLineChart = (): JSX.Element => {
         buildRectangle(2, group2, event2);
         buildRectangle(3, group3, event3);
 
+        // button function
+        const redraw = function () {
+          [group1, group2, group3].forEach(group => {
+            // remove previous lines
+            group.select("rect").remove();
+            group.select("foreignObject").remove();
+            group.select("line").remove();
+          });
+          // get the path
+          let path = d3.select("#linePath");
+          // get the length
+          let totalLength = path.node().getTotalLength();
+          // redraw
+          path
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength)
+            .transition()
+              .duration(totalPathAnimationTime)
+              .ease(d3.easeLinear)
+              .attr("stroke-dashoffset", 0);
+          // also lines + boxes
+          buildRectangle(1, group1, event1);
+          buildRectangle(2, group2, event2);
+          buildRectangle(3, group3, event3);
+
+        }
+        // set the btton
+        d3.select("#animation_btn")
+          .attr("class", "button")
+          .attr("width", 50)
+          .attr("height", 30)
+          .html("Replay Animation")
+          .on("click", redraw);
+
+
       });
     }
   }, [d3Container.current]);
@@ -451,6 +490,7 @@ const ChessLineChart = (): JSX.Element => {
   return (
     <div>
       <h2>Chess Timeseries plot</h2>
+      <button id="animation_btn" type="button"></button>
       <svg className="d3-component" width={w} height={h} ref={d3Container} />
     </div>
   );

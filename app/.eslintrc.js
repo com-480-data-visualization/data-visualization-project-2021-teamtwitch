@@ -58,5 +58,14 @@ module.exports = {
       },
     ],
     "react/prop-types": "off",
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        extendDefaults: true,
+        types: {
+          "{}": false,
+        },
+      },
+    ],
   },
 };
