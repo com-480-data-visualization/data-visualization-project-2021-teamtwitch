@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import * as d3 from "d3";
-import { sliderBottom } from "d3-simple-slider";
+import { sliderBottom, sliderLeft } from "d3-simple-slider";
 
 const ScatterPlot = (): JSX.Element => {
   const d3Container = React.useRef(null);
@@ -49,6 +49,8 @@ const ScatterPlot = (): JSX.Element => {
       // specify time format
       var formatTime = d3.timeFormat("%e %B %Y");
 
+      const numberDatapoints = 100;
+
       // set the dimensions and margins of the graph
       var margin = {
         top: 10,
@@ -93,11 +95,79 @@ const ScatterPlot = (): JSX.Element => {
       var sliderSvg = d3
         .select("#scatter-slider")
         .append("svg")
+        .attr("width", 500)
+        .attr("height", 100)
+        .append("g")
+        .attr("transform",
+              "translate(" + width/4 + "," + margin.top + ")");
+      // add vertical slider element
+      var sliderStepSvg = d3
+        .select("#scatter-step-slider")
+        .append("svg")
         .attr("width", 1000)
         .attr("height", 100)
         .append("g")
         .attr("transform",
-              "translate(" + width/2 + "," + margin.top + ")");;
+              "translate(" + width*3/4 + "," + margin.top + ")");
+
+      //
+      let currentN = 5;
+      const CreateStepSlider = function() {
+        // step slider for n
+        var sliderStep = sliderBottom()
+          .domain([0,20])
+          .step(2)
+          .ticks(10)
+          .height(sliderHeight)
+          .width(sliderWidth)
+          .default(0)
+          .on('onchange', function (d) {
+            d3.select('p#scatter-step-slider').text(d3.format('.2%')(d));
+            if (
+              d != currentN
+            ) {
+              // save new month and year
+              currentN = d;
+              // color corresponding points?
+              currentlyDisplayedData = MakeDataPath(
+                currentlyDisplayedYear,
+                months[currentlyDisplayedMonth].toLowerCase()
+              );
+              // color top n points
+              colorDots(currentlyDisplayedData);
+            }
+          });
+          sliderStepSvg.call(sliderStep);
+          d3.select('p#value-step').text(d3.format('.2%')(sliderStep.value()));
+      }
+
+      const colorDots = function(newDataPath){
+        d3.csv(newDataPath).then(function(newData) {
+          const transferDuration = 1000;
+          preprocessing(newData);
+          newData = newData.slice(0, numberDatapoints);
+          // reset the circles before colouring the new ones
+          svg.selectAll("circle")
+           .data(newData)
+           .transition()
+           .duration(transferDuration)
+           .attr("r", 5)
+           .attr("fill", "firebrick")
+          // get the top n in unique channels
+          var topData = newData.sort(function(a) {
+              return d3.descending(+a.avgchannels);
+          }).slice(0, currentN);
+          console.log(topData);
+
+          svg.selectAll("circle")
+           .data(topData)
+           .transition()
+           .duration(transferDuration)
+           .attr("r", 10)
+           .attr("fill", "dodgerblue")
+           })
+      }
+
       // for creating the slider
       const CreateSlider = function () {
         var sliderSimple = sliderBottom()
@@ -115,6 +185,7 @@ const ScatterPlot = (): JSX.Element => {
               `<b>${months[d.getUTCMonth()]} <br/> ${d.getUTCFullYear()}</b>`
             );
             // depending on the selected value, display the corresponding data
+
             if (
               d.getUTCFullYear() != currentlyDisplayedYear ||
               d.getUTCMonth() != currentlyDisplayedMonth
@@ -216,7 +287,7 @@ const ScatterPlot = (): JSX.Element => {
         d3.csv(newDataPath).then(function(newData) {
           const transferDuration = 5000;
           preprocessing(newData);
-          newData = newData.slice(0, 1000);
+          newData = newData.slice(0, numberDatapoints);
           // set domain
           x.domain([0, d3.max(newData, d => d.streamedminutes)]);
           y.domain([0, d3.max(newData, d => d.viewminutes)]);
@@ -242,9 +313,10 @@ const ScatterPlot = (): JSX.Element => {
       }
     // instantiate the slider
     CreateSlider();
+    CreateStepSlider();
     // instantiate the first plot
     d3.csv(currentlyDisplayedData).then(function(data) {
-      data = data.slice(0, 1000);
+      data = data.slice(0, numberDatapoints);
       // format date and cast to numbers
       preprocessing(data);
       // set domain
@@ -254,6 +326,8 @@ const ScatterPlot = (): JSX.Element => {
       drawDots(data, x, y);
       // add the axes
       setAxes(x, y);
+
+
     });
     }
   }, [d3Container.current]);
@@ -266,9 +340,8 @@ const ScatterPlot = (): JSX.Element => {
       <h2>ScatterPlot plot</h2>
       <div>
         <p id="scatter-slider-text"></p>
-      </div>
-      <div>
         <div id="scatter-slider"></div>
+        <div id="scatter-step-slider"></div>
       </div>
       <svg className="d3-component" width={w} height={h} ref={d3Container} />
     </div>
