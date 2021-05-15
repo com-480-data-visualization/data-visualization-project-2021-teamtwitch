@@ -3,6 +3,7 @@ import AreaChart from "src/components/AreaChart";
 import ChessLineChart from "src/components/ChessLineChart";
 import BubbleChart from "src/components/BubbleChart";
 import ReactFullpage from "@fullpage/react-fullpage";
+import TitlePage from "src/components/TitlePage";
 
 export default function App(): JSX.Element {
   return (
@@ -11,6 +12,9 @@ export default function App(): JSX.Element {
       scrollingSpeed={1000}
       render={() => (
         <ReactFullpage.Wrapper>
+          <div className="section">
+            <TitlePage />
+          </div>
           <div className="section">
             <BubbleChart />
           </div>

@@ -52,6 +52,8 @@ const BubbleChart = (): JSX.Element => {
     let currentlyDisplayedYear = defaultDate.getUTCFullYear();
     let currentlyDisplayedMonth = defaultDate.getUTCMonth();
 
+
+
     // drop language down menu params
     const measures = [
       "Viewed Minutes",
@@ -203,7 +205,7 @@ const BubbleChart = (): JSX.Element => {
           .attr("stroke-width", selectedStrokeWidth) // increase stroke width
           .attr("r", (d) => d.r + selectedBubbleRadiusIncreaseFactor)
           .attr("fill-opacity", selectedBubbleOpacity);
-          
+
         // make it tooltip appear
         divTT.transition().duration(200).style("opacity", tooltipOpacity);
         // generate content for tooltip

@@ -1,0 +1,22 @@
+.wrapper {
+  display: flex;
+}
+
+.test {
+  font-size: large;
+}
+
+.paragraph {
+  border: 2px solid black;
+}
+
+.inner {
+  border: 1px solid black;
+}
+
+.outer {
+  border: 1px solid red;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
