@@ -155,7 +155,7 @@ const ScatterPlot = (): JSX.Element => {
            .attr("fill", "firebrick")
           // get the top n in unique channels
           var topData = newData.sort(function(a) {
-              return d3.descending(+a.maxchannels);
+              return d3.descending(+a.avgchannels);
           }).slice(0, currentN);
           console.log(topData);
 
