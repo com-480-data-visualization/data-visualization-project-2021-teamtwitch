@@ -100,7 +100,11 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     const width = 800 - marginV - marginH;
     const height = 480 - marginV - marginH;
 
-    if (this.d3Container.current) {
+    if (
+      this.d3Container.current &&
+      Object.keys(this.state.top10Data).length > 0 &&
+      Object.keys(this.state.top50Data).length > 0
+    ) {
       const top10DataSelected = this.state.top10Data[this.state.language][
         this.state.column
       ];
