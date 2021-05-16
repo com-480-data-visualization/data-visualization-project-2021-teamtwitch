@@ -1,0 +1,27 @@
+.wrapper {
+  display: flex;
+}
+
+.test {
+  font-size: large;
+}
+
+.p1 {
+  color: black;
+  margin: 20px 10px 0px;
+  padding: 0px 100px 40px 30px;
+  text-align: center;
+  font-size: large;
+  //font-weight: bolder;
+}
+
+.paragraph {
+  border: 2px solid black;
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  //width: 50%;
+}
