@@ -6,22 +6,36 @@
   font-size: large;
 }
 
+
 .p1 {
   color: black;
   margin: 20px 10px 0px;
   padding: 0px 100px 40px 30px;
-  text-align: center;
   font-size: large;
   //font-weight: bolder;
 }
-
-.paragraph {
-  border: 2px solid black;
+.center {
+  margin: 20px 10px 0px;
+  padding: 0px 100px 40px 30px;
+  text-align: center;
+  font-size: large;
 }
 
-.center {
+.left {
+  margin: 20px 10px 0px;
+  padding: 0px 100px 40px 30px;
+  text-align: left;
+  font-size: large;
+  line-height: 1.8;
+
+}
+
+.right {
+  margin: 20px 10px 0px;
+  padding: 0px 100px 40px 30px;
   display: block;
   margin-left: auto;
   margin-right: auto;
+  text-align: right;
   //width: 50%;
 }
