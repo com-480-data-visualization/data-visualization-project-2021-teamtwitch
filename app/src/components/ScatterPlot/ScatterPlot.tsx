@@ -3,10 +3,14 @@ import React from "react";
 import * as d3 from "d3";
 import { sliderBottom, sliderLeft } from "d3-simple-slider";
 
+const styles = require("./styles.scss");
+
+
 const ScatterPlot = (): JSX.Element => {
   const d3Container = React.useRef(null);
   const w = 1000;
   const h = 700;
+
 
 
   React.useEffect(() => {
@@ -152,7 +156,7 @@ const ScatterPlot = (): JSX.Element => {
            .transition()
            .duration(transferDuration)
            .attr("r", 5)
-           .attr("fill", "firebrick")
+           .attr("fill", "#7500D1")
           // get the top n in unique channels
           var topData = newData.sort(function(a) {
               return d3.descending(+a.avgchannels);
@@ -226,7 +230,7 @@ const ScatterPlot = (): JSX.Element => {
             .attr("r", 5)
             .attr("cx", d => x(d.streamedminutes))
             .attr("cy", d => y(d.viewminutes))
-            .attr("fill", "firebrick")
+            .attr("fill", "#7500D1")
             .on("mouseover", function (event, d) {
             div.transition().duration(200).style("opacity", 0.9);
             div
@@ -337,13 +341,20 @@ const ScatterPlot = (): JSX.Element => {
   // d3 element will be mounted on the svg node
   return (
     <div>
-      <h2>ScatterPlot plot</h2>
+      <h1>Successful channels</h2>
       <div>
-        <p id="scatter-slider-text"></p>
-        <div id="scatter-slider"></div>
-        <div id="scatter-step-slider"></div>
+        <p id="scatter-slider-text" className={styles.sliderText}></p>
+        <div id="scatter-slider" className={styles.slider}></div>
       </div>
-      <svg className="d3-component" width={w} height={h} ref={d3Container} />
+      <div className={styles.right}>
+        <p className={styles.left}> Imagine you've recently discovered Twitch.Tv and are quite excited about all the possibilities that you have for creating your own channel.
+        Before you do so, you want to research what the secret behind a successful channel is.
+        Does more stream time imply more view time? Inspect the plot on the right to figure it out!</p>
+        <svg className="d3-component" width={w} height={h} ref={d3Container} />
+      </div>
+      <div>
+
+      </div>
     </div>
   );
 };

@@ -2,6 +2,9 @@
 import React from "react";
 import * as d3 from "d3";
 
+const styles = require("./styles.scss");
+
+
 const ChessLineChart = (): JSX.Element => {
   const d3Container = React.useRef(null);
   const w = 1000;
@@ -489,7 +492,7 @@ const ChessLineChart = (): JSX.Element => {
   // d3 element will be mounted on the svg node
   return (
     <div>
-      <h2>Chess Timeseries plot</h2>
+      <h1>Chess Channel</h2>
       <button id="animation_btn" type="button"></button>
       <svg className="d3-component" width={w} height={h} ref={d3Container} />
     </div>

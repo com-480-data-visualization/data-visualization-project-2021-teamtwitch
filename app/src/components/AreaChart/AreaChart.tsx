@@ -264,7 +264,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     return (
       <div className={styles.wrapper}>
         <div className={styles.content}>
-          <h2>How does the populartiy of Twitch change over time?</h2>
+          <h1>Populartiy of Twitch.Tv over time</h2>  
           <div className={styles.description}>
             <p>
               Twitch is now a well-known streaming platform, but how popular was
