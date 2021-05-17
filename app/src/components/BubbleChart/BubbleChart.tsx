@@ -464,21 +464,17 @@ const BubbleChart = (): JSX.Element => {
   // d3 element will be mounted on the svg node
   return (
     <div>
-      <h2>Bubble Chart</h2>
-      <div>
+      <h1 >Explore the data</h2>
+      <div className={styles.padding}>
+        <div className={styles.slider} >
+          <p id="bubble-slider-text" className={styles.sliderText}></p>
+          <p id="bubble-slider"></p>
+        </div>
         <div>
           <select id="bubble-select-language"></select>
           <select id="bubble-select-measure"></select>
-          <div>
-            <p id="bubble-slider-text"></p>
-          </div>
-          <div>
-            <div id="bubble-slider"></div>
-          </div>
         </div>
-        <div className={styles.bubbleChartWrapper}>
-          <div id="bubbleChart"></div>
-        </div>
+        <p id="bubbleChart" className={styles.bubbleChartWrapper}></p>
       </div>
     </div>
   );

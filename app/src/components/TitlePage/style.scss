@@ -1,22 +1,37 @@
-.wrapper {
-  display: flex;
+
+// Global changes
+html *
+{
+   font-family: Arial !important;
 }
 
-.test {
-  font-size: large;
+body {
+background: no-repeat url(//s.ytimg.com/yt/imgbin/www-refreshbg-vflC3wnbM.png) 0 0;
+background-color: #EBEBEB;
+background-repeat: repeat;
+}
+
+h1 {
+  color: #7500D1;
+  margin: 20px 10px 0px;
+  //padding: 0px 100px 40px 30px;
+  text-align: center;
+  font-size: 40px;
+
+}
+
+.image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.head1 {
+  font-size: 70px;
+  //font-weight: bolder;
 }
 
 .paragraph {
-  border: 2px solid black;
-}
-
-.inner {
-  border: 1px solid black;
-}
-
-.outer {
-  border: 1px solid red;
-  width: 100%;
-  display: flex;
-  justify-content: center;
+  font-size: x-large;
+  text-align: center;
 }
