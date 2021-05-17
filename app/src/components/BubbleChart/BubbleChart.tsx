@@ -7,12 +7,17 @@ import {
   Pack,
   MakeHierarchy,
   MakeHierarchicalData,
-  MakeDataPath
+  MakeAggPath,
+  MakeDataPath,
+  DrawLineChart
 } from "./bubbleFunctions";
+
+
 
 const styles = require("./bubblechart.scss");
 
 const BubbleChart = (): JSX.Element => {
+
   const width = 700;
   const height = 500;
   const [currItem, setCurrItem] = React.useState<any>(null);
@@ -108,13 +113,13 @@ const BubbleChart = (): JSX.Element => {
       currentlyDisplayedYear,
       months[currentlyDisplayedMonth].toLowerCase()
     );
-
+    //d3.select(d3Container.current).html("");
     // create div for the tooltip
     var divTT = d3
       .select(`.${styles.bubbleChartWrapper}`)
       .append("div")
       .attr("id", styles.bubbleChartInfo)
-      .html("Click on a bubble to see some data :)");
+      .html("Click on the Bubbles to see some Data :)");
 
     // get the node and attach svg to it, set it up
     const svg = d3
@@ -208,6 +213,8 @@ const BubbleChart = (): JSX.Element => {
 
         // make it tooltip appear
         divTT.transition().duration(200).style("opacity", tooltipOpacity);
+
+        ``
         // generate content for tooltip
         let p1 = `<b>${d.data.name}</b>`;
         let p2 = "<b>Viewed Minutes:</b>" + "\t" + d.data.viewminutes;
@@ -224,7 +231,60 @@ const BubbleChart = (): JSX.Element => {
           "<br/>"
         );
         // fil the tooltip
-        divTT.html(toolTipText);
+        divTT.html(`
+          <img src="${d.data.logo}" alt="${d.data.name}"><br/>
+          <b>${d.data.name}</b><br/>
+          <table style="width:100%">
+            <tr>
+              <td>Viewed Minutes</td>
+              <td>${d.data.viewminutes}</td>
+            </tr>
+            <tr>
+              <td>Streamed Minutes</td>
+              <td>${d.data.streamedminutes}</td>
+            </tr>
+            <tr>
+              <td>Peak Number of Channels</td>
+              <td>${d.data.maxchannels}</td>
+            </tr>
+            <tr>
+              <td>Unique Channels</td>
+              <td>${d.data.uniquechannels}</td>
+            </tr>
+            <tr>
+              <td>Average Number of Channels</td>
+              <td>${d.data.avgchannels}</td>
+            </tr>
+            <tr>
+              <td>Peak Number of Viewers</td>
+              <td>${d.data.maxviewers}</td>
+            </tr>
+            <tr>
+              <td>Viewer/Channel Ratio</td>
+              <td>${d.data.avgratio}</td>
+            </tr>
+            <tr>
+              <td>Average Number of Viewers</td>
+              <td>${d.data.avgviewers}</td>
+            </tr>
+        </table></br>
+        Development over Time:</br>`
+        );
+        var aggPath = MakeAggPath(currentlyDisplayedLanguage, currentlyDisplayedMeasure);
+        console.log(aggPath);
+        d3.csv(currentlyDisplayedData).then(function (d) {
+          DrawLineChart(
+            divTT,
+            200,
+            200,
+            10,
+            40,
+            40,
+            0,
+            "Viewed Minutes",
+            100,
+            100);
+        });
       });
     };
 
