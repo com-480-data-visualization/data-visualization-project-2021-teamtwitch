@@ -464,7 +464,7 @@ const BubbleChart = (): JSX.Element => {
   // d3 element will be mounted on the svg node
   return (
     <div>
-      <h1 >Explore the data</h2>
+      <h1 >Explore the data</h1>
       <div className={styles.padding}>
         <div className={styles.slider} >
           <p id="bubble-slider-text" className={styles.sliderText}></p>
