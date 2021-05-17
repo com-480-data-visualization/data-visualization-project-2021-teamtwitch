@@ -57,8 +57,14 @@ const BubbleChart = (): JSX.Element => {
     let currentlyDisplayedYear = defaultDate.getUTCFullYear();
     let currentlyDisplayedMonth = defaultDate.getUTCMonth();
 
-
-
+    // for line chart
+    const line_chart_width = 200;
+    const line_chart_height = 200;
+    const line_chart_margin_top = 10;
+    const line_chart_margin_bottom = 40;
+    const line_chart_margin_left = 100;
+    const line_chart_margin_right = 0;
+    var currentlyDisplayedGame = null;
     // drop language down menu params
     const measures = [
       "Viewed Minutes",
@@ -113,7 +119,7 @@ const BubbleChart = (): JSX.Element => {
       currentlyDisplayedYear,
       months[currentlyDisplayedMonth].toLowerCase()
     );
-    //d3.select(d3Container.current).html("");
+
     // create div for the tooltip
     var divTT = d3
       .select(`.${styles.bubbleChartWrapper}`)
@@ -210,11 +216,11 @@ const BubbleChart = (): JSX.Element => {
           .attr("stroke-width", selectedStrokeWidth) // increase stroke width
           .attr("r", (d) => d.r + selectedBubbleRadiusIncreaseFactor)
           .attr("fill-opacity", selectedBubbleOpacity);
-
+        divTT.html("");
         // make it tooltip appear
         divTT.transition().duration(200).style("opacity", tooltipOpacity);
 
-        ``
+        currentlyDisplayedGame = d.data.name;
         // generate content for tooltip
         let p1 = `<b>${d.data.name}</b>`;
         let p2 = "<b>Viewed Minutes:</b>" + "\t" + d.data.viewminutes;
@@ -231,60 +237,61 @@ const BubbleChart = (): JSX.Element => {
           "<br/>"
         );
         // fil the tooltip
-        divTT.html(`
-          <img src="${d.data.logo}" alt="${d.data.name}"><br/>
-          <b>${d.data.name}</b><br/>
-          <table style="width:100%">
-            <tr>
-              <td>Viewed Minutes</td>
-              <td>${d.data.viewminutes}</td>
-            </tr>
-            <tr>
-              <td>Streamed Minutes</td>
-              <td>${d.data.streamedminutes}</td>
-            </tr>
-            <tr>
-              <td>Peak Number of Channels</td>
-              <td>${d.data.maxchannels}</td>
-            </tr>
-            <tr>
-              <td>Unique Channels</td>
-              <td>${d.data.uniquechannels}</td>
-            </tr>
-            <tr>
-              <td>Average Number of Channels</td>
-              <td>${d.data.avgchannels}</td>
-            </tr>
-            <tr>
-              <td>Peak Number of Viewers</td>
-              <td>${d.data.maxviewers}</td>
-            </tr>
-            <tr>
-              <td>Viewer/Channel Ratio</td>
-              <td>${d.data.avgratio}</td>
-            </tr>
-            <tr>
-              <td>Average Number of Viewers</td>
-              <td>${d.data.avgviewers}</td>
-            </tr>
-        </table></br>
-        Development over Time:</br>`
+        // divTT.html(`
+        //   <img src="${d.data.logo}" alt="${d.data.name}"><br/>
+        //   <b>${d.data.name}</b><br/>
+        //   <table style="width:100%">
+        //     <tr>
+        //       <td>Viewed Minutes</td>
+        //       <td>${d.data.viewminutes}</td>
+        //     </tr>
+        //     <tr>
+        //       <td>Streamed Minutes</td>
+        //       <td>${d.data.streamedminutes}</td>
+        //     </tr>
+        //     <tr>
+        //       <td>Peak Number of Channels</td>
+        //       <td>${d.data.maxchannels}</td>
+        //     </tr>
+        //     <tr>
+        //       <td>Unique Channels</td>
+        //       <td>${d.data.uniquechannels}</td>
+        //     </tr>
+        //     <tr>
+        //       <td>Average Number of Channels</td>
+        //       <td>${d.data.avgchannels}</td>
+        //     </tr>
+        //     <tr>
+        //       <td>Peak Number of Viewers</td>
+        //       <td>${d.data.maxviewers}</td>
+        //     </tr>
+        //     <tr>
+        //       <td>Viewer/Channel Ratio</td>
+        //       <td>${d.data.avgratio}</td>
+        //     </tr>
+        //     <tr>
+        //       <td>Average Number of Viewers</td>
+        //       <td>${d.data.avgviewers}</td>
+        //     </tr>
+        // </table></br>
+        // Development over Time:</br>`
+        // );
+
+
+        DrawLineChart(
+          divTT,
+          currentlyDisplayedLanguage,
+          currentlyDisplayedMeasure,
+          currentlyDisplayedGame,
+          line_chart_width,
+          line_chart_height,
+          line_chart_margin_top,
+          line_chart_margin_bottom,
+          line_chart_margin_left,
+          line_chart_margin_right,
+          currentlyDisplayedMeasure
         );
-        var aggPath = MakeAggPath(currentlyDisplayedLanguage, currentlyDisplayedMeasure);
-        console.log(aggPath);
-        d3.csv(currentlyDisplayedData).then(function (d) {
-          DrawLineChart(
-            divTT,
-            200,
-            200,
-            10,
-            40,
-            40,
-            0,
-            "Viewed Minutes",
-            100,
-            100);
-        });
+
       });
     };
 
@@ -375,6 +382,7 @@ const BubbleChart = (): JSX.Element => {
         );
         // make a transition with the new data
         BubbleTransition();
+
       });
     };
 
@@ -456,6 +464,20 @@ const BubbleChart = (): JSX.Element => {
                   .replaceAll("'", "")})`
             );
       });
+      divTT.html("");
+      DrawLineChart(
+        divTT,
+        currentlyDisplayedLanguage,
+        currentlyDisplayedMeasure,
+        currentlyDisplayedGame,
+        line_chart_width,
+        line_chart_height,
+        line_chart_margin_top,
+        line_chart_margin_bottom,
+        line_chart_margin_left,
+        line_chart_margin_right,
+        currentlyDisplayedMeasure
+      );
     }
 
   });
