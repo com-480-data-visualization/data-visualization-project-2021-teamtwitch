@@ -280,6 +280,8 @@ const ScatterPlot = (): JSX.Element => {
             d.date = d3.timeParse("%Y-%m-%d")(d.date);
             d.viewminutes = +d.viewminutes;
             d.streamedminutes = +d.streamedminutes;
+            d.avgchannels = +d.avgchannels;
+            d.avgviewers = +d.avgviewers;
         });
       }
 
@@ -353,7 +355,6 @@ const ScatterPlot = (): JSX.Element => {
         <svg className="d3-component" width={w} height={h} ref={d3Container} />
       </div>
       <div>
-
       </div>
     </div>
   );

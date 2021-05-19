@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import * as d3 from "d3";
+import classNames from "classnames";
 
 const styles = require("./styles.scss");
 
@@ -18,7 +19,6 @@ const ChessLineChart = (): JSX.Element => {
       const lockdowns = new Date("2020-03-09");
       const queens_gambit = new Date("2020-10-23");
       const gm_twitch = new Date("2017-07-04");
-
 
       const totalPathAnimationTime = 12000;
       const blinkTimer = 1100;
@@ -132,7 +132,7 @@ const ChessLineChart = (): JSX.Element => {
            .data([data])
            .attr("id", "linePath")
            .attr("fill", "none")
-           .attr("stroke", "firebrick")
+           .attr("stroke", "#7500D1")
            .attr("class", "line")
            .attr("stroke-width", 2)
            .attr("d", valueline);
@@ -155,7 +155,7 @@ const ChessLineChart = (): JSX.Element => {
             .attr("r", 15)
             .attr("cx", function(d) { return x(d.date); })
             .attr("cy", function(d) { return y(d.viewminutes); })
-            .attr("fill", "firebrick")
+            .attr("fill", "#7500D1")
             .style("opacity", 0)
             .on("mouseover", function (event, d) {
               div.transition().duration(200).style("opacity", 0.9);
@@ -474,7 +474,7 @@ const ChessLineChart = (): JSX.Element => {
           buildRectangle(3, group3, event3);
 
         }
-        // set the btton
+        // set the button
         d3.select("#animation_btn")
           .attr("class", "button")
           .attr("width", 50)
@@ -488,13 +488,39 @@ const ChessLineChart = (): JSX.Element => {
   }, [d3Container.current]);
 
 
-  // Arrange descriptions and other JS logic here
-  // d3 element will be mounted on the svg node
   return (
+
     <div>
       <h1>Chess Channel</h2>
-      <button id="animation_btn" type="button"></button>
-      <svg className="d3-component" width={w} height={h} ref={d3Container} />
+      <div className={styles.row}>
+
+
+        <div>
+          <p className={styles.column}> Explore the chess category on Twitch.Tv over time with us.
+            <ul>
+              <li>
+                How did the corona pandemic influence its popularity?
+              </li>
+              <li>
+                What about the release of the famous TV show Queen's Gambit?
+              </li>
+            </ul>
+            Click on the boxes to discover what the third important event was.
+
+          </p>
+        </div>
+
+        <div className={styles.column} >
+          <svg className="d3-component" width={w} height={h} ref={d3Container} />
+        </div>
+      </div>
+
+
+
+
+      <div className={styles.button}>
+        <button  id="animation_btn" type="button"></button>
+      </div>
     </div>
   );
 };

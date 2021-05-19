@@ -24,14 +24,15 @@ export default function App(): JSX.Element {
             <BubbleChart />
           </div>
           <div className="section">
-            <ScatterPlot />
-          </div>
-          <div className="section">
             <AreaChart />
           </div>
           <div className="section">
             <ChessLineChart />
           </div>
+          <div className="section">
+            <ScatterPlot />
+          </div>
+
         </ReactFullpage.Wrapper>
       )}
     />
