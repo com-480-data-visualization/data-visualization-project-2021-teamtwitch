@@ -1,23 +1,21 @@
-
 // Global changes
-html *
-{
-   font-family: Arial !important;
+html * {
+  font-family: Arial !important;
 }
 
 body {
-background: no-repeat url(//s.ytimg.com/yt/imgbin/www-refreshbg-vflC3wnbM.png) 0 0;
-background-color: #EBEBEB;
-background-repeat: repeat;
+  background: no-repeat url(//s.ytimg.com/yt/imgbin/www-refreshbg-vflC3wnbM.png)
+    0 0;
+  background-color: #ebebeb;
+  background-repeat: repeat;
 }
 
 h1 {
-  color: #7500D1;
+  color: #7500d1;
   margin: 20px 10px 0px;
   //padding: 0px 100px 40px 30px;
   text-align: center;
   font-size: 40px;
-
 }
 
 .image {

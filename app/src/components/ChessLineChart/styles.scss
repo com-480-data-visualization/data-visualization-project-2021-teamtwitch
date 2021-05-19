@@ -1,19 +1,16 @@
-
-.button{
+.button {
   margin-left: 1000px;
   margin-top: 30px;
   padding: 0px 100px 40px 30px;
-  background-color: "#7500D1"
+  background-color: "#7500D1";
 }
-
-
 
 /* Create three equal columns that floats next to each other */
 .column {
   float: left;
   width: 33.33%;
   padding: 10px;
-  padding-top: 100px;
+  padding-top: 50px;
   padding-left: 50px;
   font-size: large;
   margin-left: auto;
@@ -26,7 +23,6 @@
   display: table;
   clear: both;
 }
-
 
 /* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
 @media (max-width: 600px) {
