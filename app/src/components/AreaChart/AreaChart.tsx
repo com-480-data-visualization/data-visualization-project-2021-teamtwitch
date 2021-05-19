@@ -264,7 +264,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     return (
       <div className={styles.wrapper}>
         <div className={styles.content}>
-          <h1>Populartiy of Twitch.Tv over time</h2>
+          <h1>Populartiy of Twitch.Tv over time</h1>
           <div className={styles.description}>
             <p>
               Twitch is now a well-known streaming platform, but how popular was
@@ -432,7 +432,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             (xIndex < this.state.dateSelected[0] ||
               xIndex > this.state.dateSelected[1])
         );
-      console.log(this.state.dateSelected, xIndex);
+
       // Tooltip
       const isLessThanHalf = xIndex > dataSelected[i].length / 2;
       const hoverTextX = isLessThanHalf ? "-0.75em" : "0.75em";
