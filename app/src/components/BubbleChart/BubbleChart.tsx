@@ -9,21 +9,17 @@ import {
   MakeHierarchicalData,
   MakeAggPath,
   MakeDataPath,
-  DrawLineChart
+  DrawLineChart,
 } from "./bubbleFunctions";
-
-
 
 const styles = require("./bubblechart.scss");
 
 const BubbleChart = (): JSX.Element => {
-
   const width = 700;
   const height = 500;
   const [currItem, setCurrItem] = React.useState<any>(null);
 
   React.useEffect(() => {
-
     // left/top padding
     const padding = 50;
 
@@ -130,6 +126,7 @@ const BubbleChart = (): JSX.Element => {
     // get the node and attach svg to it, set it up
     const svg = d3
       .select("#bubbleChart") // select the current container
+      .html("")
       .append("svg") // create svg container
       .attr("viewBox", [0, 0, width, height]) // set viewbox
       .attr("height", height)
@@ -277,7 +274,6 @@ const BubbleChart = (): JSX.Element => {
         // Development over Time:</br>`
         // );
 
-
         DrawLineChart(
           divTT,
           currentlyDisplayedLanguage,
@@ -291,7 +287,6 @@ const BubbleChart = (): JSX.Element => {
           line_chart_margin_right,
           currentlyDisplayedMeasure
         );
-
       });
     };
 
@@ -302,7 +297,11 @@ const BubbleChart = (): JSX.Element => {
         .domain([earliestDate, latestDate])
         .step(totalMonths)
         .ticks(sliderTicks)
-        .tickValues(Array.from({length:6},(_,k)=>k+2015).map(y => new Date(y, 12, 15)))
+        .tickValues(
+          Array.from({ length: 6 }, (_, k) => k + 2015).map(
+            (y) => new Date(y, 12, 15)
+          )
+        )
         .tickFormat(d3.timeFormat("%Y"))
         .width(sliderWidth)
         .height(sliderHeight)
@@ -337,6 +336,7 @@ const BubbleChart = (): JSX.Element => {
       // creating the svg for the slider
       var gSimple = d3
         .select("#bubble-slider")
+        .html("")
         .append("svg")
         .attr("width", sliderWidth + sliderPaddingLeft * 2)
         .attr("height", sliderHeight + sliderPaddingTop)
@@ -382,7 +382,6 @@ const BubbleChart = (): JSX.Element => {
         );
         // make a transition with the new data
         BubbleTransition();
-
       });
     };
 
@@ -439,30 +438,35 @@ const BubbleChart = (): JSX.Element => {
         );
 
         // change the patterns ids and urls
-        defs.selectAll(".category-pattern")
+        defs
+          .selectAll(".category-pattern")
           .data(newData)
-            .attr("id", (d) => {
-              return d.data.name.toLowerCase().replaceAll(" ", "-").replaceAll("'", "");
-            })
+          .attr("id", (d) => {
+            return d.data.name
+              .toLowerCase()
+              .replaceAll(" ", "-")
+              .replaceAll("'", "");
+          })
           .select("image")
-            .attr("xlink:href", (d) => d.data.logo);
+          .attr("xlink:href", (d) => d.data.logo);
 
         // change data and logo reference in the circles
-        svg.selectAll("g")
+        svg
+          .selectAll("g")
           .data(newData)
           .transition()
-            .duration(500)
-            .attr("transform", (d) => `translate(${d.x + 1},${d.y + 1})`)
+          .duration(500)
+          .attr("transform", (d) => `translate(${d.x + 1},${d.y + 1})`)
           .select("circle")
-            .attr("r", (d) => d.r)
-            .attr(
-              "fill",
-              (d) =>
-                `url(#${d.data.name
-                  .toLowerCase()
-                  .replaceAll(" ", "-")
-                  .replaceAll("'", "")})`
-            );
+          .attr("r", (d) => d.r)
+          .attr(
+            "fill",
+            (d) =>
+              `url(#${d.data.name
+                .toLowerCase()
+                .replaceAll(" ", "-")
+                .replaceAll("'", "")})`
+          );
       });
       divTT.html("");
       DrawLineChart(
@@ -478,17 +482,16 @@ const BubbleChart = (): JSX.Element => {
         line_chart_margin_right,
         currentlyDisplayedMeasure
       );
-    }
-
+    };
   });
 
   // Arrange descriptions and other JS logic here
   // d3 element will be mounted on the svg node
   return (
     <div>
-      <h1 >Explore the data</h1>
+      <h1>Explore the data</h1>
       <div className={styles.padding}>
-        <div className={styles.slider} >
+        <div className={styles.slider}>
           <p id="bubble-slider-text" className={styles.sliderText}></p>
           <p id="bubble-slider"></p>
         </div>
