@@ -511,10 +511,10 @@ const ChessLineChart = (): JSX.Element => {
 
   return (
     <div>
-      <h1>Chess Channel</h1>
       <div className={styles.row}>
         <div>
           <p className={styles.column}>
+          <h1 className={styles.h1} >Chess Channel</h1>
             {" "}
             Explore the chess category on Twitch.Tv over time with us.
             <ul>

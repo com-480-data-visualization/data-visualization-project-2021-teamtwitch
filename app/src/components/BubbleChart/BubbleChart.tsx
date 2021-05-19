@@ -489,19 +489,33 @@ const BubbleChart = (): JSX.Element => {
   // d3 element will be mounted on the svg node
   return (
     <div>
-      <h1>Explore the data</h1>
-      <div className={styles.padding}>
-        <div className={styles.slider}>
-          <p id="bubble-slider-text" className={styles.sliderText}></p>
-          <p id="bubble-slider"></p>
-        </div>
+      <div className={styles.row}>
         <div>
-          <select id="bubble-select-language"></select>
-          <select id="bubble-select-measure"></select>
+          <p className={styles.column}>
+            <h1 className={styles.h1} >Explore the data</h1>
+            {" "}
+            Now that you roughly know what Twitch.Tv looks like, you must be curious about its content.
+            What categories are there? Which ones are popular and when?
+            Are the trends the same in every language?
+            Check out the right plot to find answers to all your questions!
+          </p>
         </div>
-        <p id="bubbleChart" className={styles.bubbleChartWrapper}></p>
+
+        <div className={styles.column}>
+          <div classNames={styles.dropdown}>
+            <select id="bubble-select-language"></select>
+            <select id="bubble-select-measure"></select>
+          </div>
+          <p id="bubbleChart" className={styles.bubbleChartWrapper}></p>
+          <div className={styles.slider}>
+            <p id="bubble-slider-text" ></p>
+            <p id="bubble-slider"></p>
+          </div>
+        </div>
       </div>
     </div>
+
+
   );
 };
 

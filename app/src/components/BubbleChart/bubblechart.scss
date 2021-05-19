@@ -33,11 +33,54 @@ td {
   text-align: center;
 }
 
+.dropdown {
+  padding-left: 200px;
+}
+
 .slider {
-  text-align: center;
+  display: flex;
+  padding-left: 140px;
 }
 
 .sliderText {
-  //padding-left: 140px;
-  text-align: center;
+  padding-bottom: 100px;
+  //text-align: center;
+}
+
+.button {
+  margin-left: 800px;
+  margin-top: 30px;
+  //padding: 0px 100px 40px 30px;
+  background-color: "#7500d1";
+}
+
+/* Create three equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 33.33%;
+  padding: 10px;
+  padding-top: 50px;
+  padding-left: 50px;
+  font-size: large;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.8;
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Responsive layout - makes the three columns stack on top of each other instead of next to each other */
+@media (max-width: 600px) {
+  .column {
+    width: 100%;
+  }
+}
+
+.h1 {
+  padding-bottom: 35px;
 }

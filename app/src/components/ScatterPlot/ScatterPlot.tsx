@@ -351,23 +351,32 @@ const ScatterPlot = (): JSX.Element => {
   // d3 element will be mounted on the svg node
   return (
     <div>
-      <h1>Successful channels</h1>
-      <div>
-        <p id="scatter-slider-text" className={styles.sliderText}></p>
-        <div id="scatter-slider" className={styles.slider}></div>
+      <div className={styles.row}>
+        <div>
+          <p className={styles.column}>
+            <h1 className={styles.h1} >Successful Channels</h1>
+            {" "}
+            Imagine you've recently discovered Twitch.Tv and are quite excited
+            about all the possibilities that you have for creating your own
+            channel. Before you do so, you want to research what the secret behind
+            a successful channel is. Does more stream time imply more view time?
+            Inspect the plot on the right to figure it out!
+          </p>
+        </div>
+
+        <div className={styles.column}>
+          <svg
+            className="d3-component"
+            width={w}
+            height={h}
+            ref={d3Container}
+          />
+          <div className={styles.slider}>
+            <p id="scatter-slider-text"></p>
+            <p id="scatter-slider"></p>
+          </div>
+        </div>
       </div>
-      <div className={styles.right}>
-        <p className={styles.left}>
-          {" "}
-          Imagine you've recently discovered Twitch.Tv and are quite excited
-          about all the possibilities that you have for creating your own
-          channel. Before you do so, you want to research what the secret behind
-          a successful channel is. Does more stream time imply more view time?
-          Inspect the plot on the right to figure it out!
-        </p>
-        <svg className="d3-component" width={w} height={h} ref={d3Container} />
-      </div>
-      <div></div>
     </div>
   );
 };

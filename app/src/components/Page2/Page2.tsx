@@ -5,9 +5,11 @@ const styles = require("./style.scss");
 
 const Page2 = (): JSX.Element => (
   <div>
-    <h1>What is Twitch.Tv?</h1>
+
     <div className={styles.wrapper}>
+
       <p className={styles.left}>
+      <h1>What is Twitch.Tv?</h1>
         {" "}
         TwitchTv, a subsidiary of <i>Amazon.com Inc</i>, is a streaming service
         that is concentrated on <b>video game live streaming</b>, broadcasting
