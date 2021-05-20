@@ -78,15 +78,15 @@ export const dateLabels = [
   "2021 March",
 ];
 
-export const columnLabels = [
-  "View minutes",
-  "Streamed minutes",
-  "Unique channels",
-  "Max channels",
-  "Avg channels",
-  "Max viewers",
-  "Avg viewers",
-];
+export const columnLabels: Record<string, string> = {
+  "View minutes": "viewminutes",
+  "Streamed minutes": "streamedminutes",
+  "Average number of unique channels": "uniquechannels",
+  "Max number of channels": "maxchannels",
+  "Average number of channels": "avgchannels",
+  "Max number of viewers": "maxviewers",
+  "Average number of viewers": "avgviewers",
+};
 
 const months: { [key: string]: string } = {
   january: "01",

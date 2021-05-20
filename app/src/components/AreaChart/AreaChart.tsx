@@ -19,10 +19,8 @@ interface IDataEntry {
   value: number;
 }
 
-const top50DataUrl =
-  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/76a3b9357d650b5e9dcf5c31ec23894dfb354aeb/data/agg-50.json";
-const top10DataUrl =
-  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/76a3b9357d650b5e9dcf5c31ec23894dfb354aeb/data/agg-10.json";
+const top20DataUrl =
+  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/fix-area-chart/data/agg-20.json";
 
 const loadData = async (
   url: string
@@ -35,7 +33,7 @@ const loadData = async (
       const data: {
         [key: string]: { [key: string]: IDataEntry[] };
       } = {};
-      const colKeys = columnLabels.map((s) => s.toLowerCase().replace(" ", ""));
+      const colKeys = Object.values(columnLabels);
       for (const code of Object.values(languageMapping)) {
         data[code] = {};
         for (const col of colKeys) {
@@ -54,10 +52,7 @@ const loadData = async (
     });
 };
 interface IAreaChartState {
-  top10Data: {
-    [key: string]: { [key: string]: IDataEntry[] };
-  };
-  top50Data: {
+  top20Data: {
     [key: string]: { [key: string]: IDataEntry[] };
   };
   language: string;
@@ -69,28 +64,26 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   d3Container: React.MutableRefObject<null>;
   circles: { id: string; fill: string }[] = [
     {
-      id: "areaCircle10",
+      id: "areaCircle20",
       fill: "#147f90",
     },
-    { id: "areaCircle50", fill: "#8000a3" },
   ];
-  tooltipIds: string[] = ["areaTooltip10", "areaTooltip50"];
-  infoBoxIds: string[] = ["areaInfobox10", "areaInfobox50"];
+  tooltipIds: string[] = ["areaTooltip20"];
+  infoBoxIds: string[] = ["areaInfobox20"];
   constructor(props: {}) {
     super(props);
     this.d3Container = React.createRef();
     this.state = {
-      top10Data: {},
-      top50Data: {},
+      top20Data: {},
       language: "000",
-      column: "viewminutes",
+      column: "View minutes",
       dateSelected: [0, dateLabels.length - 1],
     };
   }
 
   componentDidMount(): void {
-    Promise.all([loadData(top10DataUrl), loadData(top50DataUrl)]).then((d) =>
-      this.setState({ top10Data: d[0], top50Data: d[1] })
+    Promise.all([loadData(top20DataUrl)]).then((d) =>
+      this.setState({ top20Data: d[0] })
     );
   }
 
@@ -102,17 +95,13 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
     if (
       this.d3Container.current &&
-      Object.keys(this.state.top10Data).length > 0 &&
-      Object.keys(this.state.top50Data).length > 0
+      Object.keys(this.state.top20Data).length > 0
     ) {
-      const top10DataSelected = this.state.top10Data[this.state.language][
-        this.state.column
+      const top20DataSelected = this.state.top20Data[this.state.language][
+        columnLabels[this.state.column]
       ];
-      const top50DataSelected = this.state.top50Data[this.state.language][
-        this.state.column
-      ];
-      const dataSelected = [top10DataSelected, top50DataSelected];
-      const xExtent = d3.extent(top10DataSelected, (d) => d.date) as [
+      const dataSelected = [top20DataSelected];
+      const xExtent = d3.extent(top20DataSelected, (d) => d.date) as [
         Date,
         Date
       ];
@@ -123,7 +112,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
       const y = d3
         .scaleLinear()
-        .domain([0, 1.1 * (d3.max(top10DataSelected, (d) => d.value) || 0)])
+        .domain([0, 1.1 * (d3.max(top20DataSelected, (d) => d.value) || 0)])
         .range([height, 0]);
 
       d3.select(this.d3Container.current).html("");
@@ -154,26 +143,23 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       const yAxis = d3.axisLeft(y).tickFormat(d3.format("~s"));
 
       svg.append("g").attr("transform", `translate(${marginH}, 0)`).call(yAxis);
+      svg
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0)
+        .attr("x", 0 - height / 2)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("fill", "#777")
+        .text(this.state.column);
 
-      const gradIdTop10 = "areaGradTop10";
-      const gradIdTop50 = "areaGradTop50";
+      const gradIdTop20 = "areaGradTop20";
       const strokeWidth = 1.5;
       svg
         .append("path")
-        .datum(top10DataSelected)
-        .style("fill", `url(#${gradIdTop10})`)
-        .attr("stroke", `url(#${gradIdTop10})`)
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-width", strokeWidth)
-        // @ts-ignore weird type hints
-        .attr("d", area);
-
-      svg
-        .append("path")
-        .datum(top50DataSelected)
-        .style("fill", `url(#${gradIdTop50})`)
-        .attr("stroke", `url(#${gradIdTop50})`)
+        .datum(top20DataSelected)
+        .style("fill", `url(#${gradIdTop20})`)
+        .attr("stroke", `url(#${gradIdTop20})`)
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
         .attr("stroke-width", strokeWidth)
@@ -238,15 +224,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       const defs = svg.append("defs");
       this.createGradient(
         defs,
-        gradIdTop10,
+        gradIdTop20,
         "lightblue",
-        x1Percentage,
-        x2Percentage
-      );
-      this.createGradient(
-        defs,
-        gradIdTop50,
-        "#BE90D4",
         x1Percentage,
         x2Percentage
       );
@@ -255,8 +234,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         event.preventDefault();
         const xCoord = d3.pointer(event)[0];
         this.handleMouseMove(xCoord, svg, x, y, width, marginH, [
-          top10DataSelected,
-          top50DataSelected,
+          top20DataSelected,
         ]);
       });
     }
@@ -272,6 +250,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
               some regions simply favour this platform more?
             </p>
             <p>
+              Here we present the statistics of top-20 popular games that have
+              been streamed on Twitch in different languages from 2016 to 2021.
               There are some interesting things here that are worth
               investigating:
             </p>
@@ -285,19 +265,24 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
               </li>
               <li>
                 Is there any interesting change between languages when COVID hit
-                the world?
+                the world?{" "}
+                <u
+                  className={styles.clickable}
+                  onClick={() =>
+                    this.setState({
+                      dateSelected: [
+                        dateLabels.length - 15,
+                        dateLabels.length - 1,
+                      ],
+                    })
+                  }
+                >
+                  Click me to find out!
+                </u>
               </li>
             </ul>
             <p>...and anything else you are curious about! :)</p>
-            <p>
-              Here we present the two types of statistics of games that have
-              been streamed on Twitch in different languages from 2016 to 2021:
-            </p>
-            <ul>
-              <li>Average data of top-10 popular games (blue)</li>
-              <li>Average data of top-50 popular games (purple)</li>
-            </ul>
-            <p>Drag the verticle bars and check this out!</p>
+            <p>Drag the verticle bars and explore yourself!</p>
           </div>
         </div>
         <div>
@@ -308,7 +293,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
               language={this.state.language}
             />
             <ColumnSelector
-              columnLabels={columnLabels}
+              columnLabels={Object.keys(columnLabels)}
               column={this.state.column}
               setColumn={(c) => this.setState({ column: c })}
             />
@@ -316,7 +301,6 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           <div>
             <div>
               <div className={styles.infobox}>
-                <div className={styles.title} />
                 <div className={`year1 ${styles.box}`}>
                   <div className={styles.date} />
                 </div>
@@ -326,17 +310,6 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
                 </div>
               </div>
               <div className={styles.infobox} id={this.infoBoxIds[0]}>
-                <div className={styles.title}>Top-10 Average</div>
-                <div className={`year1 ${styles.box}`}>
-                  <div className={styles.value} />
-                </div>
-                <div className={styles.diff}></div>
-                <div className={`year2 ${styles.box}`}>
-                  <div className={styles.value} />
-                </div>
-              </div>
-              <div className={styles.infobox} id={this.infoBoxIds[1]}>
-                <div className={styles.title}>Top-50 Average</div>
                 <div className={`year1 ${styles.box}`}>
                   <div className={styles.value} />
                 </div>
@@ -666,7 +639,7 @@ const ColumnSelector = (props: {
       }
     >
       {props.columnLabels.map((k) => (
-        <option key={k} value={k.toLowerCase().replace(" ", "")}>
+        <option key={k} value={k}>
           {k}
         </option>
       ))}

@@ -42,6 +42,9 @@ module.exports = {
     "src/components/BubbleChart/",
     "src/components/OldBubbleChart/",
     "src/components/ChessLineChart/",
+    "src/components/ScatterPlot/",
+    "src/components/Page2/",
+    "src/components/TitlePage/",
   ],
   rules: {
     quotes: ["error", "double", { avoidEscape: true }],

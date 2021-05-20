@@ -9,8 +9,11 @@
 
 .description {
   margin-top: 3em;
-  line-height: 1.8;
-  font-size: large;
+  line-height: 1.3;
+
+  & li {
+    margin: 4px 0;
+  }
 }
 
 .hoverPoint {
@@ -38,12 +41,6 @@
   &:first-child {
     margin-top: 2em;
   }
-
-  & .title {
-    display: flex;
-    align-items: center;
-    width: 130px;
-  }
 }
 
 .box {
@@ -51,7 +48,7 @@
   text-align: center;
   width: 150px;
   & .date {
-    color: darkgray;
+    color: #555;
   }
 
   & .value {
@@ -88,10 +85,15 @@
   }
 
   &:not(:last-child) {
-    margin-right: 4em;
+    margin-right: 2em;
   }
 }
 
 .tooltip {
   font: 12px sans-serif;
+}
+
+.clickable {
+  color: blue;
+  cursor: pointer;
 }
