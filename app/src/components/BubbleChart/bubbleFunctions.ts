@@ -77,8 +77,6 @@ export const DrawLineChart = function (
   );
 
   d3.csv(aggPath).then(function (fullDataset) {
-    console.log(aggPath);
-    console.log(fullDataset);
 
     // translate into right form
     var dataset = [];
@@ -89,7 +87,6 @@ export const DrawLineChart = function (
       });
     });
 
-    console.log(dataset);
 
     // define scales
     var xScale = d3

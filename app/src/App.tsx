@@ -15,6 +15,9 @@ export default function App(): JSX.Element {
       render={() => (
         <ReactFullpage.Wrapper>
           <div className="section">
+            <ScatterPlot />
+          </div>
+          <div className="section">
             <TitlePage />
           </div>
           <div className="section">
@@ -29,9 +32,7 @@ export default function App(): JSX.Element {
           <div className="section">
             <ChessLineChart />
           </div>
-          <div className="section">
-            <ScatterPlot />
-          </div>
+
         </ReactFullpage.Wrapper>
       )}
     />

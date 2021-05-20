@@ -13,6 +13,13 @@ const ScatterPlot = (): JSX.Element => {
   React.useEffect(() => {
     // Think of d3Container.current as the HTML node that d3 will attach to
     if (d3Container.current) {
+
+      // for the dropdown
+      const dropdownNumbers = [1,2,3,4,5,10]
+
+      // for keeping track of currently displayed measure
+      let currentlyDisplayedMeasure = 1;
+
       // for translating numbers to months
       const months = [
         "January",
@@ -49,7 +56,7 @@ const ScatterPlot = (): JSX.Element => {
       // specify time format
       const formatTime = d3.timeFormat("%e %B %Y");
 
-      const numberDatapoints = 100;
+      const numberDatapoints = 40;
 
       // set the dimensions and margins of the graph
       const margin = {
@@ -116,6 +123,8 @@ const ScatterPlot = (): JSX.Element => {
           "translate(" + (width * 3) / 4 + "," + margin.top + ")"
         );
 
+
+
       //
       let currentN = 5;
       const CreateStepSlider = function () {
@@ -161,7 +170,7 @@ const ScatterPlot = (): JSX.Element => {
           // get the top n in unique channels
           const topData = newData
             .sort(function (a) {
-              return d3.descending(+a.avgchannels);
+              return d3.descending(+a.viewminutes);
             })
             .slice(0, currentN);
           console.log(topData);
@@ -237,7 +246,7 @@ const ScatterPlot = (): JSX.Element => {
           //.filter(function(d) { return d.date =="2016-01-01" })
           .attr("r", 5)
           .attr("cx", (d) => x(d.streamedminutes))
-          .attr("cy", (d) => y(d.viewminutes))
+          .attr("cy", (d) => y(d.viewerratio))
           .attr("fill", "#7500D1")
           .on("mouseover", function (event, d) {
             div.transition().duration(200).style("opacity", 0.9);
@@ -281,7 +290,7 @@ const ScatterPlot = (): JSX.Element => {
           .attr("x", 0 - height / 2)
           .attr("dy", "1em")
           .style("text-anchor", "middle")
-          .text("Viewed Minutes");
+          .text("Viewed Minutes / # Average Viewers");
       };
 
       const preprocessing = function (data) {
@@ -292,6 +301,9 @@ const ScatterPlot = (): JSX.Element => {
           d.streamedminutes = +d.streamedminutes;
           d.avgchannels = +d.avgchannels;
           d.avgviewers = +d.avgviewers;
+          d.viewerratio = d.viewminutes/(d.avgviewers+1);
+
+          console.log(d.streamedratio)
         });
       };
 
@@ -306,7 +318,7 @@ const ScatterPlot = (): JSX.Element => {
           newData = newData.slice(0, numberDatapoints);
           // set domain
           x.domain([0, d3.max(newData, (d) => d.streamedminutes)]);
-          y.domain([0, d3.max(newData, (d) => d.viewminutes)]);
+          y.domain([d3.min(newData, (d) => d.viewerratio), d3.max(newData, (d) => d.viewerratio)]);
 
           //change axes
           d3.select("#xAxis")
@@ -325,12 +337,14 @@ const ScatterPlot = (): JSX.Element => {
             .duration(transferDuration)
             .attr("r", 5)
             .attr("cx", (d) => x(d.streamedminutes))
-            .attr("cy", (d) => y(d.viewminutes));
+            .attr("cy", (d) => y(d.viewerratio));
         });
       };
+
       // instantiate the slider
       CreateSlider();
       CreateStepSlider();
+
       // instantiate the first plot
       d3.csv(currentlyDisplayedData).then(function (data) {
         data = data.slice(0, numberDatapoints);
@@ -338,11 +352,27 @@ const ScatterPlot = (): JSX.Element => {
         preprocessing(data);
         // set domain
         x.domain([0, d3.max(data, (d) => d.streamedminutes)]);
-        y.domain([0, d3.max(data, (d) => d.viewminutes)]);
+        y.domain([d3.min(data, (d) => d.viewerratio), d3.max(data, (d) => d.viewerratio)]);
+
         // draw the scatter chart; supply the x and y axis
         drawDots(data, x, y);
         // add the axes
         setAxes(x, y);
+
+        console.log(dropdownNumbers);
+
+        var dropdown = d3.select("#vis-container")
+                      .insert("select", "svg")
+                      .on("change", changeDots);
+
+                  dropdown.selectAll("option")
+                      .data(data)
+                    .enter().append("option")
+                      .attr("value", function (d) { return d; })
+                      .text(function (d) {
+                          return dropdownNumbers; // capitalize 1st letter
+                            });
+
       });
     }
   }, [d3Container.current]);
@@ -351,23 +381,33 @@ const ScatterPlot = (): JSX.Element => {
   // d3 element will be mounted on the svg node
   return (
     <div>
-      <h1>Successful channels</h1>
-      <div>
-        <p id="scatter-slider-text" className={styles.sliderText}></p>
-        <div id="scatter-slider" className={styles.slider}></div>
+      <div className={styles.row}>
+        <div className={styles.column}>
+          <h1 className={styles.h1}> Successful Channels </h1>
+          <p>
+            {" "}
+            Imagine you've recently discovered Twitch.Tv and are quite excited
+            about all the possibilities that you have for creating your own
+            channel. Before you do so, you want to research what the secret behind
+            a successful channel is. Does more stream time imply more view time?
+            Inspect the plot on the right to figure it out!
+          </p>
+        </div>
+        <div className={styles.column}>
+          <div id='vis-container'></div>
+          <svg
+            className="d3-component"
+            width={w}
+            height={h}
+            ref={d3Container}
+          />
+          <div className={styles.slider}>
+            <p id="scatter-slider-text"></p>
+            <p id="scatter-slider"></p>
+            <p id="scatter-step-slider"></p>
+          </div>
+        </div>
       </div>
-      <div className={styles.right}>
-        <p className={styles.left}>
-          {" "}
-          Imagine you've recently discovered Twitch.Tv and are quite excited
-          about all the possibilities that you have for creating your own
-          channel. Before you do so, you want to research what the secret behind
-          a successful channel is. Does more stream time imply more view time?
-          Inspect the plot on the right to figure it out!
-        </p>
-        <svg className="d3-component" width={w} height={h} ref={d3Container} />
-      </div>
-      <div></div>
     </div>
   );
 };
