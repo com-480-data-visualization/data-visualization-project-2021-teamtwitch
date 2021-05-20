@@ -19,10 +19,8 @@ interface IDataEntry {
   value: number;
 }
 
-const top50DataUrl =
-  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/76a3b9357d650b5e9dcf5c31ec23894dfb354aeb/data/agg-50.json";
-const top10DataUrl =
-  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/76a3b9357d650b5e9dcf5c31ec23894dfb354aeb/data/agg-10.json";
+const top20DataUrl =
+  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/fix-area-chart/data/agg-20.json";
 
 const loadData = async (
   url: string
@@ -54,10 +52,7 @@ const loadData = async (
     });
 };
 interface IAreaChartState {
-  top10Data: {
-    [key: string]: { [key: string]: IDataEntry[] };
-  };
-  top50Data: {
+  top20Data: {
     [key: string]: { [key: string]: IDataEntry[] };
   };
   language: string;
@@ -69,19 +64,17 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   d3Container: React.MutableRefObject<null>;
   circles: { id: string; fill: string }[] = [
     {
-      id: "areaCircle10",
+      id: "areaCircle20",
       fill: "#147f90",
     },
-    { id: "areaCircle50", fill: "#8000a3" },
   ];
-  tooltipIds: string[] = ["areaTooltip10", "areaTooltip50"];
-  infoBoxIds: string[] = ["areaInfobox10", "areaInfobox50"];
+  tooltipIds: string[] = ["areaTooltip20"];
+  infoBoxIds: string[] = ["areaInfobox20"];
   constructor(props: {}) {
     super(props);
     this.d3Container = React.createRef();
     this.state = {
-      top10Data: {},
-      top50Data: {},
+      top20Data: {},
       language: "000",
       column: "viewminutes",
       dateSelected: [0, dateLabels.length - 1],
@@ -89,8 +82,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   }
 
   componentDidMount(): void {
-    Promise.all([loadData(top10DataUrl), loadData(top50DataUrl)]).then((d) =>
-      this.setState({ top10Data: d[0], top50Data: d[1] })
+    Promise.all([loadData(top20DataUrl)]).then((d) =>
+      this.setState({ top20Data: d[0] })
     );
   }
 
@@ -102,17 +95,13 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
     if (
       this.d3Container.current &&
-      Object.keys(this.state.top10Data).length > 0 &&
-      Object.keys(this.state.top50Data).length > 0
+      Object.keys(this.state.top20Data).length > 0
     ) {
-      const top10DataSelected = this.state.top10Data[this.state.language][
+      const top20DataSelected = this.state.top20Data[this.state.language][
         this.state.column
       ];
-      const top50DataSelected = this.state.top50Data[this.state.language][
-        this.state.column
-      ];
-      const dataSelected = [top10DataSelected, top50DataSelected];
-      const xExtent = d3.extent(top10DataSelected, (d) => d.date) as [
+      const dataSelected = [top20DataSelected];
+      const xExtent = d3.extent(top20DataSelected, (d) => d.date) as [
         Date,
         Date
       ];
@@ -123,7 +112,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
       const y = d3
         .scaleLinear()
-        .domain([0, 1.1 * (d3.max(top10DataSelected, (d) => d.value) || 0)])
+        .domain([0, 1.1 * (d3.max(top20DataSelected, (d) => d.value) || 0)])
         .range([height, 0]);
 
       d3.select(this.d3Container.current).html("");
@@ -155,25 +144,13 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
       svg.append("g").attr("transform", `translate(${marginH}, 0)`).call(yAxis);
 
-      const gradIdTop10 = "areaGradTop10";
-      const gradIdTop50 = "areaGradTop50";
+      const gradIdTop20 = "areaGradTop20";
       const strokeWidth = 1.5;
       svg
         .append("path")
-        .datum(top10DataSelected)
-        .style("fill", `url(#${gradIdTop10})`)
-        .attr("stroke", `url(#${gradIdTop10})`)
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-width", strokeWidth)
-        // @ts-ignore weird type hints
-        .attr("d", area);
-
-      svg
-        .append("path")
-        .datum(top50DataSelected)
-        .style("fill", `url(#${gradIdTop50})`)
-        .attr("stroke", `url(#${gradIdTop50})`)
+        .datum(top20DataSelected)
+        .style("fill", `url(#${gradIdTop20})`)
+        .attr("stroke", `url(#${gradIdTop20})`)
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
         .attr("stroke-width", strokeWidth)
@@ -238,15 +215,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       const defs = svg.append("defs");
       this.createGradient(
         defs,
-        gradIdTop10,
+        gradIdTop20,
         "lightblue",
-        x1Percentage,
-        x2Percentage
-      );
-      this.createGradient(
-        defs,
-        gradIdTop50,
-        "#BE90D4",
         x1Percentage,
         x2Percentage
       );
@@ -255,8 +225,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         event.preventDefault();
         const xCoord = d3.pointer(event)[0];
         this.handleMouseMove(xCoord, svg, x, y, width, marginH, [
-          top10DataSelected,
-          top50DataSelected,
+          top20DataSelected,
         ]);
       });
     }
@@ -326,17 +295,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
                 </div>
               </div>
               <div className={styles.infobox} id={this.infoBoxIds[0]}>
-                <div className={styles.title}>Top-10 Average</div>
-                <div className={`year1 ${styles.box}`}>
-                  <div className={styles.value} />
-                </div>
-                <div className={styles.diff}></div>
-                <div className={`year2 ${styles.box}`}>
-                  <div className={styles.value} />
-                </div>
-              </div>
-              <div className={styles.infobox} id={this.infoBoxIds[1]}>
-                <div className={styles.title}>Top-50 Average</div>
+                <div className={styles.title}>Top-20 Average</div>
                 <div className={`year1 ${styles.box}`}>
                   <div className={styles.value} />
                 </div>
