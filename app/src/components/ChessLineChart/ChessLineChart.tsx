@@ -423,7 +423,6 @@ const ChessLineChart = (): JSX.Element => {
               text.transition().duration(boxTime).attr("opacity", 0);
 
               // change the text of the textbox in the middle and make it appear
-              // TODO POOR IMPLEMENTATION
               textBox
                 .html("")
                 .attr("id", "textbox")
@@ -512,19 +511,17 @@ const ChessLineChart = (): JSX.Element => {
   return (
     <div>
       <div className={styles.row}>
-        <div>
-          <p className={styles.column}>
+        <div className={styles.column}>
           <h1 className={styles.h1} >Chess Channel</h1>
-            {" "}
-            Explore the chess category on Twitch.Tv over time with us.
-            <ul>
-              <li>How did the corona pandemic influence its popularity?</li>
-              <li>
-                What about the release of the famous TV show Queen's Gambit?
-              </li>
-            </ul>
+          <ul>
+          {" "}
+          Explore the chess category on Twitch.Tv over time with us.
+            <li>How did the corona pandemic influence its popularity?</li>
+            <li>
+              What about the release of the famous TV show Queen's Gambit?
+            </li>
             Click on the boxes to discover what the third important event was.
-          </p>
+          </ul>
         </div>
 
         <div className={styles.column}>

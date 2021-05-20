@@ -490,9 +490,9 @@ const BubbleChart = (): JSX.Element => {
   return (
     <div>
       <div className={styles.row}>
-        <div>
-          <p className={styles.column}>
-            <h1 className={styles.h1} >Explore the data</h1>
+        <div className={styles.column}>
+          <h1 className={styles.h1} >Explore the data</h1>
+          <p >
             {" "}
             Now that you roughly know what Twitch.Tv looks like, you must be curious about its content.
             What categories are there? Which ones are popular and when?
