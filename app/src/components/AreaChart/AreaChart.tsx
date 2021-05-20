@@ -20,7 +20,7 @@ interface IDataEntry {
 }
 
 const top20DataUrl =
-  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/fix-area-chart/data/agg-20.json";
+  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/a3a5e569993ebf66859dc5f0dfaaa74e16e767c7/data/agg-20.json";
 
 const loadData = async (
   url: string
@@ -250,10 +250,12 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
               some regions simply favour this platform more?
             </p>
             <p>
-              Here we present the statistics of top-20 popular games that have
-              been streamed on Twitch in different languages from 2016 to 2021.
-              There are some interesting things here that are worth
-              investigating:
+              Here we present the statistics of games that have been streamed on
+              Twitch in different languages from 2016 to 2021. Since the
+              distribution is highly skewed, we present the top-20 popular games
+              so that we can see the trend and the order of magnitude more
+              clearly in general. There are some interesting things here that
+              are worth investigating:
             </p>
             <ul>
               <li>
