@@ -361,6 +361,7 @@ const BubbleChart = (): JSX.Element => {
     const CreateLanguageSelection = function (languageOptions) {
       // create drop down menu
       d3.select("#bubble-select-language")
+        .html("")
         .selectAll("myOptions")
         .data(languageOptions)
         .enter()
@@ -389,6 +390,7 @@ const BubbleChart = (): JSX.Element => {
     const CreateMeasureSelection = function (measureOptions) {
       // create drop down menu
       d3.select("#bubble-select-measure")
+        .html("")
         .selectAll("myOptions")
         .data(measureOptions)
         .enter()
