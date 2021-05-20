@@ -233,46 +233,46 @@ const BubbleChart = (): JSX.Element => {
         let toolTipText = [img, p1, p2, p3, p4, p5, p6, p7, p8, p9].join(
           "<br/>"
         );
-        // fil the tooltip
-        // divTT.html(`
-        //   <img src="${d.data.logo}" alt="${d.data.name}"><br/>
-        //   <b>${d.data.name}</b><br/>
-        //   <table style="width:100%">
-        //     <tr>
-        //       <td>Viewed Minutes</td>
-        //       <td>${d.data.viewminutes}</td>
-        //     </tr>
-        //     <tr>
-        //       <td>Streamed Minutes</td>
-        //       <td>${d.data.streamedminutes}</td>
-        //     </tr>
-        //     <tr>
-        //       <td>Peak Number of Channels</td>
-        //       <td>${d.data.maxchannels}</td>
-        //     </tr>
-        //     <tr>
-        //       <td>Unique Channels</td>
-        //       <td>${d.data.uniquechannels}</td>
-        //     </tr>
-        //     <tr>
-        //       <td>Average Number of Channels</td>
-        //       <td>${d.data.avgchannels}</td>
-        //     </tr>
-        //     <tr>
-        //       <td>Peak Number of Viewers</td>
-        //       <td>${d.data.maxviewers}</td>
-        //     </tr>
-        //     <tr>
-        //       <td>Viewer/Channel Ratio</td>
-        //       <td>${d.data.avgratio}</td>
-        //     </tr>
-        //     <tr>
-        //       <td>Average Number of Viewers</td>
-        //       <td>${d.data.avgviewers}</td>
-        //     </tr>
-        // </table></br>
-        // Development over Time:</br>`
-        // );
+        //fill the tooltip
+        divTT.html(`
+          <img src="${d.data.logo}" alt="${d.data.name}"><br/>
+          <b>${d.data.name}</b><br/>
+          <table style="width:100%">
+            <tr>
+              <td>Viewed Minutes</td>
+              <td>${d.data.viewminutes}</td>
+            </tr>
+            <tr>
+              <td>Streamed Minutes</td>
+              <td>${d.data.streamedminutes}</td>
+            </tr>
+            <tr>
+              <td>Peak Number of Channels</td>
+              <td>${d.data.maxchannels}</td>
+            </tr>
+            <tr>
+              <td>Unique Channels</td>
+              <td>${d.data.uniquechannels}</td>
+            </tr>
+            <tr>
+              <td>Average Number of Channels</td>
+              <td>${d.data.avgchannels}</td>
+            </tr>
+            <tr>
+              <td>Peak Number of Viewers</td>
+              <td>${d.data.maxviewers}</td>
+            </tr>
+            <tr>
+              <td>Viewer/Channel Ratio</td>
+              <td>${d.data.avgratio}</td>
+            </tr>
+            <tr>
+              <td>Average Number of Viewers</td>
+              <td>${d.data.avgviewers}</td>
+            </tr>
+        </table></br>
+        Development over Time:</br>`
+        );
 
         DrawLineChart(
           divTT,
@@ -361,6 +361,7 @@ const BubbleChart = (): JSX.Element => {
     const CreateLanguageSelection = function (languageOptions) {
       // create drop down menu
       d3.select("#bubble-select-language")
+        .html("")
         .selectAll("myOptions")
         .data(languageOptions)
         .enter()
@@ -389,6 +390,7 @@ const BubbleChart = (): JSX.Element => {
     const CreateMeasureSelection = function (measureOptions) {
       // create drop down menu
       d3.select("#bubble-select-measure")
+        .html("")
         .selectAll("myOptions")
         .data(measureOptions)
         .enter()
@@ -498,6 +500,7 @@ const BubbleChart = (): JSX.Element => {
             What categories are there? Which ones are popular and when?
             Are the trends the same in every language?
             Check out the right plot to find answers to all your questions!
+            You can filter based on different languages, measure and timepoints.
           </p>
         </div>
 
