@@ -33,7 +33,7 @@ const loadData = async (
       const data: {
         [key: string]: { [key: string]: IDataEntry[] };
       } = {};
-      const colKeys = columnLabels.map((s) => s.toLowerCase().replace(" ", ""));
+      const colKeys = Object.values(columnLabels);
       for (const code of Object.values(languageMapping)) {
         data[code] = {};
         for (const col of colKeys) {
@@ -76,7 +76,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     this.state = {
       top20Data: {},
       language: "000",
-      column: "viewminutes",
+      column: "View minutes",
       dateSelected: [0, dateLabels.length - 1],
     };
   }
@@ -98,7 +98,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       Object.keys(this.state.top20Data).length > 0
     ) {
       const top20DataSelected = this.state.top20Data[this.state.language][
-        this.state.column
+        columnLabels[this.state.column]
       ];
       const dataSelected = [top20DataSelected];
       const xExtent = d3.extent(top20DataSelected, (d) => d.date) as [
@@ -143,6 +143,14 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       const yAxis = d3.axisLeft(y).tickFormat(d3.format("~s"));
 
       svg.append("g").attr("transform", `translate(${marginH}, 0)`).call(yAxis);
+      svg
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0)
+        .attr("x", 0 - height / 2)
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text(this.state.column);
 
       const gradIdTop20 = "areaGradTop20";
       const strokeWidth = 1.5;
@@ -277,7 +285,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
               language={this.state.language}
             />
             <ColumnSelector
-              columnLabels={columnLabels}
+              columnLabels={Object.keys(columnLabels)}
               column={this.state.column}
               setColumn={(c) => this.setState({ column: c })}
             />
@@ -285,7 +293,6 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           <div>
             <div>
               <div className={styles.infobox}>
-                <div className={styles.title} />
                 <div className={`year1 ${styles.box}`}>
                   <div className={styles.date} />
                 </div>
@@ -295,7 +302,6 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
                 </div>
               </div>
               <div className={styles.infobox} id={this.infoBoxIds[0]}>
-                <div className={styles.title}>Top-20 Average</div>
                 <div className={`year1 ${styles.box}`}>
                   <div className={styles.value} />
                 </div>
@@ -625,7 +631,7 @@ const ColumnSelector = (props: {
       }
     >
       {props.columnLabels.map((k) => (
-        <option key={k} value={k.toLowerCase().replace(" ", "")}>
+        <option key={k} value={k}>
           {k}
         </option>
       ))}
