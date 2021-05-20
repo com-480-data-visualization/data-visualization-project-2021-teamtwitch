@@ -116,13 +116,6 @@ const BubbleChart = (): JSX.Element => {
       months[currentlyDisplayedMonth].toLowerCase()
     );
 
-    // create div for the tooltip
-    var divTT = d3
-      .select(`.${styles.bubbleChartWrapper}`)
-      .append("div")
-      .attr("id", styles.bubbleChartInfo)
-      .html("Click on the Bubbles to see some Data :)");
-
     // get the node and attach svg to it, set it up
     const svg = d3
       .select("#bubbleChart") // select the current container
@@ -135,6 +128,13 @@ const BubbleChart = (): JSX.Element => {
       .attr("font-family", fontFamily)
       .attr("text-anchor", "middle")
       .attr("overflow-y", "scroll");
+    
+    // create div for the tooltip
+    var divTT = d3
+      .select("#bubbleChart")
+      .append("div")
+      .attr("id", styles.bubbleChartInfo)
+      .html("Click on the Bubbles to see some Data :)");
 
     // add a defs to it, necessary for filling the circles with images
     var defs = svg.append("defs");
