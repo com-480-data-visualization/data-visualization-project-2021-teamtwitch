@@ -150,6 +150,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .attr("x", 0 - height / 2)
         .attr("dy", "1em")
         .style("text-anchor", "middle")
+        .style("fill", "#777")
         .text(this.state.column);
 
       const gradIdTop20 = "areaGradTop20";
@@ -249,6 +250,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
               some regions simply favour this platform more?
             </p>
             <p>
+              Here we present the statistics of top-20 popular games that have
+              been streamed on Twitch in different languages from 2016 to 2021.
               There are some interesting things here that are worth
               investigating:
             </p>
@@ -262,19 +265,24 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
               </li>
               <li>
                 Is there any interesting change between languages when COVID hit
-                the world?
+                the world?{" "}
+                <u
+                  className={styles.clickable}
+                  onClick={() =>
+                    this.setState({
+                      dateSelected: [
+                        dateLabels.length - 15,
+                        dateLabels.length - 1,
+                      ],
+                    })
+                  }
+                >
+                  Click me to find out!
+                </u>
               </li>
             </ul>
             <p>...and anything else you are curious about! :)</p>
-            <p>
-              Here we present the two types of statistics of games that have
-              been streamed on Twitch in different languages from 2016 to 2021:
-            </p>
-            <ul>
-              <li>Average data of top-10 popular games (blue)</li>
-              <li>Average data of top-50 popular games (purple)</li>
-            </ul>
-            <p>Drag the verticle bars and check this out!</p>
+            <p>Drag the verticle bars and explore yourself!</p>
           </div>
         </div>
         <div>
