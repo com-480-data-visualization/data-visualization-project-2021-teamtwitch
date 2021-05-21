@@ -523,9 +523,13 @@ const BubbleChart = (): JSX.Element => {
             (in respect to the selected measure) categories as bubbles.
             The sizes of these bubbles correspond to the
             relative difference between their respective measure value.
+          </p>
+          <p >
             You can even click the bubbles, to see the values of all the measures,
             as well as a linechart that depicts its development over time for the
             selected measure!
+          </p>
+          <p >
             What categories are there? Which ones are popular and when?
             Are the trends the same in every language?
             Dive into this plot and find it out yourself!

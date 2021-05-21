@@ -90,8 +90,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   render(): JSX.Element {
     const marginV = 30;
     const marginH = 60;
-    const width = 800 - marginV - marginH;
-    const height = 480 - marginV - marginH;
+    const width = 1000 - marginV - marginH;
+    const height = 580 - marginV - marginH;
 
     if (
       this.d3Container.current &&
@@ -245,29 +245,45 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           <h1>Populartiy of Twitch.Tv over time</h1>
           <div className={styles.description}>
             <p>
-              Twitch is now a well-known streaming platform, but how popular was
-              it a few years ago? Is it popular across countries? Or people in
-              some regions simply favour this platform more?
+              Twitch.Tv is very well-estbalished streaming platform, but we one
+              might be interested its development throught time. Especially,
+              we were interested in how the pandemic, and the fact that we started
+              to spent more and more time in our rooms, affected how much content
+              on Twitch is viewed.
             </p>
             <p>
-              Here we present the statistics of games that have been streamed on
-              Twitch in different languages from 2016 to 2021. Since the
-              distribution is highly skewed, we present the top-20 popular games
-              so that we can see the trend and the order of magnitude more
-              clearly in general. There are some interesting things here that
-              are worth investigating:
+              Here we present a vizualization, that displays the statistics,
+              aggregated over all categories, for different languages from
+              2016 to 2021. Since the distribution is highly skewed, we present
+              the top-20 popular games so that we can see the trend and the order
+              of magnitude more clearly in general. To give you some starting ideas
+              consider the following:
             </p>
             <ul>
               <li>
-                In which languages does Twitch get more popular in recent years?
+                Observe the growth of Twitch.Tv from 2016 to 2020. How much more
+                viewed minutes can we see? How does this differ for different
+                languages?{" "}
+                <u
+                  className={styles.clickable}
+                  onClick={() =>
+                    this.setState({
+                      dateSelected: [
+                        dateLabels.length - 63,
+                        dateLabels.length - 16,
+                      ],
+                    })
+                  }
+                >
+                  Click me to find out!
+                </u>
               </li>
               <li>
-                Is there any seasonal or annual change in max viewers of
-                channels?
-              </li>
-              <li>
-                Is there any interesting change between languages when COVID hit
-                the world?{" "}
+                Try to compare this to the growth that Twitch.Tv experienced
+                during the COVID pandemic? Do people actually start spending
+                more time on Twitch? How does this growth differ between different
+                languages, especially considering how Twitch.Tv has its viewership
+                mainly based in the western hemisphere!{" "}
                 <u
                   className={styles.clickable}
                   onClick={() =>
@@ -282,9 +298,14 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
                   Click me to find out!
                 </u>
               </li>
+              <li>
+                Is there any seasonal or annual change in max viewers of
+                channels? To give you a starting point, consider the months of
+                December. If you find an interesting pattern, what do you think
+                is the reason for it?
+              </li>
             </ul>
-            <p>...and anything else you are curious about! :)</p>
-            <p>Drag the verticle bars and explore yourself!</p>
+            <p>Generally, drag the verticle bars yourself and explore a bit!</p>
           </div>
         </div>
         <div>

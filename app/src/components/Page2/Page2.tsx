@@ -1,5 +1,5 @@
 import * as React from "react";
-import classNames from "classnames";
+//import classNames from "classnames";
 
 const styles = require("./style.scss");
 
@@ -22,14 +22,13 @@ const Page2 = (): JSX.Element => (
           can expect when you go on{" "}
           <a href="https://www.twitch.tv/" target="_blank" rel="noreferrer">
             Twitch.Tv
-          </a>
-          :
+          </a>.
         </p>
       </div>
       <img
         src="https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/gh-pages/images/page2.png"
-        width="800"
-        height="400"
+        width="1000"
+        height="600"
         className={styles.right}
       />
     </div>
