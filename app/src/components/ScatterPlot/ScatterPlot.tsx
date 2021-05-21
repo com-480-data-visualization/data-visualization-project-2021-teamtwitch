@@ -15,10 +15,8 @@ const ScatterPlot = (): JSX.Element => {
     if (d3Container.current) {
 
       // for the dropdown
-      const dropdownNumbers = [1,2,3,4,5,10]
-
-      // for keeping track of currently displayed measure
-      let currentlyDisplayedMeasure = 1;
+      const languages = [1,2,3,4,5,10];
+      let currentlyDisplayedN = 1;
 
       // for translating numbers to months
       const months = [
@@ -125,34 +123,7 @@ const ScatterPlot = (): JSX.Element => {
 
 
 
-      //
-      let currentN = 5;
-      const CreateStepSlider = function () {
-        // step slider for n
-        const sliderStep = sliderBottom()
-          .domain([0, 20])
-          .step(2)
-          .ticks(10)
-          .height(sliderHeight)
-          .width(sliderWidth)
-          .default(0)
-          .on("onchange", function (d) {
-            d3.select("p#scatter-step-slider").text(d3.format(".2%")(d));
-            if (d != currentN) {
-              // save new month and year
-              currentN = d;
-              // color corresponding points?
-              currentlyDisplayedData = MakeDataPath(
-                currentlyDisplayedYear,
-                months[currentlyDisplayedMonth].toLowerCase()
-              );
-              // color top n points
-              colorDots(currentlyDisplayedData);
-            }
-          });
-        sliderStepSvg.call(sliderStep);
-        d3.select("p#value-step").text(d3.format(".2%")(sliderStep.value()));
-      };
+    
 
       const colorDots = function (newDataPath) {
         d3.csv(newDataPath).then(function (newData) {
@@ -172,8 +143,7 @@ const ScatterPlot = (): JSX.Element => {
             .sort(function (a) {
               return d3.descending(+a.viewminutes);
             })
-            .slice(0, currentN);
-          console.log(topData);
+            .slice(0, currentlyDisplayedN);
 
           svg
             .selectAll("circle")
@@ -181,7 +151,7 @@ const ScatterPlot = (): JSX.Element => {
             .transition()
             .duration(transferDuration)
             .attr("r", 10)
-            .attr("fill", "dodgerblue");
+            .attr("fill", "gold");
         });
       };
 
@@ -302,8 +272,6 @@ const ScatterPlot = (): JSX.Element => {
           d.avgchannels = +d.avgchannels;
           d.avgviewers = +d.avgviewers;
           d.viewerratio = d.viewminutes/(d.avgviewers+1);
-
-          console.log(d.streamedratio)
         });
       };
 
@@ -341,9 +309,52 @@ const ScatterPlot = (): JSX.Element => {
         });
       };
 
+      // for creating a drop down menu
+      const CreateLanguageSelection = function (languageOptions) {
+        // create drop down menu
+        d3.select("#scatter-select-n")
+          .html("")
+          .selectAll("myOptions")
+          .data(languageOptions)
+          .enter()
+          .append("option")
+          .text((d) => d)
+          .attr("value", (d) => d);
+
+        // make it, so that when a new language is selected, then change data
+        d3.select("#scatter-select-n").on("change", function (d) {
+
+          if (d != currentlyDisplayedN) {
+            // save new month and year
+            currentlyDisplayedN = d;
+            // color corresponding points?
+            currentlyDisplayedData = MakeDataPath(
+              currentlyDisplayedYear,
+              months[currentlyDisplayedMonth].toLowerCase()
+            );
+            // color top n points
+            colorDots(currentlyDisplayedData);
+          }
+
+          // only fires, if value is changed; we do not need to check
+          // recover chosen language
+          currentlyDisplayedN = d3.select(this).property("value");
+          // generate path to select data
+          currentlyDisplayedData = MakeDataPath(
+            currentlyDisplayedYear,
+            months[currentlyDisplayedMonth].toLowerCase()
+          );
+          // make a transition with the new data
+          colorDots(currentlyDisplayedData);
+
+        });
+      };
+
+      //create language selection
+      CreateLanguageSelection(languages);
+
       // instantiate the slider
       CreateSlider();
-      CreateStepSlider();
 
       // instantiate the first plot
       d3.csv(currentlyDisplayedData).then(function (data) {
@@ -358,20 +369,6 @@ const ScatterPlot = (): JSX.Element => {
         drawDots(data, x, y);
         // add the axes
         setAxes(x, y);
-
-        console.log(dropdownNumbers);
-
-        var dropdown = d3.select("#vis-container")
-                      .insert("select", "svg")
-                      .on("change", changeDots);
-
-                  dropdown.selectAll("option")
-                      .data(data)
-                    .enter().append("option")
-                      .attr("value", function (d) { return d; })
-                      .text(function (d) {
-                          return dropdownNumbers; // capitalize 1st letter
-                            });
 
       });
     }
@@ -394,7 +391,9 @@ const ScatterPlot = (): JSX.Element => {
           </p>
         </div>
         <div className={styles.column}>
-          <div id='vis-container'></div>
+          <div classNames={styles.dropdown}>
+            <select id="scatter-select-n"></select>
+          </div>
           <svg
             className="d3-component"
             width={w}
