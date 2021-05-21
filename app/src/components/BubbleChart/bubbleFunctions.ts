@@ -82,7 +82,7 @@ export const DrawLineChart = function (
     var dataset = [];
     fullDataset.forEach((element) => {
       dataset.push({
-        date: Date.parse(element[""]),
+        date: Date.parse(element["date"]),
         value: element[selectedGame],
       });
     });
@@ -130,29 +130,31 @@ export const DrawLineChart = function (
       .attr("transform", "translate(0," + line_height + ")")
       .call(d3.axisBottom(xScale));
 
-    div_svg
-      .append("text")
-      .attr(
-        "transform",
-        "translate(" +
-          line_width / 2 +
-          " ," +
-          (line_height + margin_bottom / 2 + 10) +
-          ")"
-      )
-      .style("text-anchor", "middle")
-      .text("Date");
+    // div_svg
+    //   .append("text")
+    //   .attr(
+    //     "transform",
+    //     "translate(" +
+    //       line_width / 2 +
+    //       " ," +
+    //       (line_height + margin_bottom / 2 + 10) +
+    //       ")"
+    //   )
+    //   .style("text-anchor", "middle")
+    //   .text("Date");
 
-    div_svg.append("g").attr("class", "y axis").call(d3.axisLeft(yScale));
+    div_svg.append("g")
+      .attr("class", "y axis")
+      .call(d3.axisLeft(yScale).ticks(4, d3.format(".1n")));
 
-    div_svg
-      .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 0 - margin_left - 5)
-      .attr("x", 0 - line_height / 2 - 10)
-      .attr("dy", "1em")
-      .style("text-anchor", "middle")
-      .text(feature);
+    // div_svg
+    //   .append("text")
+    //   .attr("transform", "rotate(-90)")
+    //   .attr("y", 0 - margin_left)
+    //   .attr("x", 0 - line_height / 2 - 10)
+    //   .attr("dy", "1em")
+    //   .style("text-anchor", "middle")
+    //   .text(feature);
 
     // append dots
     div_svg

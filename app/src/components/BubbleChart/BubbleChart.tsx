@@ -15,8 +15,8 @@ import {
 const styles = require("./bubblechart.scss");
 
 const BubbleChart = (): JSX.Element => {
-  const width = 700;
-  const height = 500;
+  const width = 1000;
+  const height = 600;
   const [currItem, setCurrItem] = React.useState<any>(null);
 
   React.useEffect(() => {
@@ -38,6 +38,8 @@ const BubbleChart = (): JSX.Element => {
     const transitionDurationThick = 250;
     const bubbleDurationAppear = 400;
     const bubbleTextFontSize = "0";
+    const bubbleWidth = 600;
+    const bubbleHeight = 600;
 
     // slider params
     const earliestDate = new Date(2016, 1, 1);
@@ -53,12 +55,17 @@ const BubbleChart = (): JSX.Element => {
     let currentlyDisplayedYear = defaultDate.getUTCFullYear();
     let currentlyDisplayedMonth = defaultDate.getUTCMonth();
 
+    // tooltip params
+    const tooltipOpacity = 1;
+    const tooltipWidth = width - bubbleWidth;
+    const tooltipHeight = height;
+
     // for line chart
-    const line_chart_width = 200;
-    const line_chart_height = 200;
+    const line_chart_width = tooltipWidth;
+    const line_chart_height = 100;
     const line_chart_margin_top = 10;
     const line_chart_margin_bottom = 40;
-    const line_chart_margin_left = 100;
+    const line_chart_margin_left = 40;
     const line_chart_margin_right = 0;
     var currentlyDisplayedGame = null;
     // drop language down menu params
@@ -82,6 +89,16 @@ const BubbleChart = (): JSX.Element => {
       "Average Number of Viewers": "avgviewers",
       "Viewer/Channel Ratio": "avgratio",
     };
+    const attributeToMeasure = {
+      "viewminutes":"Viewed Minutes",
+      "streamedminutes":"Streamed Minutes",
+      "maxchannels":"Peak Number of Channels",
+      "uniquechannels":"Unique Channels",
+      "avgchannels":"Average Number of Channels",
+      "maxviewers":"Peak Number of Viewers",
+      "avgviewers":"Average Number of Viewers",
+      "avgratio":"Viewer/Channel Ratio",
+    };
 
     // for keeping track of currently displayed measure
     let currentlyDisplayedMeasure = "viewminutes";
@@ -90,8 +107,6 @@ const BubbleChart = (): JSX.Element => {
     const languages = ["All", "English", "French", "German", "Italian"];
     let currentlyDisplayedLanguage = "All";
 
-    // tooltip params
-    const tooltipOpacity = 1;
 
     // for translating numbers to months
     const months = [
@@ -116,25 +131,33 @@ const BubbleChart = (): JSX.Element => {
       months[currentlyDisplayedMonth].toLowerCase()
     );
 
+    d3.select("#bubbleChart")
+      .style("width", `${width}px`)
+      .style("height", `${height}px`);
+
     // get the node and attach svg to it, set it up
     const svg = d3
       .select("#bubbleChart") // select the current container
       .html("")
       .append("svg") // create svg container
-      .attr("viewBox", [0, 0, width, height]) // set viewbox
-      .attr("height", height)
-      .attr("width", width)
+      .attr("viewBox", [0, 0, bubbleWidth, bubbleHeight]) // set viewbox
+      .attr("height", bubbleHeight)
+      .attr("width", bubbleWidth)
       .attr("font-size", fontSize) // define font-size, etc.
       .attr("font-family", fontFamily)
       .attr("text-anchor", "middle")
       .attr("overflow-y", "scroll");
-    
+
     // create div for the tooltip
     var divTT = d3
       .select("#bubbleChart")
       .append("div")
+      .style("width", `${tooltipWidth}px`)
+      .style("height", `${tooltipHeight}px`)
       .attr("id", styles.bubbleChartInfo)
-      .html("Click on the Bubbles to see some Data :)");
+      .html("Click on a Bubble!")
+        .style("font-size", "34px")
+        .style("align", "center");
 
     // add a defs to it, necessary for filling the circles with images
     var defs = svg.append("defs");
@@ -144,8 +167,8 @@ const BubbleChart = (): JSX.Element => {
       const root = MakeHierarchicalData(
         data,
         currentlyDisplayedMeasure,
-        width,
-        height,
+        bubbleWidth,
+        bubbleHeight,
         padding,
         bubblePadding
       );
@@ -233,9 +256,11 @@ const BubbleChart = (): JSX.Element => {
         let toolTipText = [img, p1, p2, p3, p4, p5, p6, p7, p8, p9].join(
           "<br/>"
         );
+        console.log("Happening");
         //fill the tooltip
+        //
         divTT.html(`
-          <img src="${d.data.logo}" alt="${d.data.name}"><br/>
+          <img src="${d.data.logo}" alt="${d.data.name}" height="150" align="left"><br/>
           <b>${d.data.name}</b><br/>
           <table style="width:100%">
             <tr>
@@ -270,9 +295,10 @@ const BubbleChart = (): JSX.Element => {
               <td>Average Number of Viewers</td>
               <td>${d.data.avgviewers}</td>
             </tr>
-        </table></br>
-        Development over Time:</br>`
-        );
+        </table><br/>
+        Development over Time [${attributeToMeasure[currentlyDisplayedMeasure]}]:</br>`
+        )
+          .style("font-size", "18px");
 
         DrawLineChart(
           divTT,
@@ -330,7 +356,9 @@ const BubbleChart = (): JSX.Element => {
           }
 
           // also, when sliding, empty the tooltip
-          divTT.html("Click on a bubble to see some data :)");
+          divTT.html("Click on a Bubble!")
+            .style("font-size", "34px")
+            .style("align", "center");
         });
 
       // creating the svg for the slider
@@ -383,6 +411,9 @@ const BubbleChart = (): JSX.Element => {
         );
         // make a transition with the new data
         BubbleTransition();
+        divTT.html("Click on a Bubble!")
+          .style("font-size", "34px")
+          .style("align", "center");
       });
     };
 
@@ -408,6 +439,9 @@ const BubbleChart = (): JSX.Element => {
 
         // make a transition with the new data
         BubbleTransition();
+        divTT.html("Click on a Bubble!")
+          .style("font-size", "34px")
+          .style("align", "center");
       });
     };
 
@@ -433,8 +467,8 @@ const BubbleChart = (): JSX.Element => {
         let newData = MakeHierarchicalData(
           tempData,
           currentlyDisplayedMeasure,
-          width,
-          height,
+          bubbleWidth,
+          bubbleHeight,
           padding,
           bubblePadding
         );
@@ -471,19 +505,6 @@ const BubbleChart = (): JSX.Element => {
           );
       });
       divTT.html("");
-      DrawLineChart(
-        divTT,
-        currentlyDisplayedLanguage,
-        currentlyDisplayedMeasure,
-        currentlyDisplayedGame,
-        line_chart_width,
-        line_chart_height,
-        line_chart_margin_top,
-        line_chart_margin_bottom,
-        line_chart_margin_left,
-        line_chart_margin_right,
-        currentlyDisplayedMeasure
-      );
     };
   });
 
@@ -497,10 +518,17 @@ const BubbleChart = (): JSX.Element => {
           <p >
             {" "}
             Now that you roughly know what Twitch.Tv looks like, you must be curious about its content.
+            The figure on the will allow you to explore to your heart's desire!
+            For a point in time and selected language, it will display the top 50
+            (in respect to the selected measure) categories as bubbles.
+            The sizes of these bubbles correspond to the
+            relative difference between their respective measure value.
+            You can even click the bubbles, to see the values of all the measures,
+            as well as a linechart that depicts its development over time for the
+            selected measure!
             What categories are there? Which ones are popular and when?
             Are the trends the same in every language?
-            Check out the right plot to find answers to all your questions!
-            You can filter based on different languages, measure and timepoints.
+            Dive into this plot and find it out yourself!
           </p>
         </div>
 
@@ -509,7 +537,7 @@ const BubbleChart = (): JSX.Element => {
             <select id="bubble-select-language"></select>
             <select id="bubble-select-measure"></select>
           </div>
-          <p id="bubbleChart" className={styles.bubbleChartWrapper}></p>
+          <div id="bubbleChart" className={styles.bubbleChartWrapper}></div>
           <div className={styles.slider}>
             <p id="bubble-slider-text" ></p>
             <p id="bubble-slider"></p>

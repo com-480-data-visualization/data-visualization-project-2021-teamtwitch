@@ -7,7 +7,7 @@ const styles = require("./styles.scss");
 
 const ChessLineChart = (): JSX.Element => {
   const d3Container = React.useRef(null);
-  const w = 800;
+  const w = 1000;
   const h = 480;
 
   React.useEffect(() => {
@@ -42,7 +42,7 @@ const ChessLineChart = (): JSX.Element => {
         date: gm_twitch,
         text: `<b>${formatTime(
           gm_twitch
-        )}</b> <br/> Grandmaster Hikaru Nakamura, 5-times US chess champion, joins Twitch.Tv.`,
+        )}</b> <br/> Grandmaster Hikaru Nakamura, 5-times US chess champion, joins Twitch.Tv as a streamer.`,
         image_url:
           "https://pbs.twimg.com/profile_images/1370552383151828995/k0xtMmPB_400x400.jpg",
         box_image_url: "https://static.thenounproject.com/png/71303-200.png",
@@ -215,7 +215,7 @@ const ChessLineChart = (): JSX.Element => {
           .attr("x", 0 - height / 2)
           .attr("dy", "1em")
           .style("text-anchor", "middle")
-          .text("Viewminutes");
+          .text("Total Viewed Minutes");
       };
 
       // Get the data
@@ -406,7 +406,6 @@ const ChessLineChart = (): JSX.Element => {
                     .duration("1") //so it happens at the end
                     .attr("fill", other_rect.attr("standard_fill"));
 
-                  console.log(`line${indx}`);
                   // make the line also longer again, since img is gone
                   d3.select(
                     `#line${other_rect
@@ -480,6 +479,11 @@ const ChessLineChart = (): JSX.Element => {
             group.select("foreignObject").remove();
             group.select("line").remove();
           });
+
+          // make tooltip invisible
+          svg.select("#textBox")
+            .html("");
+
           // get the path
           let path = d3.select("#linePath");
           // get the length
@@ -513,15 +517,14 @@ const ChessLineChart = (): JSX.Element => {
       <div className={styles.row}>
         <div className={styles.column}>
           <h1 className={styles.h1} >Chess Channel</h1>
-          <ul>
           {" "}
-          Explore the chess category on Twitch.Tv over time with us.
-            <li>How did the corona pandemic influence its popularity?</li>
-            <li>
-              What about the release of the famous TV show Queen's Gambit?
-            </li>
-            Click on the boxes to discover what the third important event was.
-          </ul>
+          One category whose development of popularity over time is quite interesting,
+          is the chess category! You can press the replay button, to observe
+          how people started to watch chess more and more, especially during the
+          pandemic.
+          Under closer inspection, it seems that there were 3 specific timepoints
+          at which the popularity increased significantly. Click on the check figures
+          to find out what events lead to these surges!
         </div>
 
         <div className={styles.column}>
