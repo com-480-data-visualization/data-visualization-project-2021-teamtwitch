@@ -8,15 +8,15 @@ const styles = require("./styles.scss");
 const ScatterPlot = (): JSX.Element => {
   const d3Container = React.useRef(null);
   const w = 1000;
-  const h = 700;
+  const h = 600;
 
   React.useEffect(() => {
     // Think of d3Container.current as the HTML node that d3 will attach to
     if (d3Container.current) {
 
       // for the dropdown
-      const languages = [1,2,3,4,5,10];
-      let currentlyDisplayedN = 1;
+      const languages = [0,1,2,3,4,5,10];
+      let currentlyDisplayedN = 0;
 
       // for translating numbers to months
       const months = [
@@ -123,7 +123,7 @@ const ScatterPlot = (): JSX.Element => {
 
 
 
-    
+
 
       const colorDots = function (newDataPath) {
         d3.csv(newDataPath).then(function (newData) {
@@ -310,7 +310,7 @@ const ScatterPlot = (): JSX.Element => {
       };
 
       // for creating a drop down menu
-      const CreateLanguageSelection = function (languageOptions) {
+      const CreateNSelection = function (languageOptions) {
         // create drop down menu
         d3.select("#scatter-select-n")
           .html("")
@@ -324,34 +324,21 @@ const ScatterPlot = (): JSX.Element => {
         // make it, so that when a new language is selected, then change data
         d3.select("#scatter-select-n").on("change", function (d) {
 
-          if (d != currentlyDisplayedN) {
-            // save new month and year
-            currentlyDisplayedN = d;
-            // color corresponding points?
-            currentlyDisplayedData = MakeDataPath(
-              currentlyDisplayedYear,
-              months[currentlyDisplayedMonth].toLowerCase()
-            );
-            // color top n points
-            colorDots(currentlyDisplayedData);
-          }
-
           // only fires, if value is changed; we do not need to check
-          // recover chosen language
           currentlyDisplayedN = d3.select(this).property("value");
           // generate path to select data
           currentlyDisplayedData = MakeDataPath(
             currentlyDisplayedYear,
             months[currentlyDisplayedMonth].toLowerCase()
           );
-          // make a transition with the new data
+          // color the new dots
           colorDots(currentlyDisplayedData);
 
         });
       };
 
-      //create language selection
-      CreateLanguageSelection(languages);
+      //create top N selection
+      CreateNSelection(languages);
 
       // instantiate the slider
       CreateSlider();
@@ -389,11 +376,24 @@ const ScatterPlot = (): JSX.Element => {
             a successful channel is. Does more stream time imply more view time?
             Inspect the plot on the right to figure it out!
           </p>
+          <p>
+            {" "}
+            Note that the y-axis displays the viewed minutes divided by the number
+            of average viewers. If a category is well balanced between minutes of
+            streaming and minutes of viewing, we call it successful, since without much streaming,
+            it reaches lots of viewers. A successull category will therefore be
+            placed in the upper left corner of the plot.
+
+          </p>
         </div>
         <div className={styles.column}>
-          <div classNames={styles.dropdown}>
-            <select id="scatter-select-n"></select>
-          </div>
+
+            <p > Highlight the categories with the most viewed minutes:
+              <span  > </span>
+              <select id="scatter-select-n"></select>
+            </p>
+
+
           <svg
             className="d3-component"
             width={w}
@@ -403,7 +403,6 @@ const ScatterPlot = (): JSX.Element => {
           <div className={styles.slider}>
             <p id="scatter-slider-text"></p>
             <p id="scatter-slider"></p>
-            <p id="scatter-step-slider"></p>
           </div>
         </div>
       </div>
