@@ -40,7 +40,6 @@ module.exports = {
     "coverage/",
     "dist/",
     "src/components/BubbleChart/",
-    "src/components/OldBubbleChart/",
     "src/components/ChessLineChart/",
     "src/components/ScatterPlot/",
     "src/components/Page2/",
