@@ -32,7 +32,6 @@ export default function App(): JSX.Element {
           <div className="section">
             <ScatterPlot />
           </div>
-
         </ReactFullpage.Wrapper>
       )}
     />

@@ -19,8 +19,8 @@ interface IDataEntry {
   value: number;
 }
 
-const top20DataUrl =
-  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/a3a5e569993ebf66859dc5f0dfaaa74e16e767c7/data/agg-20.json";
+const dataUrl =
+  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/dd2a1feb7db036217b2f045edd20ae7886015815/data/agg.json";
 
 const loadData = async (
   url: string
@@ -52,7 +52,7 @@ const loadData = async (
     });
 };
 interface IAreaChartState {
-  top20Data: {
+  rawData: {
     [key: string]: { [key: string]: IDataEntry[] };
   };
   language: string;
@@ -64,17 +64,17 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   d3Container: React.MutableRefObject<null>;
   circles: { id: string; fill: string }[] = [
     {
-      id: "areaCircle20",
+      id: "areaCircleAll",
       fill: "#147f90",
     },
   ];
-  tooltipIds: string[] = ["areaTooltip20"];
-  infoBoxIds: string[] = ["areaInfobox20"];
+  tooltipIds: string[] = ["areaTooltipAll"];
+  infoBoxIds: string[] = ["areaInfoboxAll"];
   constructor(props: {}) {
     super(props);
     this.d3Container = React.createRef();
     this.state = {
-      top20Data: {},
+      rawData: {},
       language: "000",
       column: "View minutes",
       dateSelected: [0, dateLabels.length - 1],
@@ -82,29 +82,28 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   }
 
   componentDidMount(): void {
-    Promise.all([loadData(top20DataUrl)]).then((d) =>
-      this.setState({ top20Data: d[0] })
+    Promise.all([loadData(dataUrl)]).then((d) =>
+      this.setState({ rawData: d[0] })
     );
   }
 
   render(): JSX.Element {
     const marginV = 30;
     const marginH = 60;
-    const width = 800 - marginV - marginH;
-    const height = 480 - marginV - marginH;
+    const width =
+      (window.screen.availWidth > 1560 ? 1000 : 750) - marginV - marginH;
+    const height =
+      (window.screen.availHeight > 900 ? 580 : 480) - marginV - marginH;
 
     if (
       this.d3Container.current &&
-      Object.keys(this.state.top20Data).length > 0
+      Object.keys(this.state.rawData).length > 0
     ) {
-      const top20DataSelected = this.state.top20Data[this.state.language][
+      const rawDataSelected = this.state.rawData[this.state.language][
         columnLabels[this.state.column]
       ];
-      const dataSelected = [top20DataSelected];
-      const xExtent = d3.extent(top20DataSelected, (d) => d.date) as [
-        Date,
-        Date
-      ];
+      const dataSelected = [rawDataSelected];
+      const xExtent = d3.extent(rawDataSelected, (d) => d.date) as [Date, Date];
       const x = d3
         .scaleTime()
         .range([marginH, width + marginH])
@@ -112,7 +111,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
       const y = d3
         .scaleLinear()
-        .domain([0, 1.1 * (d3.max(top20DataSelected, (d) => d.value) || 0)])
+        .domain([0, 1.1 * (d3.max(rawDataSelected, (d) => d.value) || 0)])
         .range([height, 0]);
 
       d3.select(this.d3Container.current).html("");
@@ -153,13 +152,13 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .style("fill", "#777")
         .text(this.state.column);
 
-      const gradIdTop20 = "areaGradTop20";
+      const gradIdTopAll = "areaGradTopAll";
       const strokeWidth = 1.5;
       svg
         .append("path")
-        .datum(top20DataSelected)
-        .style("fill", `url(#${gradIdTop20})`)
-        .attr("stroke", `url(#${gradIdTop20})`)
+        .datum(rawDataSelected)
+        .style("fill", `url(#${gradIdTopAll})`)
+        .attr("stroke", `url(#${gradIdTopAll})`)
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
         .attr("stroke-width", strokeWidth)
@@ -224,7 +223,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       const defs = svg.append("defs");
       this.createGradient(
         defs,
-        gradIdTop20,
+        gradIdTopAll,
         "lightblue",
         x1Percentage,
         x2Percentage
@@ -234,7 +233,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         event.preventDefault();
         const xCoord = d3.pointer(event)[0];
         this.handleMouseMove(xCoord, svg, x, y, width, marginH, [
-          top20DataSelected,
+          rawDataSelected,
         ]);
       });
     }
@@ -245,29 +244,40 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           <h1>Populartiy of Twitch.Tv over time</h1>
           <div className={styles.description}>
             <p>
-              Twitch is now a well-known streaming platform, but how popular was
-              it a few years ago? Is it popular across countries? Or people in
-              some regions simply favour this platform more?
+              Twitch.Tv is very well-estbalished streaming platform, but one
+              might be interested its development throught time. Especially, we
+              were interested in how the pandemic, and the fact that we started
+              to spent more and more time in our rooms, affected how much
+              content on Twitch is viewed.
             </p>
             <p>
-              Here we present the statistics of games that have been streamed on
-              Twitch in different languages from 2016 to 2021. Since the
-              distribution is highly skewed, we present the top-20 popular games
-              so that we can see the trend and the order of magnitude more
-              clearly in general. There are some interesting things here that
-              are worth investigating:
+              Here we present a vizualization that displays the statistics
+              aggregated over games streamed on Twitch for different languages
+              from 2016 to 2021. To give you some starting ideas, consider the
+              following:
             </p>
             <ul>
               <li>
-                In which languages does Twitch get more popular in recent years?
+                Observe the growth of Twitch.Tv from 2016 to 2020. What changes
+                in view minutes can we see? How does this differ for different
+                languages?{" "}
+                <u
+                  className={styles.clickable}
+                  onClick={() =>
+                    this.setState({
+                      dateSelected: [0, dateLabels.length - 16],
+                    })
+                  }
+                >
+                  Click here to find out!
+                </u>
               </li>
               <li>
-                Is there any seasonal or annual change in max viewers of
-                channels?
-              </li>
-              <li>
-                Is there any interesting change between languages when COVID hit
-                the world?{" "}
+                Try to compare this to the growth that Twitch.Tv experienced
+                during the COVID pandemic? Do people actually start spending
+                more time on Twitch? How does this growth differ between
+                languages, especially considering how Twitch.Tv has its
+                viewership mainly based in the western hemisphere!{" "}
                 <u
                   className={styles.clickable}
                   onClick={() =>
@@ -279,12 +289,16 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
                     })
                   }
                 >
-                  Click me to find out!
+                  Click here to find out!
                 </u>
               </li>
+              <li>
+                Is there any seasonal or annual change? To give you a starting
+                point, consider the months of December. If you find an
+                interesting pattern, what do you think is the reason for it?
+              </li>
             </ul>
-            <p>...and anything else you are curious about! :)</p>
-            <p>Drag the verticle bars and explore yourself!</p>
+            <p>Generally, drag the verticle bars yourself and explore a bit!</p>
           </div>
         </div>
         <div>

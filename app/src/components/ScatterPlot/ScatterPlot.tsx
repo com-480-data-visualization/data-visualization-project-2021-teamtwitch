@@ -396,7 +396,7 @@ const ScatterPlot = (): JSX.Element => {
         </div>
         <div className={styles.column}>
 
-            <p > Highlight the categories with the most viewed minutes:
+            <p > Select the N most popular categories. N =
               <span  > </span>
               <select id="scatter-select-n"></select>
             </p>

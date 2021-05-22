@@ -1,5 +1,9 @@
 .wrapper {
   display: flex;
+
+  @media (min-width: 1560px) {
+    max-width: 1800px;
+  }
 }
 
 .content {
@@ -8,11 +12,17 @@
 }
 
 .description {
-  margin-top: 3em;
-  line-height: 1.3;
+  @media (min-width: 1560px) {
+    margin-top: 4em;
+    line-height: 1.5;
 
-  & li {
-    margin: 4px 0;
+    & li {
+      margin: 4px 0;
+    }
+  }
+  @media (max-width: 1560px) {
+    margin-top: 2em;
+    margin-right: 4px;
   }
 }
 

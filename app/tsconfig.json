@@ -22,8 +22,10 @@
   "linterOptions": {
     "exclude": [
       "src/components/BubbleChart/**",
-      "src/components/OldBubbleChart/**",
       "src/components/ChessLineChart/**",
+      "src/components/Page2/**",
+      "src/components/ScatterPlot/**",
+      "src/components/TitlePage/**",
     ],
   },
   "include": [

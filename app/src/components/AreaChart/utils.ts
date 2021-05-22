@@ -81,11 +81,7 @@ export const dateLabels = [
 export const columnLabels: Record<string, string> = {
   "View minutes": "viewminutes",
   "Streamed minutes": "streamedminutes",
-  "Average number of unique channels": "uniquechannels",
-  "Max number of channels": "maxchannels",
-  "Average number of channels": "avgchannels",
-  "Max number of viewers": "maxviewers",
-  "Average number of viewers": "avgviewers",
+  "Number of unique channels": "uniquechannels",
 };
 
 const months: { [key: string]: string } = {
