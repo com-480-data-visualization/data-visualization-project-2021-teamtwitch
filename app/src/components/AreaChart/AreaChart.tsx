@@ -19,8 +19,8 @@ interface IDataEntry {
   value: number;
 }
 
-const top20DataUrl =
-  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/a3a5e569993ebf66859dc5f0dfaaa74e16e767c7/data/agg-20.json";
+const dataUrl =
+  "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/dd2a1feb7db036217b2f045edd20ae7886015815/data/agg.json";
 
 const loadData = async (
   url: string
@@ -52,7 +52,7 @@ const loadData = async (
     });
 };
 interface IAreaChartState {
-  top20Data: {
+  rawData: {
     [key: string]: { [key: string]: IDataEntry[] };
   };
   language: string;
@@ -64,17 +64,17 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   d3Container: React.MutableRefObject<null>;
   circles: { id: string; fill: string }[] = [
     {
-      id: "areaCircle20",
+      id: "areaCircleAll",
       fill: "#147f90",
     },
   ];
-  tooltipIds: string[] = ["areaTooltip20"];
-  infoBoxIds: string[] = ["areaInfobox20"];
+  tooltipIds: string[] = ["areaTooltipAll"];
+  infoBoxIds: string[] = ["areaInfoboxAll"];
   constructor(props: {}) {
     super(props);
     this.d3Container = React.createRef();
     this.state = {
-      top20Data: {},
+      rawData: {},
       language: "000",
       column: "View minutes",
       dateSelected: [0, dateLabels.length - 1],
@@ -82,8 +82,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
   }
 
   componentDidMount(): void {
-    Promise.all([loadData(top20DataUrl)]).then((d) =>
-      this.setState({ top20Data: d[0] })
+    Promise.all([loadData(dataUrl)]).then((d) =>
+      this.setState({ rawData: d[0] })
     );
   }
 
@@ -97,16 +97,13 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
     if (
       this.d3Container.current &&
-      Object.keys(this.state.top20Data).length > 0
+      Object.keys(this.state.rawData).length > 0
     ) {
-      const top20DataSelected = this.state.top20Data[this.state.language][
+      const rawDataSelected = this.state.rawData[this.state.language][
         columnLabels[this.state.column]
       ];
-      const dataSelected = [top20DataSelected];
-      const xExtent = d3.extent(top20DataSelected, (d) => d.date) as [
-        Date,
-        Date
-      ];
+      const dataSelected = [rawDataSelected];
+      const xExtent = d3.extent(rawDataSelected, (d) => d.date) as [Date, Date];
       const x = d3
         .scaleTime()
         .range([marginH, width + marginH])
@@ -114,7 +111,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
 
       const y = d3
         .scaleLinear()
-        .domain([0, 1.1 * (d3.max(top20DataSelected, (d) => d.value) || 0)])
+        .domain([0, 1.1 * (d3.max(rawDataSelected, (d) => d.value) || 0)])
         .range([height, 0]);
 
       d3.select(this.d3Container.current).html("");
@@ -155,13 +152,13 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         .style("fill", "#777")
         .text(this.state.column);
 
-      const gradIdTop20 = "areaGradTop20";
+      const gradIdTopAll = "areaGradTopAll";
       const strokeWidth = 1.5;
       svg
         .append("path")
-        .datum(top20DataSelected)
-        .style("fill", `url(#${gradIdTop20})`)
-        .attr("stroke", `url(#${gradIdTop20})`)
+        .datum(rawDataSelected)
+        .style("fill", `url(#${gradIdTopAll})`)
+        .attr("stroke", `url(#${gradIdTopAll})`)
         .attr("stroke-linejoin", "round")
         .attr("stroke-linecap", "round")
         .attr("stroke-width", strokeWidth)
@@ -226,7 +223,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       const defs = svg.append("defs");
       this.createGradient(
         defs,
-        gradIdTop20,
+        gradIdTopAll,
         "lightblue",
         x1Percentage,
         x2Percentage
@@ -236,7 +233,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
         event.preventDefault();
         const xCoord = d3.pointer(event)[0];
         this.handleMouseMove(xCoord, svg, x, y, width, marginH, [
-          top20DataSelected,
+          rawDataSelected,
         ]);
       });
     }
@@ -256,10 +253,8 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
             <p>
               Here we present a vizualization that displays the statistics
               aggregated over games streamed on Twitch for different languages
-              from 2016 to 2021. Since the distribution is highly skewed, we
-              show the top-20 popular games so that it is easier to see the
-              trend and the order of magnitude more clearly in general. To give
-              you some starting ideas, consider the following:
+              from 2016 to 2021. To give you some starting ideas, consider the
+              following:
             </p>
             <ul>
               <li>
