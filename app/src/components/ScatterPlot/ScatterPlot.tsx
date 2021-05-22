@@ -60,7 +60,7 @@ const ScatterPlot = (): JSX.Element => {
       const margin = {
           top: 10,
           right: 30,
-          bottom: 30,
+          bottom: 50,
           left: 150,
         },
         width = 1000 - margin.left - margin.right,
@@ -151,7 +151,7 @@ const ScatterPlot = (): JSX.Element => {
             .transition()
             .duration(transferDuration)
             .attr("r", 10)
-            .attr("fill", "gold");
+            .attr("fill", "orange");
         });
       };
 
@@ -215,7 +215,7 @@ const ScatterPlot = (): JSX.Element => {
           .append("circle")
           //.filter(function(d) { return d.date =="2016-01-01" })
           .attr("r", 5)
-          .attr("cx", (d) => x(d.streamedminutes))
+          .attr("cx", (d) => x(d.streamratio))
           .attr("cy", (d) => y(d.viewerratio))
           .attr("fill", "#7500D1")
           .on("mouseover", function (event, d) {
@@ -244,10 +244,10 @@ const ScatterPlot = (): JSX.Element => {
           .append("text")
           .attr(
             "transform",
-            "translate(" + width / 2 + " ," + (height + margin.top + 20) + ")"
+            "translate(" + width / 2 + " ," + (height + margin.top + 30) + ")"
           )
           .style("text-anchor", "middle")
-          .text("Streamed Minutes");
+          .text("Streamed Minutes / # Unique Channels");
 
         // add the y-axis
         svg.append("g").attr("id", "yAxis").call(d3.axisLeft(y));
@@ -271,7 +271,11 @@ const ScatterPlot = (): JSX.Element => {
           d.streamedminutes = +d.streamedminutes;
           d.avgchannels = +d.avgchannels;
           d.avgviewers = +d.avgviewers;
+          d.uniquechannels = +d.uniquechannels;
+
+
           d.viewerratio = d.viewminutes/(d.avgviewers+1);
+          d.streamratio = d.streamedminutes/(d.uniquechannels+1);
         });
       };
 
@@ -285,7 +289,8 @@ const ScatterPlot = (): JSX.Element => {
           preprocessing(newData);
           newData = newData.slice(0, numberDatapoints);
           // set domain
-          x.domain([0, d3.max(newData, (d) => d.streamedminutes)]);
+          //x.domain([0, d3.max(newData, (d) => d.streamedminutes)]);
+          x.domain([d3.min(newData, (d) => d.streamratio), d3.max(newData, (d) => d.streamratio)]);
           y.domain([d3.min(newData, (d) => d.viewerratio), d3.max(newData, (d) => d.viewerratio)]);
 
           //change axes
@@ -304,7 +309,7 @@ const ScatterPlot = (): JSX.Element => {
             .transition()
             .duration(transferDuration)
             .attr("r", 5)
-            .attr("cx", (d) => x(d.streamedminutes))
+            .attr("cx", (d) => x(d.streamratio))
             .attr("cy", (d) => y(d.viewerratio));
         });
       };
@@ -349,7 +354,9 @@ const ScatterPlot = (): JSX.Element => {
         // format date and cast to numbers
         preprocessing(data);
         // set domain
-        x.domain([0, d3.max(data, (d) => d.streamedminutes)]);
+        //x.domain([0, d3.max(data, (d) => d.streamedminutes)]);
+        x.domain([d3.min(data, (d) => d.streamratio), d3.max(data, (d) => d.streamratio)]);
+
         y.domain([d3.min(data, (d) => d.viewerratio), d3.max(data, (d) => d.viewerratio)]);
 
         // draw the scatter chart; supply the x and y axis
@@ -379,7 +386,8 @@ const ScatterPlot = (): JSX.Element => {
           <p>
             {" "}
             Note that the y-axis displays the viewed minutes divided by the number
-            of average viewers. If a category is well balanced between minutes of
+            of average viewers. The x-axis shows the total accumulated streamed minutes divided by
+            the number of average channels. If a category is well balanced between minutes of
             streaming and minutes of viewing, we call it successful, since without much streaming,
             it reaches lots of viewers. A successull category will therefore be
             placed in the upper left corner of the plot.
@@ -401,8 +409,8 @@ const ScatterPlot = (): JSX.Element => {
             ref={d3Container}
           />
           <div className={styles.slider}>
-            <p id="scatter-slider-text"></p>
             <p id="scatter-slider"></p>
+            <p id="scatter-slider-text"></p>
           </div>
         </div>
       </div>
