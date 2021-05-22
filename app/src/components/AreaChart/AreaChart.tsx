@@ -298,10 +298,9 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
                 </u>
               </li>
               <li>
-                Is there any seasonal or annual change in terms of the number of
-                max viewers of channels? To give you a starting point, consider
-                the months of December. If you find an interesting pattern, what
-                do you think is the reason for it?
+                Is there any seasonal or annual change? To give you a starting
+                point, consider the months of December. If you find an
+                interesting pattern, what do you think is the reason for it?
               </li>
             </ul>
             <p>Generally, drag the verticle bars yourself and explore a bit!</p>
