@@ -355,23 +355,30 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     endOffset: string
   ): void {
     const gradient = defs.append("linearGradient").attr("id", id);
+    // Left non-selected area
     gradient
       .append("stop")
       .attr("class", "start")
       .attr("offset", startOffset)
       .attr("stop-color", colorCode)
       .attr("stop-opacity", 0.3);
+
+    // Left bound of selected area
     gradient
       .append("stop")
       .attr("class", "start")
       .attr("offset", startOffset)
       .attr("stop-color", colorCode);
+
+    // Right bound of selected area
     gradient
       .append("stop")
       .attr("class", "end")
       .attr("offset", endOffset)
       .attr("stop-color", colorCode)
       .attr("stop-opacity", 1);
+    
+    // Right non-selected area
     gradient
       .append("stop")
       .attr("class", "end")
@@ -606,7 +613,9 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           } else if (!isRight && siblingXIdx - xIndex < 1) {
             xIndex = siblingXIdx - 1;
           }
-
+          
+          // Set state only at end of drag to prevent re-rendering
+          // during the drag
           const newState = [
             Math.min(siblingXIdx, xIndex),
             Math.max(siblingXIdx, xIndex),
