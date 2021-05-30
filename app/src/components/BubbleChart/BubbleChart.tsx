@@ -62,7 +62,7 @@ const BubbleChart = (): JSX.Element => {
 
     // for line chart
     const line_chart_width = tooltipWidth;
-    const line_chart_height = 100;
+    const line_chart_height = 80;
     const line_chart_margin_top = 10;
     const line_chart_margin_bottom = 40;
     const line_chart_margin_left = 40;
