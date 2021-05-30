@@ -85,6 +85,7 @@ Please find our report [here](https://github.com/com-480-data-visualization/data
 **80% of the final grade**
 
 Tech setup for local development: [doc](./app/README.md)
+Screencast: [video](./video/dv_video.mp4)
 
 
 ## Late policy
