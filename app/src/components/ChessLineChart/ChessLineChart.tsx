@@ -509,7 +509,7 @@ const ChessLineChart = (): JSX.Element => {
           buildRectangle(2, group2, event2);
           buildRectangle(3, group3, event3);
         };
-        
+
         // set the button
         d3.select("#animation_btn")
           .attr("class", "button")
@@ -527,13 +527,13 @@ const ChessLineChart = (): JSX.Element => {
         <div className={styles.column}>
           <h1 className={styles.h1} >Chess Channel</h1>
           {" "}
-          One category whose development of popularity over time is quite interesting,
-          is the chess category! You can press the replay button, to observe
-          how people started to watch chess more and more, especially during the
+          One category whose development of popularity over time is quite interesting
+          is chess. You can press the replay button in order to observe
+          how people started to watch more and more chess, especially during the
           pandemic.
           Under closer inspection, it seems that there were 3 specific timepoints
-          at which the popularity increased significantly. Click on the check figures
-          to find out what events lead to these surges!
+          at which its popularity increased significantly. Click on the chess pieces
+          to find out which events led to the respective surges!
         </div>
 
         <div className={styles.column}>

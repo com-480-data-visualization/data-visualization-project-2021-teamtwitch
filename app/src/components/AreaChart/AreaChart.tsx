@@ -241,25 +241,25 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
     return (
       <div className={styles.wrapper}>
         <div className={styles.content}>
-          <h1>Populartiy of Twitch.Tv over time</h1>
+          <h1>Popularity of Twitch.Tv over time</h1>
           <div className={styles.description}>
             <p>
-              Twitch.Tv is very well-estbalished streaming platform, but one
-              might be interested its development throught time. Especially, we
-              were interested in how the pandemic, and the fact that we started
-              to spent more and more time in our rooms, affected how much
-              content on Twitch is viewed.
+              Given that nowadays Twitch.Tv is a very well-established streaming
+              platform, we were interested in how it developed over time. Especially, we
+              wanted to investigate how the pandemic and the fact that we started
+              to spend more and more time indoors affected the amount of content
+              viewed on Twitch.Tv.
             </p>
             <p>
               Here we present a vizualization that displays the statistics
-              aggregated over games streamed on Twitch for different languages
+              aggregated over games streamed on Twitch.Tv for different languages
               from 2016 to 2021. To give you some starting ideas, consider the
               following:
             </p>
             <ul>
               <li>
                 Observe the growth of Twitch.Tv from 2016 to 2020. What changes
-                in view minutes can we see? How does this differ for different
+                in view minutes can you see? How does this differ for different
                 languages?{" "}
                 <u
                   className={styles.clickable}
@@ -274,9 +274,9 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
               </li>
               <li>
                 Try to compare this to the growth that Twitch.Tv experienced
-                during the COVID pandemic? Do people actually start spending
+                during the COVID pandemic. Do people actually start spending
                 more time on Twitch? How does this growth differ between
-                languages, especially considering how Twitch.Tv has its
+                languages, especially considering that Twitch.Tv has its
                 viewership mainly based in the western hemisphere!{" "}
                 <u
                   className={styles.clickable}
@@ -377,7 +377,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
       .attr("offset", endOffset)
       .attr("stop-color", colorCode)
       .attr("stop-opacity", 1);
-    
+
     // Right non-selected area
     gradient
       .append("stop")
@@ -613,7 +613,7 @@ class AreaChart extends React.Component<{}, IAreaChartState> {
           } else if (!isRight && siblingXIdx - xIndex < 1) {
             xIndex = siblingXIdx - 1;
           }
-          
+
           // Set state only at end of drag to prevent re-rendering
           // during the drag
           const newState = [

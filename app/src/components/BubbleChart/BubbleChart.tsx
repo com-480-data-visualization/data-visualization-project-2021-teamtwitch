@@ -478,7 +478,7 @@ const BubbleChart = (): JSX.Element => {
       // load the data
       d3.csv(currentlyDisplayedData).then(function (d) {
         let tempData = d.slice(0, nrBubbles);
-        
+
         // create a bubble layout with the data
         let newData = MakeHierarchicalData(
           tempData,
@@ -534,16 +534,15 @@ const BubbleChart = (): JSX.Element => {
           <p >
             {" "}
             Now that you roughly know what Twitch.Tv looks like, you must be curious about its content.
-            The figure on the will allow you to explore to your heart's desire!
+            The figure to your right will allow you to explore it to your heart's desire.
             For a point in time and selected language, it will display the top 50
             (in respect to the selected measure) categories as bubbles.
             The sizes of these bubbles correspond to the
             relative difference between their respective measure value.
           </p>
           <p >
-            You can even click the bubbles, to see the values of all the measures,
-            as well as a linechart that depicts its development over time for the
-            selected measure!
+            You can even click on the bubbles, to see the values of all the measures
+            as well as a linechart that depicts its development over time.
           </p>
           <p >
             What categories are there? Which ones are popular and when?
