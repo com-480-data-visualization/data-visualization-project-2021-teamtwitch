@@ -20,6 +20,7 @@ const BubbleChart = (): JSX.Element => {
   const [currItem, setCurrItem] = React.useState<any>(null);
 
   React.useEffect(() => {
+
     // left/top padding
     const padding = 50;
 
@@ -41,7 +42,7 @@ const BubbleChart = (): JSX.Element => {
     const bubbleWidth = 600;
     const bubbleHeight = 600;
 
-    // slider params
+    // slider parametes
     const earliestDate = new Date(2016, 1, 1);
     const latestDate = new Date(2021, 3, 1);
     const sliderTextFontSize = "1em";
@@ -55,7 +56,7 @@ const BubbleChart = (): JSX.Element => {
     let currentlyDisplayedYear = defaultDate.getUTCFullYear();
     let currentlyDisplayedMonth = defaultDate.getUTCMonth();
 
-    // tooltip params
+    // tooltip parameters
     const tooltipOpacity = 1;
     const tooltipWidth = width - bubbleWidth;
     const tooltipHeight = height;
@@ -68,7 +69,8 @@ const BubbleChart = (): JSX.Element => {
     const line_chart_margin_left = 40;
     const line_chart_margin_right = 0;
     var currentlyDisplayedGame = null;
-    // drop language down menu params
+
+    // drop language down menu parameters
     const measures = [
       "Viewed Minutes",
       "Streamed Minutes",
@@ -106,7 +108,6 @@ const BubbleChart = (): JSX.Element => {
     // drop language down menu params
     const languages = ["All", "English", "French", "German", "Italian"];
     let currentlyDisplayedLanguage = "All";
-
 
     // for translating numbers to months
     const months = [
@@ -163,6 +164,7 @@ const BubbleChart = (): JSX.Element => {
     var defs = svg.append("defs");
 
     const CreateBubbles = function (data) {
+
       // get hierachical data with bubble layout
       const root = MakeHierarchicalData(
         data,
@@ -229,6 +231,7 @@ const BubbleChart = (): JSX.Element => {
           .attr("stroke-width", defaultStrokeWidth)
           .attr("r", (d) => d.r)
           .attr("fill-opacity", defaultBubbleOpacity);
+
         // highlight the selected circle
         d3.select(this)
           .transition()
@@ -237,18 +240,19 @@ const BubbleChart = (): JSX.Element => {
           .attr("r", (d) => d.r + selectedBubbleRadiusIncreaseFactor)
           .attr("fill-opacity", selectedBubbleOpacity);
         divTT.html("");
+
         // make it tooltip appear
         divTT.transition().duration(200).style("opacity", tooltipOpacity);
 
         currentlyDisplayedGame = d.data.name;
+
         // generate content for tooltip
         let p1 = `<b>${d.data.name}</b>`;
         let p2 = "<b>Viewed Minutes:</b>" + "\t" + d.data.viewminutes;
         let p3 = "<b>Streamed Minutes:</b>" + "\t" + d.data.streamedminutes;
         let p4 = "<b>Peak Number of Channels:</b>" + "\t" + d.data.maxchannels;
         let p5 = "<b>Unique Channels:</b>" + "\t" + d.data.uniquechannels;
-        let p6 =
-          "<b>Average Number of Channels:</b>" + "\t" + d.data.avgchannels;
+        let p6 = "<b>Average Number of Channels:</b>" + "\t" + d.data.avgchannels;
         let p7 = "<b>Peak Number of Viewers:</b>" + "\t" + d.data.maxviewers;
         let p8 = "<b>Viewer/Channel Ratio\n:</b>" + "\t" + d.data.avgratio;
         let p9 = "<b>Average Number of Viewers:</b>" + "\t" + d.data.avgviewers;
@@ -256,9 +260,10 @@ const BubbleChart = (): JSX.Element => {
         let toolTipText = [img, p1, p2, p3, p4, p5, p6, p7, p8, p9].join(
           "<br/>"
         );
+
         console.log("Happening");
+
         //fill the tooltip
-        //
         divTT.html(`
           <img src="${d.data.logo}" alt="${d.data.name}" height="150" align="left"><br/>
           <b>${d.data.name}</b><br/>
@@ -318,6 +323,7 @@ const BubbleChart = (): JSX.Element => {
 
     // for creating the slider
     const CreateSlider = function () {
+
       // define the slider
       var sliderSimple = sliderBottom()
         .domain([earliestDate, latestDate])
@@ -333,24 +339,29 @@ const BubbleChart = (): JSX.Element => {
         .height(sliderHeight)
         .default(defaultDate)
         .on("onchange", function (d) {
+
           // change the shown text
           d3.select("p#bubble-slider-text").html(
             `<b>${months[d.getUTCMonth()]} <br/> ${d.getUTCFullYear()}</b>`
           );
+
           // depending on the selected value, display the corresponding data
           if (
             d.getUTCFullYear() != currentlyDisplayedYear ||
             d.getUTCMonth() != currentlyDisplayedMonth
           ) {
+
             // save new month and year
             currentlyDisplayedYear = d.getUTCFullYear();
             currentlyDisplayedMonth = d.getUTCMonth();
+
             // load corresponding data
             currentlyDisplayedData = MakeDataPath(
               currentlyDisplayedLanguage,
               currentlyDisplayedYear,
               months[currentlyDisplayedMonth].toLowerCase()
             );
+
             // make a transition with the new data
             BubbleTransition();
           }
@@ -376,6 +387,7 @@ const BubbleChart = (): JSX.Element => {
 
       // link slider to svg
       gSimple.call(sliderSimple);
+
       // show default text
       d3.select("p#bubble-slider-text")
         .html(
@@ -387,6 +399,7 @@ const BubbleChart = (): JSX.Element => {
 
     // for creating a drop down menu
     const CreateLanguageSelection = function (languageOptions) {
+
       // create drop down menu
       d3.select("#bubble-select-language")
         .html("")
@@ -399,16 +412,18 @@ const BubbleChart = (): JSX.Element => {
 
       // make it, so that when a new language is selected, then change data
       d3.select("#bubble-select-language").on("change", function (d) {
-        // only fires, if value is changed; we do not need to check
 
+        // only active, if value is changed
         // recover chosen language
         currentlyDisplayedLanguage = d3.select(this).property("value");
+
         // generate path to select data
         currentlyDisplayedData = MakeDataPath(
           currentlyDisplayedLanguage,
           currentlyDisplayedYear,
           months[currentlyDisplayedMonth].toLowerCase()
         );
+
         // make a transition with the new data
         BubbleTransition();
         divTT.html("Click on a Bubble!")
@@ -419,6 +434,7 @@ const BubbleChart = (): JSX.Element => {
 
     // for creating a drop down menu for the selected measure
     const CreateMeasureSelection = function (measureOptions) {
+
       // create drop down menu
       d3.select("#bubble-select-measure")
         .html("")
@@ -431,7 +447,6 @@ const BubbleChart = (): JSX.Element => {
 
       // make it, so that when a new measure is selected, then change data
       d3.select("#bubble-select-measure").on("change", function (d) {
-        // only fires, if value is changed; we do not need to check
 
         // recover chosen language
         currentlyDisplayedMeasure =
@@ -451,18 +466,19 @@ const BubbleChart = (): JSX.Element => {
     CreateMeasureSelection(measures);
     //create the slider
     CreateSlider();
+
     //create initial bubbles
     d3.csv(currentlyDisplayedData).then(function (d) {
       CreateBubbles(d.slice(0, nrBubbles));
     });
 
-    // function for initiating a fluid transition by means of
-    // different data / measure
+    // function for initiating a fluid transition by means of different data / measure
     const BubbleTransition = function () {
+
       // load the data
       d3.csv(currentlyDisplayedData).then(function (d) {
         let tempData = d.slice(0, nrBubbles);
-        //d3.shuffle(tempData); in or out?
+        
         // create a bubble layout with the data
         let newData = MakeHierarchicalData(
           tempData,

@@ -54,6 +54,7 @@ const ScatterPlot = (): JSX.Element => {
       // specify time format
       const formatTime = d3.timeFormat("%e %B %Y");
 
+      // number of datapoints to be displayed
       const numberDatapoints = 40;
 
       // set the dimensions and margins of the graph
@@ -66,7 +67,7 @@ const ScatterPlot = (): JSX.Element => {
         width = 1000 - margin.left - margin.right,
         height = 600 - margin.top - margin.bottom;
 
-      // slider params
+      // slider parameters
       const earliestDate = new Date(2016, 1, 1);
       const latestDate = new Date(2021, 3, 1);
       const sliderTextFontSize = "1em";
@@ -80,7 +81,7 @@ const ScatterPlot = (): JSX.Element => {
       let currentlyDisplayedYear = defaultDate.getUTCFullYear();
       let currentlyDisplayedMonth = defaultDate.getUTCMonth();
 
-      //
+      // get the data path for a given month and year
       const MakeDataPath = function (year, month) {
         return `https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/master/data/All/All-${year}${month}.csv`;
       };
@@ -100,6 +101,7 @@ const ScatterPlot = (): JSX.Element => {
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
       const sliderSvg = d3
         .select("#scatter-slider")
         .html("")
@@ -108,6 +110,7 @@ const ScatterPlot = (): JSX.Element => {
         .attr("height", 100)
         .append("g")
         .attr("transform", "translate(" + width / 4 + "," + margin.top + ")");
+
       // add vertical slider element
       const sliderStepSvg = d3
         .select("#scatter-step-slider")
@@ -120,10 +123,6 @@ const ScatterPlot = (): JSX.Element => {
           "transform",
           "translate(" + (width * 3) / 4 + "," + margin.top + ")"
         );
-
-
-
-
 
       const colorDots = function (newDataPath) {
         d3.csv(newDataPath).then(function (newData) {
@@ -171,19 +170,22 @@ const ScatterPlot = (): JSX.Element => {
           .height(sliderHeight)
           .default(defaultDate)
           .on("onchange", function (d) {
+
             // change the shown text
             d3.select("p#scatter-slider-text").html(
               `<b>${months[d.getUTCMonth()]} <br/> ${d.getUTCFullYear()}</b>`
             );
-            // depending on the selected value, display the corresponding data
 
+            // depending on the selected value, display the corresponding data
             if (
               d.getUTCFullYear() != currentlyDisplayedYear ||
               d.getUTCMonth() != currentlyDisplayedMonth
             ) {
+
               // save new month and year
               currentlyDisplayedYear = d.getUTCFullYear();
               currentlyDisplayedMonth = d.getUTCMonth();
+
               // load corresponding data
               currentlyDisplayedData = MakeDataPath(
                 currentlyDisplayedYear,
@@ -194,8 +196,10 @@ const ScatterPlot = (): JSX.Element => {
               changeDots(currentlyDisplayedData);
             }
           });
+
         // add slider to the corresponding div
         sliderSvg.call(sliderSimple);
+
         // show default text
         d3.select("p#scatter-slider-text")
           .html(
@@ -207,13 +211,13 @@ const ScatterPlot = (): JSX.Element => {
 
       // for drawing the path of the linechart
       const drawDots = function (data, x, y) {
+
         // add the dots with tooltips
         svg
           .selectAll(".dot")
           .data(data)
           .enter()
           .append("circle")
-          //.filter(function(d) { return d.date =="2016-01-01" })
           .attr("r", 5)
           .attr("cx", (d) => x(d.streamratio))
           .attr("cy", (d) => y(d.viewerratio))
@@ -232,6 +236,7 @@ const ScatterPlot = (): JSX.Element => {
 
       // for correctly setting the axes
       const setAxes = function (x, y) {
+
         // add the x axis
         svg
           .append("g")
@@ -272,8 +277,6 @@ const ScatterPlot = (): JSX.Element => {
           d.avgchannels = +d.avgchannels;
           d.avgviewers = +d.avgviewers;
           d.uniquechannels = +d.uniquechannels;
-
-
           d.viewerratio = d.viewminutes/(d.avgviewers+1);
           d.streamratio = d.streamedminutes/(d.uniquechannels+1);
         });
@@ -288,12 +291,12 @@ const ScatterPlot = (): JSX.Element => {
           const transferDuration = 5000;
           preprocessing(newData);
           newData = newData.slice(0, numberDatapoints);
+
           // set domain
-          //x.domain([0, d3.max(newData, (d) => d.streamedminutes)]);
           x.domain([d3.min(newData, (d) => d.streamratio), d3.max(newData, (d) => d.streamratio)]);
           y.domain([d3.min(newData, (d) => d.viewerratio), d3.max(newData, (d) => d.viewerratio)]);
 
-          //change axes
+          // change axes
           d3.select("#xAxis")
             .transition()
             .duration(transferDuration)
@@ -326,16 +329,18 @@ const ScatterPlot = (): JSX.Element => {
           .text((d) => d)
           .attr("value", (d) => d);
 
-        // make it, so that when a new language is selected, then change data
+        // when a new language is selected, change data
         d3.select("#scatter-select-n").on("change", function (d) {
 
-          // only fires, if value is changed; we do not need to check
+          // only active, if value is changed; we do not need to check
           currentlyDisplayedN = d3.select(this).property("value");
+
           // generate path to select data
           currentlyDisplayedData = MakeDataPath(
             currentlyDisplayedYear,
             months[currentlyDisplayedMonth].toLowerCase()
           );
+
           // color the new dots
           colorDots(currentlyDisplayedData);
 
@@ -351,16 +356,17 @@ const ScatterPlot = (): JSX.Element => {
       // instantiate the first plot
       d3.csv(currentlyDisplayedData).then(function (data) {
         data = data.slice(0, numberDatapoints);
+
         // format date and cast to numbers
         preprocessing(data);
-        // set domain
-        //x.domain([0, d3.max(data, (d) => d.streamedminutes)]);
-        x.domain([d3.min(data, (d) => d.streamratio), d3.max(data, (d) => d.streamratio)]);
 
+        // set domain
+        x.domain([d3.min(data, (d) => d.streamratio), d3.max(data, (d) => d.streamratio)]);
         y.domain([d3.min(data, (d) => d.viewerratio), d3.max(data, (d) => d.viewerratio)]);
 
         // draw the scatter chart; supply the x and y axis
         drawDots(data, x, y);
+        
         // add the axes
         setAxes(x, y);
 
