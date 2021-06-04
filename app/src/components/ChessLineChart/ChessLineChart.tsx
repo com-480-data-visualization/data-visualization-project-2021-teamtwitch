@@ -11,10 +11,11 @@ const ChessLineChart = (): JSX.Element => {
   const h = 480;
 
   React.useEffect(() => {
+
     // Think of d3Container.current as the HTML node that d3 will attach to
     if (d3Container.current) {
       d3.select(d3Container.current).html("");
-      // set days for special events
+
       // set days for special events
       const lockdowns = new Date("2020-03-09");
       const queens_gambit = new Date("2020-10-23");
@@ -26,6 +27,7 @@ const ChessLineChart = (): JSX.Element => {
       const textBoxWidth = 300;
       const textBoxHeight = 200;
       const boxTime = 400;
+
       // specify time format
       var formatTime = d3.timeFormat("%e %B %Y");
 
@@ -49,6 +51,7 @@ const ChessLineChart = (): JSX.Element => {
         line_delay: totalPathAnimationTime / 8.5,
         text_delay: totalPathAnimationTime / 4.15, // because text delay is for some reason different from the rest, we need extra value for it
       };
+
       const event2 = {
         y: 85,
         x_text: 5,
@@ -128,6 +131,7 @@ const ChessLineChart = (): JSX.Element => {
 
       // for drawing the path of the linechart
       const drawLineChart = function (data, x, y) {
+
         // define the lines
         var valueline = d3
           .line()
@@ -218,10 +222,11 @@ const ChessLineChart = (): JSX.Element => {
           .text("Total Viewed Minutes");
       };
 
-      // Get the data
+      // get the data
       d3.csv(
         "https://raw.githubusercontent.com/com-480-data-visualization/data-visualization-project-2021-teamtwitch/master/data/chess.csv"
       ).then(function (data) {
+
         // set the ranges
         var x = d3.scaleTime().range([0, width]);
         var y = d3.scaleLinear().range([height, 0]);
@@ -248,6 +253,7 @@ const ChessLineChart = (): JSX.Element => {
 
         // draw the line chart; supply the x and y axis
         drawLineChart(data, x, y);
+
         // add the axes
         setAxes(x, y);
 
@@ -271,6 +277,7 @@ const ChessLineChart = (): JSX.Element => {
           .html("");
 
         const defs = svg.append("defs");
+
         // add all necessary patterns for the images
         [event1, event2, event3].forEach(function (event, index) {
           defs
@@ -318,6 +325,7 @@ const ChessLineChart = (): JSX.Element => {
 
         // function for actually building the rectangles
         const buildRectangle = function (indx, group, event_obj) {
+
           // create objects
           var rect = group.append("rect").attr("id", `rect${indx}`);
           var text = group.append("foreignObject").attr("id", `text${indx}`);
@@ -367,8 +375,6 @@ const ChessLineChart = (): JSX.Element => {
             .attr("opacity", 1)
             .on("end", blink);
 
-          //blink();
-
           // fill it with corresponding attributes
           rect
             .attr("id", `rect${indx}`)
@@ -384,11 +390,13 @@ const ChessLineChart = (): JSX.Element => {
             .attr("opacity", 0)
             .attr("select_state", "not_selected")
             .on("click", function (event, d) {
-              // unselect any other rectangle, that might be currently
-              // selected
+
+              // unselect any other rectangle, that might be currently selected
               d3.selectAll("rect").each(function (r, i) {
-                // get the rectange objet
+
+                // get the rectangle object
                 let other_rect = d3.select(this);
+
                 // check that it is not this one and that it is selected
                 if (
                   other_rect.attr("id") != `rect${indx}` &&
@@ -437,8 +445,7 @@ const ChessLineChart = (): JSX.Element => {
                 .style("text-align", "center")
                 .html(event_obj.text);
 
-              // retract the horizontal line as much as needed together
-              // with the image
+              // retract the horizontal line as much as needed together with the image
               line
                 .transition()
                 .duration(boxTime)
@@ -496,11 +503,13 @@ const ChessLineChart = (): JSX.Element => {
             .duration(totalPathAnimationTime)
             .ease(d3.easeLinear)
             .attr("stroke-dashoffset", 0);
+
           // also lines + boxes
           buildRectangle(1, group1, event1);
           buildRectangle(2, group2, event2);
           buildRectangle(3, group3, event3);
         };
+
         // set the button
         d3.select("#animation_btn")
           .attr("class", "button")
@@ -518,13 +527,13 @@ const ChessLineChart = (): JSX.Element => {
         <div className={styles.column}>
           <h1 className={styles.h1} >Chess Channel</h1>
           {" "}
-          One category whose development of popularity over time is quite interesting,
-          is the chess category! You can press the replay button, to observe
-          how people started to watch chess more and more, especially during the
+          One category whose development of popularity over time is quite interesting
+          is chess. You can press the replay button in order to observe
+          how people started to watch more and more chess, especially during the
           pandemic.
           Under closer inspection, it seems that there were 3 specific timepoints
-          at which the popularity increased significantly. Click on the check figures
-          to find out what events lead to these surges!
+          at which its popularity increased significantly. Click on the chess pieces
+          to find out which events led to the respective surges!
         </div>
 
         <div className={styles.column}>
