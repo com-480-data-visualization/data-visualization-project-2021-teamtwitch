@@ -387,11 +387,17 @@ const ScatterPlot = (): JSX.Element => {
             {" "}
             Note that the y-axis displays the viewed minutes divided by the number
             of average viewers. The x-axis shows the total accumulated streamed minutes divided by
-            the number of average channels. If a category is well balanced between minutes of
+            the number of unique channels within the month. If a category is well balanced between minutes of
             streaming and minutes of viewing, we call it successful, since without much streaming,
             it reaches lots of viewers. A successull category will therefore be
             placed in the upper left corner of the plot.
 
+          </p>
+          <p>
+            {" "}
+            You can select to color a number of popular categories by the means
+            of the select menu, in order to inspect how channels inside them
+            perform and contrast this to less popular categories.
           </p>
         </div>
         <div className={styles.column}>
