@@ -531,7 +531,7 @@ const ChessLineChart = (): JSX.Element => {
           is chess. You can press the replay button in order to observe
           how people started to watch more and more chess, especially during the
           pandemic.
-          Under closer inspection, it seems that there were 3 specific timepoints
+          Under closer inspection, it seems that there were three specific timepoints
           at which its popularity increased significantly. Click on the chess pieces
           to find out which events led to the respective surges!
         </div>
